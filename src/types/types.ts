@@ -3,3 +3,8 @@ export type basicType = {
     email:string,
     password:string
 }
+
+export type userType = {
+    email:string,
+    password:string
+}

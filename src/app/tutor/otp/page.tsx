@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, FormEvent } from 'react';
-import { otpPost, resendOtp } from '@/app/service/user/userApi';
+import { otpPost, resendOtp } from '@/app/service/tutor/tutorApi';
 import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -105,7 +105,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
       const response = await otpPost(otpString, email);
       if (response) {
         toast.success("OTP Verified Successfully");
-        router.push("/login");
+        router.push("/tutor/login");
       }
     }
   };
@@ -117,7 +117,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
         <div className="hidden md:flex md:w-1/2 items-center justify-center p-12">
           <div className="w-96">
             <img
-              src="/images/StudentLogin.png"
+              src="/images/TutorLogin.png"
               alt="Student verification"
               className="w-full h-auto"
             />

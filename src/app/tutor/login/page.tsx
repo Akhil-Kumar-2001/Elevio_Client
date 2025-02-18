@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { loginValidation } from '@/app/utits/validation';
-import { userSignin } from '@/app/service/user/userApi';
-import useAuthStore from '@/store/userAuthStore';
-
-
+import { tutorSignin } from '@/app/service/tutor/tutorApi';
+import useAuthStore from '@/store/tutorAuthStore';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -19,17 +17,18 @@ const LoginPage = () => {
   const [errors, setErrors] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const  {isAuthenticated}  = useAuthStore();
+
+  useEffect(()=>{
+    if(isAuthenticated){
+      router.push('/tutor/home')
+    }
+  },[isAuthenticated])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors(null);
   };
-  const  {isAuthenticated}  = useAuthStore();
-
-    // useEffect(()=>{
-    //   if(isAuthenticated){
-    //     router.push('/home')
-    //   }
-    // },[isAuthenticated])
 
  
 
@@ -46,12 +45,13 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await userSignin(formData);
+      const response = await tutorSignin(formData);
       console.log("login response",response.data)
       useAuthStore.getState().saveUserDetails(response.data)
       toast.success(response.message);
-      router.push(`/home`);
+      router.push(`/tutor/home`);
     } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Login failed');
       setErrors('Invalid email or password');
     } finally {
       setLoading(false);
@@ -74,7 +74,7 @@ const LoginPage = () => {
         <div className="hidden md:flex md:w-1/2 items-center justify-center p-12">
           <div className="w-96">
             <img 
-              src="/images/StudentLogin.png"
+              src="/images/TutorLogin.png"
               alt="Student studying"
               className="w-full h-auto"
             />
@@ -151,7 +151,7 @@ const LoginPage = () => {
                 <a href="/forgot-password" className="hover:text-purple-600 hover:underline">
                   Forgot password?
                 </a>
-                <a href="/signup" className="hover:text-purple-600 hover:underline">
+                <a href="/tutor/signup" className="hover:text-purple-600 hover:underline">
                   Register now
                 </a>
               </div>

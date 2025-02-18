@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { signupValidation } from '../../utits/validation';
-import { userSignup } from '@/app/service/user/userApi';
+import { tutorSignup } from '@/app/service/tutor/tutorApi';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
@@ -40,9 +40,9 @@ const SignupPage = () => {
 
     setLoading(true);
     try {
-      const response = await userSignup(formData);
+      const response = await tutorSignup(formData);
       toast.success(response.message);
-      router.push(`/otp?email=${response.email}`);
+      router.push(`/tutor/otp?email=${response.email}`);
     } catch (error) {
       // Handle error
     } finally {
@@ -57,7 +57,7 @@ const SignupPage = () => {
         <div className="hidden md:flex md:w-1/2 items-center justify-center p-12">
           <div className="w-96">
             <img 
-              src="/images/StudentLogin.png" 
+              src="/images/TutorLogin.png" 
               alt="Student signing up" 
               className="w-full h-auto"
             />
@@ -122,7 +122,7 @@ const SignupPage = () => {
               </div>
 
               <div className="text-center text-sm text-gray-500 mt-6">
-                <a href="/login" className="hover:text-purple-600 hover:underline">
+                <a href="/tutor/login" className="hover:text-purple-600 hover:underline">
                   Already have an account? Sign in
                 </a>
               </div>
