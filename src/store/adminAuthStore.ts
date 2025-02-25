@@ -1,8 +1,6 @@
 import { create } from 'zustand';
-import { persist,createJSONStorage } from 'zustand/middleware';
-import tutorAxiosInstance from '@/app/service/user/userAxiosInstance';
-import { signOut } from 'next-auth/react';
-
+import { persist } from 'zustand/middleware';
+import adminAxiosInstance from '@/app/service/admin/adminAxiosInstance';
 export interface User {
   id: string;
   role: string;
@@ -49,7 +47,7 @@ const useAuthStore = create<AuthState>()(
           }
       
           // Call refresh token API only if refreshToken exists
-          const response = await tutorAxiosInstance.post<RefreshTokenResponse>('/tutor/refresh-token');
+          const response = await adminAxiosInstance.post<RefreshTokenResponse>('/admin/refresh-token');
       
           if (response.data.success) {
             set({ token: response.data.accessToken, isAuthenticated: true });
@@ -63,16 +61,15 @@ const useAuthStore = create<AuthState>()(
         }
       },
       
-      logout: async () => { 
+      logout: async () => {
         try {
-          await signOut({ redirect: false });
-          await tutorAxiosInstance.post('/tutor/logout'); 
-          console.log("User logged out successfully");
+          const response = await adminAxiosInstance.post('/admin/logout'); // Call logout API
+          console.log(response)
         } catch (error) {
-          console.error("Logout failed:", error);
+          console.error('Logout failed:', error);
         }
         set({ user: null, token: null, isAuthenticated: false });
-        },
+      }
     }),
     {
       name: 'auth-storage', // LocalStorage key

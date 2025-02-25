@@ -13,6 +13,7 @@ const page = () => {
 
   const handleLogout = () => {
     logout(); // Clear user authentication state
+    localStorage.removeItem('authUserCheck');
     toast.success('Logged out successfully!');
     router.push('/login'); // Redirect to login page
   };

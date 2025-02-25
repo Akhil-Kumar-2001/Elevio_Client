@@ -13,6 +13,7 @@ const page = () => {
 
   const handleLogout = () => {
     logout(); // Clear user authentication state
+    localStorage.removeItem('authTutorCheck');
     toast.success('Logged out successfully!');
     router.push('/tutor/login'); // Redirect to login page
   };

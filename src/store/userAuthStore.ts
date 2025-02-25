@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import userAxiosInstance from '@/app/service/user/userAxiosInstance';
+import { getSession, signIn, signOut } from 'next-auth/react';
+import { toast } from 'react-toastify';
+import { googleSignInApi } from '@/app/service/user/userApi';
+import axios from 'axios';
+
+const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
 export interface User {
   id: string;
@@ -24,6 +30,7 @@ interface AuthState {
   saveUserDetails: (response: AuthResponse) => void;
   refreshAccessToken: () => Promise<boolean>;
   logout: () => void;
+  googleSignIn: () => Promise<void>;
 }
 
 const useAuthStore = create<AuthState>()(
@@ -61,16 +68,83 @@ const useAuthStore = create<AuthState>()(
           return false;
         }
       },
+
+     
+
+   logout: async () => { 
+    try {
+      await signOut({ redirect: false });
+      await userAxiosInstance.post('/student/logout'); 
+      console.log("User logged out successfully");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    // Step 3: Clear local state
+    set({ user: null, token: null, isAuthenticated: false });
+    },
+
       
-      logout: async () => {
+      // logout: async () => {
+      //   try {
+      //     const response = await userAxiosInstance.post('/student/logout'); // Call logout API
+      //     console.log(response)
+      //   } catch (error) {
+      //     console.error('Logout failed:', error);
+      //   }
+      //   set({ user: null, token: null, isAuthenticated: false });
+      // },
+      googleSignIn: async () =>{
         try {
-          const response = await userAxiosInstance.post('/student/logout'); // Call logout API
+          const result = await signIn("google", { callbackUrl: '/home',redirect: false, } );
+    
+          if (result?.error) {
+            // console.log(error)
+            console.error('Sign-in failed', result.error);
+            toast.error('Sign in using google failed');
+            return;
+          }
+          // await new Promise((resolve) => setTimeout(resolve, 500)); 
+    
+          const session = await getSession();
+          if (!session) {
+            console.error("Session retrieval failed");
+            toast.error("Failed to retrieve session data");
+            return;
+          }
+          // console.log(session)
+          // console.log(session?.user)
+    
+          if (!session || !session.user) {
+            console.error('Session or user data is missing');
+            toast.error('Failed to retrieve session data');
+            return;
+          }
+    
+          const userData = {
+            username: session.user.name ?? '',
+            email: session.user.email ?? '',
+            image: session.user.image ?? '',
+          };
+          console.log('user data',userData);
+          // const authStore = role === 'student' ? studentAuth : tutorAuth;
+          console.log("Before calling googleSignInApi");
+    
+          // const googleApi = role == 'student' ? studentGoogle : tutorGoogle
+          console.log("Session retrieved:", session);
+          // const response = await googleSignInApi(userData,session);
+          const response = await axios.post(`${API_URI}/student/callback`,{userData,session})
           console.log(response)
-        } catch (error) {
-          console.error('Logout failed:', error);
+          localStorage.setItem('authUserCheck', response.data.accessToken) 
+          useAuthStore.getState().saveUserDetails(response.data);
+
+          // toast.success(response.message);
+          // router.push('/home') 
+    
+        } catch (error: any) {
+          console.log(error)
+          toast.error(error)
         }
-        set({ user: null, token: null, isAuthenticated: false });
-      }
+      },
     }),
     {
       name: 'auth-storage', // LocalStorage key

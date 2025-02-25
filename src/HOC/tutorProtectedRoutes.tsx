@@ -20,17 +20,10 @@ const withAuth = <P extends {}>(
 
     useEffect(() => {
       const checkAuth = async () => {
-         console.log("isAutheticated",isAuthenticated)
-        if (!isAuthenticated) {
-          try {
-            const refreshed = await refreshAccessToken();
-            if (!refreshed) {
-              router.push('/tutor/login');
-            }
-          } catch (error) {
-            console.error('Auth check failed:', error);
-            router.push('/tutor/login');
-          }
+        //  console.log("isAutheticated",isAuthenticated)
+         const tokenCheck = localStorage.getItem('authTutorCheck')
+        if (!tokenCheck) {
+          router.push('/tutor/login')
         }
         setIsLoading(false);
       };

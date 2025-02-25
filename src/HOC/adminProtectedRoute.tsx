@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import useAuthStore from '@/store/userAuthStore';
+import useAuthStore from '@/store/adminAuthStore';
 import { NextPage } from 'next';
 
 // Extended type for components with getInitialProps
@@ -20,15 +20,15 @@ const withAuth = <P extends {}>(
 
     useEffect(() => {
       const checkAuth = async () => {
-        //  console.log("isAutheticated from jjjjjjj",isAuthenticated)
-        const tokenCheck = localStorage.getItem('authUserCheck')
+        //  console.log("isAutheticated",isAuthenticated)
+         const tokenCheck = localStorage.getItem('authAdminCheck')
         if (!tokenCheck) {
-          router.push('/login')
+          router.push('/admin/login')
         }
         setIsLoading(false);
       };
 
-      setTimeout(() => checkAuth(), 1000)
+      checkAuth();
     }, [isAuthenticated, refreshAccessToken, router]);
 
     if (isLoading) {
