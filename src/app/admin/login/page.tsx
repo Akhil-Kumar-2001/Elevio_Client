@@ -1,4 +1,4 @@
-import LoginPage from "@/Component/login";
+import LoginPage from "@/components/login";
 
 const AdminLogin = () =>{
     return <LoginPage role="admin" />

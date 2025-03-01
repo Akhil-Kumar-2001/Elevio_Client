@@ -62,7 +62,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
       authStore.saveUserDetails(response.data);
 
       toast.success(response.message);
-      role == 'student' ? router.push('/home') : role == 'tutor' ? router.push('/tutor/home'): router.push('/admin/dashboard');
+      role == 'student' ? router.push('/home') : role == 'tutor' ? router.push('/tutor/dashboard'): router.push('/admin/dashboard');
     } catch (error) {
       setErrors('Invalid email or password');
     } finally {
@@ -119,7 +119,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
   const handleGoogleLogin = async () => {
     try {
       // Step 1: Redirect to Google Sign-in (this does NOT return session immediately)
-      const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/home',redirect: false, });
+      const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/dashboard',redirect: false, });
   
       if (result?.error) {
         console.error("Sign-in failed", result.error);
@@ -203,7 +203,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12"
                 />
-                <button
+                {/* <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-4 p-1  text-gray-600 hover:text-gray-800 focus:outline-none"
@@ -214,7 +214,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
                   ) : (
                     <Eye className="w-5 h-5 stroke-[1.5]" />
                   )}
-                </button>
+                </button> */}
               </div>
 
               {errors && <p className="text-red-500 text-sm text-center">{errors}</p>}

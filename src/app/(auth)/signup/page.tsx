@@ -136,7 +136,7 @@
 
 // export default SignupPage;
 
-import SignupForm from "@/Component/signup";
+import SignupForm from "@/components/signup";
 
 const StudentSignUp = () =>{
       return <SignupForm role = "student" />

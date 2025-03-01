@@ -221,7 +221,7 @@
 
 // export default OTPVerification;
 
-import OTPVerification from "@/Component/otp";
+import OTPVerification from "@/components/otp";
 
 const OtpPage = () =>{
   return <OTPVerification role="tutor"  />

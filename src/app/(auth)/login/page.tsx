@@ -167,7 +167,7 @@
 
 // export default LoginPage;
 
-import LoginPage from '@/Component/login';
+import LoginPage from '@/components/login';
 
 const StudentLogin = () => {
   return <LoginPage role="student" />;

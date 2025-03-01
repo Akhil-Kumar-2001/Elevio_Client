@@ -4,14 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import withAuth from '@/HOC/adminProtectedRoute';
 import Table from '../../../components/table';
-import { getStudents, updateStudentStatus } from '@/app/service/admin/adminApi';
+import { getTutors, updateTutorStatus } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/adminsidebar';
 
-const StudentsManagement = () => {
 
-  // const TutorManagement = () => {
+const TutorManagement = () => {
 
-  interface StudentType {
+  interface TutorType {
     _id: string;
     username: string;
     email: string;
@@ -19,7 +18,8 @@ const StudentsManagement = () => {
     role:string;
     createdAt:string;
 }
-  const [students, setStudents] = useState<StudentType[]>([]);
+
+  const [tutors, setTutors] = useState<TutorType[]>([]);
   const [loading, setLoading] = useState(false);
 
   const tableColumn = [
@@ -29,16 +29,15 @@ const StudentsManagement = () => {
     { header: "Joined Date", field: "createdAt" }
   ];
 
-
-  const fetchStudents = async () => {
+  const fetchTutors = async () => {
     setLoading(true);
     try {
-      const studentData = await getStudents();
-      if (studentData && studentData.success) {
-        setStudents(studentData.data);
+      const tutorData = await getTutors();
+      if (tutorData && tutorData.success) {
+        setTutors(tutorData.data);
       }
     } catch (error) {
-      toast.error('Failed to fetch students');
+      toast.error('Failed to fetch tutors');
     } finally {
       setLoading(false);
     }
@@ -47,46 +46,49 @@ const StudentsManagement = () => {
   const handleBlockUnblockUser = async (userId: string, currentStatus: number) => {
     try {
         const newStatus = currentStatus === 1 ? -1 : 1;
-        const response = await updateStudentStatus(userId);
+        const response = await updateTutorStatus(userId);
         
         if (response && response.success) {
-            toast.success(newStatus === 1 ? 'Student unblocked successfully' : 'Student blocked successfully');
-            setStudents(students.map(student => 
-                student._id === userId ? { ...student, status: newStatus } : student
+            toast.success(newStatus === 1 ? 'Tutor unblocked successfully' : 'Tutor blocked successfully');
+            setTutors(tutors.map(tutor => 
+                tutor._id === userId ? { ...tutor, status: newStatus } : tutor
             ));
         }
     } catch (error) {
-        toast.error('Failed to update student status');
+        toast.error('Failed to update tutor status');
     }
 };
 
 
   useEffect(() => {
-    fetchStudents();
+    fetchTutors();
   }, []);
 
   return (
     <div className="flex flex-col h-screen">
       <div className="bg-black text-white p-4 border-b border-gray-700 flex justify-between items-center">
         <div className="text-xl font-bold">Elevio</div>
-        {/* <div>...</div> */}
+        <div></div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-       <AdminSidebar />
+
+      <div>
+        <AdminSidebar />
+      </div>
 
         <div className="flex-1 bg-black text-white overflow-auto">
           <div className="p-8">
             <div className="flex justify-between items-center mb-6">
               <div className="space-x-8 border-b border-gray-700">
-                <button className="text-lg font-medium border-b-2 border-white pb-2 mr-4 text-white">All Students</button>
+                <button className="text-lg font-medium border-b-2 border-white pb-2 mr-4 text-white">All Tutors</button>
               </div>
               {loading && <div className="text-gray-400">Loading...</div>}
             </div>
 
             <Table 
               columnArray={tableColumn} 
-              dataArray={students} 
+              dataArray={tutors} 
               actions={true}
               onBlockUser={handleBlockUnblockUser}
             />
@@ -97,4 +99,4 @@ const StudentsManagement = () => {
   );
 };
 
-export default withAuth(StudentsManagement);
+export default withAuth(TutorManagement);

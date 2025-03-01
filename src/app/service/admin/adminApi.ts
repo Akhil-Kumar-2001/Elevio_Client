@@ -35,4 +35,32 @@ export const getStudents = async() =>{
     }
 }
 
+export const getTutors = async() =>{
+    try {
+        const tutors = await adminAxiosInstance.get(`${API_URI}/admin/gettutors`,{withCredentials:true})
+        console.log(tutors)
+        return tutors.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const updateTutorStatus = async (id: string) => {
+    try {
+        const response = await adminAxiosInstance.patch(`${API_URI}/admin/updatetutorstatus`, { id, status }, { withCredentials: true });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error);
+    }
+};
+
+export const updateStudentStatus = async (id: string) => {
+    try {
+        const response = await adminAxiosInstance.patch(`${API_URI}/admin/updatestudentstatus`, { id, status }, { withCredentials: true });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error);
+    }
+};
+
 

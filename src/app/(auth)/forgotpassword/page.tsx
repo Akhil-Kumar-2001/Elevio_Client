@@ -1,4 +1,4 @@
-import ForgotPassword from "@/Component/forgotpassword";
+import ForgotPassword from "@/components/forgotpassword";
 
 const StudentForgotPassword = () =>{
   return <ForgotPassword role="student" />

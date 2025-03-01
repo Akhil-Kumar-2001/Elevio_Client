@@ -1,4 +1,4 @@
-import ResetPasswordPage from "@/Component/resetpassword";
+import ResetPasswordPage from "@/components/resetpassword";
 
 const ResetPassword = () => {
     return<ResetPasswordPage role="student" />
