@@ -111,7 +111,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
 const handleGoogleSignIn = async () => {
   try {
     // Step 1: Redirect to Google Sign-in (this does NOT return session immediately)
-    const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/home',redirect: false, });
+    const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/dashboard',redirect: false, });
 
     if (result?.error) {
       console.error("Sign-in failed", result.error);
@@ -142,13 +142,13 @@ useEffect(() => {
 
     try {
       const response = await googleApi(userData);
-      role == "student"
-        ? localStorage.setItem("authUserCheck", response.data.accessToken)
-        : localStorage.setItem("authTutorCheck", response.data.accessToken);
+      // role == "student"
+      //   ? localStorage.setItem("authUserCheck", response.data.accessToken)
+      //   : localStorage.setItem("authTutorCheck", response.data.accessToken);
 
       authStore.saveUserDetails(response.data);
       toast.success(response.message, { toastId: "google-signin-success" });
-      router.push(role == "student" ? "/home" : "/tutor/home");
+      router.push(role == "student" ? "/home" : "/tutor/dashboard");
     } catch (error) {
       console.error(error);
       toast.error("Google authentication failed.");

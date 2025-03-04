@@ -23,8 +23,20 @@ const TutorSidebar = () => {
   const pathname = usePathname();
   const { logout } = useAuthStore();
 
-  const [expanded, setExpanded] = useState<boolean>(true);
+  // const [expanded, setExpanded] = useState<boolean>(true);
+  const [expanded, setExpanded] = useState<boolean>(() => {
+    return JSON.parse(localStorage.getItem("sidebarExpanded") ?? "true");
+  });
+  
   const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Ensure localStorage is accessed only on the client
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedSidebarState = localStorage.getItem("sidebarExpanded");
+      setExpanded(storedSidebarState ? JSON.parse(storedSidebarState) : true);
+    }
+  }, []);
 
   // Prevent hydration error by only setting localStorage in useEffect
   useEffect(() => {

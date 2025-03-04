@@ -9,7 +9,7 @@ const AdminSidebar = () => {
     { label: 'Dashboard', icon: <FiGrid size={24} />, path: '/admin/dashboard' },
     { label: 'Tutor Management', icon: <FiUsers size={24} />, path: '/admin/tutormanagement' },
     { label: 'Students Management', icon: <FiUsers size={24} />, path: '/admin/studentsmanagement' },
-    { label: 'Tutor Verification', icon: <FiCheckCircle size={24} />, path: '/admin/tutor-verification' },
+    { label: 'Tutor Verification', icon: <FiCheckCircle size={24} />, path: '/admin/tutorverification' },
     { label: 'Subscription', icon: <FiCircle size={24} />, path: '/admin/subscription' },
     { label: 'Category', icon: <FiFolder size={24} />, path: '/admin/category' },
   ];

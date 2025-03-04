@@ -58,7 +58,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
       const authStore = role === 'student' ? studentAuth : role == 'tutor' ? tutorAuth : adminAuth;
 
       const response = await signInApi(formData);
-      role == 'student' ? localStorage.setItem('authUserCheck', response.data.accessToken) : role =='tutor' ? localStorage.setItem('authTutorCheck', response.data.accessToken) : localStorage.setItem('authAdminCheck',response.data.accessToken)
+      // role == 'student' ? localStorage.setItem('authUserCheck', response.data.accessToken) : role =='tutor' ? localStorage.setItem('authTutorCheck', response.data.accessToken) : localStorage.setItem('authAdminCheck',response.data.accessToken)
       authStore.saveUserDetails(response.data);
 
       toast.success(response.message);
@@ -70,51 +70,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
     }
   };
 
-
-
-  // const handleGoogleLogin = async () => {
-  //   try {
-  //     const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/home',redirect: false, });
-
-  //     if (result?.error) {
-  //       console.log(errors)
-  //       console.error('Sign-in failed', result.error);
-  //       toast.error('Sign in using google failed');
-  //       return;
-  //     }
-  //     // await new Promise((resolve) => setTimeout(resolve, 500)); 
-
-  //     const session = await getSession();
-  //     console.log(session)
-  //     console.log(session?.user)
-
-  //     if (!session || !session.user) {
-  //       console.error('Session or user data is missing');
-  //       toast.error('Failed to retrieve session data');
-  //       return;
-  //     }
-
-  //     const userData = {
-  //       username: session.user.name ?? '',
-  //       email: session.user.email ?? '',
-  //       image: session.user.image ?? '',
-  //     };
-  //     console.log('user data',userData);
-  //     const authStore = role === 'student' ? studentAuth : tutorAuth;
-  //     console.log("Before calling googleSignInApi");
-
-  //     const googleApi = role == 'student' ? studentGoogle : tutorGoogle
-  //     const response = await googleApi(userData);
-  //     role == 'student' ? localStorage.setItem('authUserCheck', response.data.accessToken) : localStorage.setItem('authTutorCheck', response.data.accessToken)
-  //     authStore.saveUserDetails(response.data);
-  //     toast.success(response.message);
-  //     role == 'student' ? router.push('/home') : router.push('/tutor/home');
-
-  //   } catch (error: any) {
-  //     console.log(error)
-  //     toast.error(error)
-  //   }
-  // };
 
   const handleGoogleLogin = async () => {
     try {
@@ -150,13 +105,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
   
       try {
         const response = await googleApi(userData);
-        role == "student"
-          ? localStorage.setItem("authUserCheck", response.data.accessToken)
-          : localStorage.setItem("authTutorCheck", response.data.accessToken);
+        // role == "student"
+        //   ? localStorage.setItem("authUserCheck", response.data.accessToken)
+        //   : localStorage.setItem("authTutorCheck", response.data.accessToken);
   
         authStore.saveUserDetails(response.data);
         toast.success(response.message, { toastId: "google-signin-success" });
-        router.push(role == "student" ? "/home" : "/tutor/home");
+        router.push(role == "student" ? "/home" : "/tutor/dashboard");
       } catch (error) {
         console.error(error);
         toast.error("Google authentication failed.");

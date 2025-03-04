@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import withAuth from '../../../HOC/tutorProtectedRoutes'
 import useAuthStore from '@/store/tutorAuthStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -30,5 +29,4 @@ const page = () => {
   )
 }
 
-// export default page
-export default withAuth(page)
+export default page

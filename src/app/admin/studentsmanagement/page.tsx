@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import withAuth from '@/HOC/adminProtectedRoute';
 import Table from '../../../components/table';
 import { getStudents, updateStudentStatus } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/adminsidebar';
@@ -39,6 +38,7 @@ const StudentsManagement = () => {
       }
     } catch (error) {
       toast.error('Failed to fetch students');
+      console.log(error)
     } finally {
       setLoading(false);
     }
@@ -97,4 +97,4 @@ const StudentsManagement = () => {
   );
 };
 
-export default withAuth(StudentsManagement);
+export default StudentsManagement

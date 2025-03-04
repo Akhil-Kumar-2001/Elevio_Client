@@ -1,6 +1,5 @@
 import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
-import withAuth from '@/HOC/tutorProtectedRoutes';
 import React from 'react';
 
 const InstructorDashboard = () => {

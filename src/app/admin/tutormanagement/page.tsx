@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import withAuth from '@/HOC/adminProtectedRoute';
 import Table from '../../../components/table';
 import { getTutors, updateTutorStatus } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/adminsidebar';
@@ -38,6 +37,7 @@ const TutorManagement = () => {
       }
     } catch (error) {
       toast.error('Failed to fetch tutors');
+      console.log(error)
     } finally {
       setLoading(false);
     }
@@ -56,6 +56,7 @@ const TutorManagement = () => {
         }
     } catch (error) {
         toast.error('Failed to update tutor status');
+        console.log(error)
     }
 };
 
@@ -99,4 +100,4 @@ const TutorManagement = () => {
   );
 };
 
-export default withAuth(TutorManagement);
+export default TutorManagement

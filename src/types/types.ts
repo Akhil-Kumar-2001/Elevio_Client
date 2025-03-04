@@ -24,3 +24,25 @@ export type resetPasswordType = {
     createdAt: string;
   };
   
+  export interface TokenPayload {
+    email: string;
+    role: string;
+    iat: number;
+    exp: number;
+  }
+
+  export interface TutorVerificationFormData {
+    _id:string;
+    isVerified: "pending" | "approved" | "rejected"; 
+    profile: {
+      bio: string;
+      documents: {
+        fileUrl: string;
+        type: "id_verification" | "experience_certificate" | string; 
+      }[];
+      experience: string;
+      qualification: string;
+      skills: string[];
+    };
+  }
+  

@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import useAuthStore from '@/store/adminAuthStore';
-import withAuth from '@/HOC/adminProtectedRoute';
 import AdminSidebar from '@/components/adminsidebar';
 
 const CourseDashboard = () => {
@@ -16,13 +15,7 @@ const CourseDashboard = () => {
 
   const { logout } = useAuthStore();
   const router = useRouter();
-  const handleLogout = () => {
-    logout(); // Clear user authentication state
-    localStorage.removeItem('authUserCheck');
-    toast.success('Logged out successfully!');
-    router.push('/admin/login'); // Redirect to login page
-  };
-
+  
   return (
     <div className="flex flex-col h-screen">
       {/* Top Navbar */}

@@ -1,13 +1,12 @@
 'use client'
 
 import React from 'react'
-import withAuth from '../../../HOC/userProtedRoutes'
 import useAuthStore from '@/store/userAuthStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 
-const page = () => {
+const Homepage = () => {
   const { logout } = useAuthStore();
   const router = useRouter();
 
@@ -30,5 +29,4 @@ const page = () => {
   )
 }
 
-export default page
-// export default withAuth(page)
+export default Homepage

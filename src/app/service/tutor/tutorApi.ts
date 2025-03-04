@@ -1,6 +1,7 @@
 import axios from "axios";
-import { basicType, userType } from "@/types/types";
+import { basicType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
+import userAxiosInstance from "./tutorAxiosInstance";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -106,3 +107,27 @@ export const googleSignInApi = async (userData: basicType) => {
         handleAxiosError(error);
     }
 };
+
+export const getTutor = async (id: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/get-tutor/${id}`, {
+            withCredentials: true,
+        });
+        console.log(response.data)
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching tutor:", error);
+        return null;
+    }
+};
+
+export const verifyTutor = async (formData:TutorVerificationFormData) => {
+    try {
+        const response = await userAxiosInstance.put(`/tutor/verify-tutor`,{formData},{withCredentials:true})
+        return response.data
+    } catch (error) {
+        
+    }
+}
+
+

@@ -63,4 +63,14 @@ export const updateStudentStatus = async (id: string) => {
     }
 };
 
+export const getPendingTutors = async () =>{
+    try {
+        const response = await adminAxiosInstance.get(`${API_URI}/admin/pending-tutor`)
+        console.log("Pending Tutors ===>>>>>",response)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
 
