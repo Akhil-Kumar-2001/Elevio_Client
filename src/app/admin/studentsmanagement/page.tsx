@@ -4,22 +4,23 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Table from '../../../components/table';
 import { getStudents, updateStudentStatus } from '@/app/service/admin/adminApi';
-import AdminSidebar from '@/components/adminsidebar';
+import AdminSidebar from '@/components/admin/adminsidebar';
+import ConfirmModal from '@/components/admin/confirmModal';
 
 const StudentsManagement = () => {
-
-  // const TutorManagement = () => {
-
   interface StudentType {
     _id: string;
     username: string;
     email: string;
     status: number;
-    role:string;
-    createdAt:string;
-}
+    role: string;
+    createdAt: string;
+  }
+  
   const [students, setStudents] = useState<StudentType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<{ id: string, status: number } | null>(null);
 
   const tableColumn = [
     { header: "Name", field: "username" },
@@ -27,7 +28,6 @@ const StudentsManagement = () => {
     { header: "Role", field: "role" },
     { header: "Joined Date", field: "createdAt" }
   ];
-
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -38,32 +38,45 @@ const StudentsManagement = () => {
       }
     } catch (error) {
       toast.error('Failed to fetch students');
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBlockUnblockUser = async (userId: string, currentStatus: number) => {
-    try {
-        const newStatus = currentStatus === 1 ? -1 : 1;
-        const response = await updateStudentStatus(userId);
-        
-        if (response && response.success) {
-            toast.success(newStatus === 1 ? 'Student unblocked successfully' : 'Student blocked successfully');
-            setStudents(students.map(student => 
-                student._id === userId ? { ...student, status: newStatus } : student
-            ));
-        }
-    } catch (error) {
-        toast.error('Failed to update student status');
-    }
-};
+  const openConfirmModal = (userId: string, currentStatus: number) => {
+    setSelectedStudent({ id: userId, status: currentStatus });
+    setModalOpen(true);
+  };
 
+  const handleBlockUnblockUser = async () => {
+    if (!selectedStudent) return;
+    
+    try {
+      const response = await updateStudentStatus(selectedStudent.id);
+      
+      if (response && response.success) {
+        const newStatus = selectedStudent.status === 1 ? -1 : 1;
+        toast.success(newStatus === 1 ? 'Student unblocked successfully' : 'Student blocked successfully');
+        setStudents(students.map(student => 
+          student._id === selectedStudent.id ? { ...student, status: newStatus } : student
+        ));
+      }
+    } catch (error) {
+      toast.error('Failed to update student status');
+    }
+  };
 
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  // Default modal props that always returns the required fields
+  const modalTitle = selectedStudent?.status === 1 ? 'Block Student' : 'Unblock Student';
+  const modalMessage = selectedStudent?.status === 1
+    ? 'Are you sure you want to block this student? They will not be able to access the platform.'
+    : 'Are you sure you want to unblock this student? They will regain access to the platform.';
+  const modalConfirmText = selectedStudent?.status === 1 ? 'Block' : 'Unblock';
 
   return (
     <div className="flex flex-col h-screen">
@@ -73,7 +86,7 @@ const StudentsManagement = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-       <AdminSidebar />
+        <AdminSidebar />
 
         <div className="flex-1 bg-black text-white overflow-auto">
           <div className="p-8">
@@ -88,7 +101,16 @@ const StudentsManagement = () => {
               columnArray={tableColumn} 
               dataArray={students} 
               actions={true}
-              onBlockUser={handleBlockUnblockUser}
+              onBlockUser={(userId, currentStatus) => openConfirmModal(userId, currentStatus)}
+            />
+
+            <ConfirmModal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              onConfirm={handleBlockUnblockUser}
+              title={modalTitle}
+              message={modalMessage}
+              confirmText={modalConfirmText}
             />
           </div>
         </div>
@@ -97,4 +119,4 @@ const StudentsManagement = () => {
   );
 };
 
-export default StudentsManagement
+export default StudentsManagement;

@@ -13,6 +13,7 @@ import { TutorVerificationFormData } from "@/types/types";
 import { verifyTutor } from "@/app/service/tutor/tutorApi";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/tutor/navbar";
 
 const schema = z.object({
   bio: z.string().min(10, "Bio must be at least 10 characters"),
@@ -85,7 +86,8 @@ const VerificationForm: React.FC = () => {
 
       // Upload to Cloudinary
       const uploadResponse = await axios.post(
-        "https://api.cloudinary.com/v1_1/dhhzuean5/upload", // Replace with your Cloudinary cloud name
+        `https://api.cloudinary.com/v1_1/dhhzuean5/upload`,
+  // Replace with your Cloudinary cloud name
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -180,7 +182,8 @@ const VerificationForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white py-2">
+    <div className="min-h-screen bg-white ">
+      <Navbar />
       <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-black mb-2">Complete Verification</h2>
         <p className="text-gray-600 text-sm mb-4">Submit required documents for basic verification.</p>

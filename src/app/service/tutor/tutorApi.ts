@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, TutorVerificationFormData, userType } from "@/types/types";
+import { basicType, Tutor, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
 
@@ -10,7 +10,7 @@ export const handleAxiosError = (error: unknown) => {
         console.log("Axios Error:", error.response?.data?.message);
         toast.error(error.response?.data?.message);
     } else {
-        console.error("Unexpected error:", error);
+        // console.error("Unexpected error:", error);
         toast.error("Something went wrong. Please try again.");
     }
   };
@@ -113,7 +113,6 @@ export const getTutor = async (id: string) => {
         const response = await userAxiosInstance.get(`/tutor/get-tutor/${id}`, {
             withCredentials: true,
         });
-        console.log(response.data)
         return response.data;
     } catch (error) {
         console.error("Error fetching tutor:", error);
@@ -125,8 +124,19 @@ export const verifyTutor = async (formData:TutorVerificationFormData) => {
     try {
         const response = await userAxiosInstance.put(`/tutor/verify-tutor`,{formData},{withCredentials:true})
         return response.data
-    } catch (error) {
-        
+    } catch (error:unknown) {
+        handleAxiosError(error);
+    }
+}
+
+export const updateTutor = async(id:string,formData:TutorType) =>{
+    try {
+        console.log("Tutor is from tutor api",id)
+        console.log("form data from tutor api",formData)
+        const response = await userAxiosInstance.patch(`/tutor/update-profile`,{id,formData})
+         return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error); 
     }
 }
 

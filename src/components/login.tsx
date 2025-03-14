@@ -1,40 +1,98 @@
 'use client';
 
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Eye, EyeOff } from 'lucide-react';
-import { loginValidation } from '@/app/utits/validation';
+import { z } from 'zod';
+import { getSession, signIn } from 'next-auth/react';
+
 import { googleSignInApi as tutorGoogle, tutorSignin } from '@/app/service/tutor/tutorApi';
 import { googleSignInApi as studentGoogle, studentSignin } from '@/app/service/user/userApi';
 import { adminSignin } from '@/app/service/admin/adminApi';
+
 import useTutorAuthStore from '@/store/tutorAuthStore';
 import useStudentAuthStore from '@/store/userAuthStore';
-import useAdminAuthStore from '@/store/adminAuthStore'
-import { getSession, signIn } from 'next-auth/react';
-import { basicType, userType } from "@/types/types";
+import useAdminAuthStore from '@/store/adminAuthStore';
 
+// Login validation schema
+const loginSchema = z.object({
+  email: z.string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Invalid email address" })
+    .max(100, { message: "Email must be less than 100 characters" }),
+  
+  password: z.string()
+    .min(1, { message: "Password is required" })
+    .min(8, { message: "Password must be at least 8 characters long" })
+});
+
+// Type for login form data
+type LoginFormData = z.infer<typeof loginSchema>;
+
+// Validation function that returns field-specific errors
+const validateLoginForm = (data: LoginFormData) => {
+  try {
+    loginSchema.parse(data);
+    return { 
+      status: true, 
+      errors: {} 
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const sortedErrors = error.errors.sort((a) => 
+        a.message.includes("is required") ? -1 : 1
+      );
+      
+      const fieldErrors = sortedErrors.reduce((acc, err) => {
+        const path = err.path[0] as string;
+        if (!acc[path]) {
+          acc[path] = err.message;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      
+      return { 
+        status: false, 
+        errors: fieldErrors 
+      };
+    }
+    return { 
+      status: false, 
+      errors: { general: "An unknown error occurred" } 
+    };
+  }
+};
 
 interface LoginPageProps {
   role: 'student' | 'tutor' | 'admin';
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<string | null>(null);
+  const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
   const studentAuth = useStudentAuthStore();
   const tutorAuth = useTutorAuthStore();
-  const adminAuth = useAdminAuthStore()
+  const adminAuth = useAdminAuthStore();
 
   const authImage = role === 'student' ? '/images/StudentLogin.png' : '/images/TutorLogin.png';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors(null);
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -45,36 +103,47 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
     e.preventDefault();
     if (loading) return;
 
-    const validationResponse = loginValidation(formData);
+    // Validate form
+    const validationResponse = validateLoginForm(formData);
     if (!validationResponse.status) {
-      setErrors(validationResponse.message ?? null);
+      setErrors(validationResponse.errors);
       return;
     }
 
     setLoading(true);
 
     try {
-      const signInApi = role === 'student' ? studentSignin : role == 'tutor' ? tutorSignin : adminSignin;
-      const authStore = role === 'student' ? studentAuth : role == 'tutor' ? tutorAuth : adminAuth;
+      const signInApi = role === 'student' ? studentSignin : role === 'tutor' ? tutorSignin : adminSignin;
+      const authStore = role === 'student' ? studentAuth : role === 'tutor' ? tutorAuth : adminAuth;
 
       const response = await signInApi(formData);
-      // role == 'student' ? localStorage.setItem('authUserCheck', response.data.accessToken) : role =='tutor' ? localStorage.setItem('authTutorCheck', response.data.accessToken) : localStorage.setItem('authAdminCheck',response.data.accessToken)
       authStore.saveUserDetails(response.data);
 
       toast.success(response.message);
-      role == 'student' ? router.push('/home') : role == 'tutor' ? router.push('/tutor/dashboard'): router.push('/admin/dashboard');
-    } catch (error) {
-      setErrors('Invalid email or password');
+      role === 'student' ? router.push('/home') : role === 'tutor' ? router.push('/tutor/dashboard') : router.push('/admin/dashboard');
+    } catch (error: any) {
+      // Handle login errors
+      if (error.response?.data?.message) {
+        // If backend returns a specific error message
+        setErrors({ general: error.response.data.message });
+      } else {
+        // Generic error
+        setErrors({ general: 'Invalid email or password' });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleGoogleLogin = async () => {
     try {
-      // Step 1: Redirect to Google Sign-in (this does NOT return session immediately)
-      const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/dashboard',redirect: false, });
+      // Step 1: Redirect to Google Sign-in
+      const result = await signIn("google", role === 'student' 
+        ? { callbackUrl: '/home', redirect: false } 
+        : role === 'tutor'
+        ? { callbackUrl: '/tutor/dashboard', redirect: false }
+        : { callbackUrl: '/admin/dashboard', redirect: false }
+      );
   
       if (result?.error) {
         console.error("Sign-in failed", result.error);
@@ -90,7 +159,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
   useEffect(() => {
     const checkSessionAndCallBackend = async () => {
       const session = await getSession();
-      if (!session || !session.user) return; // If session is not available, do nothing
+      if (!session || !session.user) return;
   
       console.log("Session found, calling backend...");
       
@@ -100,18 +169,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
         image: session.user.image ?? "",
       };
   
-      const googleApi = role == "student" ? studentGoogle : tutorGoogle;
-      const authStore = role === "student" ? studentAuth : tutorAuth;
+      const googleApi = role === "student" ? studentGoogle : role === "tutor" ? tutorGoogle : null;
+      const authStore = role === "student" ? studentAuth : role === "tutor" ? tutorAuth : adminAuth;
   
+      if (!googleApi) return;
+
       try {
         const response = await googleApi(userData);
-        // role == "student"
-        //   ? localStorage.setItem("authUserCheck", response.data.accessToken)
-        //   : localStorage.setItem("authTutorCheck", response.data.accessToken);
-  
         authStore.saveUserDetails(response.data);
         toast.success(response.message, { toastId: "google-signin-success" });
-        router.push(role == "student" ? "/home" : "/tutor/dashboard");
+        
+        role === "student" 
+          ? router.push("/home") 
+          : role === "tutor" 
+          ? router.push("/tutor/dashboard")
+          : router.push("/admin/dashboard");
       } catch (error) {
         console.error(error);
         toast.error("Google authentication failed.");
@@ -120,7 +192,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
   
     checkSessionAndCallBackend();
   }, []); // Runs when session changes
-
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
@@ -136,49 +207,70 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
         <div className="w-full md:w-1/2 p-8">
           <div className="h-full flex flex-col">
             <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
-            {role === 'student' ? 'Student Sign In' : role === 'tutor' ? 'Tutor Sign In' : 'Admin Sign In'}
+              {role === 'student' ? 'Student Sign In' : role === 'tutor' ? 'Tutor Sign In' : 'Admin Sign In'}
             </h2>
 
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6 max-w-sm mx-auto w-full">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black"
-              />
-
-              <div className="relative flex items-center">
+              <div>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12"
+                  className={`w-full px-4 py-3 border ${
+                    errors.email 
+                      ? 'border-red-500 focus:ring-red-200' 
+                      : 'border-gray-200 focus:ring-purple-500'
+                  } rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-black`}
                 />
-                {/* <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-4 p-1  text-gray-600 hover:text-gray-800 focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5 stroke-[1.5]" />
-                  ) : (
-                    <Eye className="w-5 h-5 stroke-[1.5]" />
-                  )}
-                </button> */}
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
               </div>
 
-              {errors && <p className="text-red-500 text-sm text-center">{errors}</p>}
+              <div>
+                <div className="relative flex items-center">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.password 
+                        ? 'border-red-500 focus:ring-red-200' 
+                        : 'border-gray-200 focus:ring-purple-500'
+                    } rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-black pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-4 p-1 text-gray-600 hover:text-gray-800 focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5 stroke-[1.5]" />
+                    ) : (
+                      <Eye className="w-5 h-5 stroke-[1.5]" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                )}
+              </div>
+
+              {errors.general && (
+                <p className="text-red-500 text-sm text-center">{errors.general}</p>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 rounded-lg font-medium transition-colors ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 text-white'
-                  }`}
+                className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                  loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
               >
                 {loading ? 'Loading...' : 'Sign in'}
               </button>
@@ -217,7 +309,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
                     <a href="/forgotpassword" className="hover:text-purple-600 hover:underline">Forgot password?</a>
                     <a href="/signup" className="hover:text-purple-600 hover:underline">Register now</a>
                   </>
-                ) : role == "tutor" ? (
+                ) : role === "tutor" ? (
                   <>
                     <a href="/tutor/forgotpassword" className="hover:text-purple-600 hover:underline">Forgot password?</a>
                     <a href="/tutor/signup" className="hover:text-purple-600 hover:underline">Register now</a>

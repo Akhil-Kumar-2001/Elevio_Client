@@ -1,14 +1,14 @@
-
 'use client';
 
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { signupValidation } from '../app/utits/validation';
-import { googleSignInApi as studentGoogle,userSignup } from '@/app/service/user/userApi';
-import { googleSignInApi as tutorGoogle,tutorSignup } from '@/app/service/tutor/tutorApi';
 import { FcGoogle } from 'react-icons/fc';
 import { getSession, signIn } from 'next-auth/react';
+
+import { validateSignupForm, SignupFormData } from '../app/utits/validationzod';
+import { googleSignInApi as studentGoogle, userSignup } from '@/app/service/user/userApi';
+import { googleSignInApi as tutorGoogle, tutorSignup } from '@/app/service/tutor/tutorApi';
 import useTutorAuthStore from '@/store/tutorAuthStore';
 import useStudentAuthStore from '@/store/userAuthStore';
 
@@ -17,7 +17,7 @@ interface SignupFormProps {
 }
 
 const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignupFormData>({
     username: '',
     email: '',
     password: '',
@@ -29,28 +29,32 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
   const studentAuth = useStudentAuthStore();
   const tutorAuth = useTutorAuthStore();
 
-  const [errors, setErrors] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
 
   const imageSrc = role === 'student' ? '/images/StudentLogin.png' : '/images/TutorLogin.png';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors(null);
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear the specific field error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
 
-    const validationResponse = signupValidation(formData);
+    const validationResponse = validateSignupForm(formData);
     if (!validationResponse.status) {
-      setErrors(validationResponse.message ?? null);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setErrors('Passwords do not match');
+      setErrors(validationResponse.errors);
       return;
     }
 
@@ -59,105 +63,64 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
       const signUpApi = role === 'student' ? userSignup : tutorSignup;
       const response = await signUpApi(formData);
       toast.success(response.message);
-      role === 'student' ? router.push(`/otp?email=${response.email}`) : router.push(`/tutor/otp?email=${response.email}`);
+      role === 'student' 
+        ? router.push(`/otp?email=${response.email}`) 
+        : router.push(`/tutor/otp?email=${response.email}`);
     } catch (error) {
-      setErrors('Signup failed. Please try again.');
+      setErrors({ general: 'Signup failed. Please try again.' });
     } finally {
       setLoading(false);
     }
   };
 
-//   const handleGoogleSignIn = async () => {
-//     try {
-//       const result = await signIn("google", role == 'student' ? { callbackUrl: '/home' } : { callbackUrl: '/tutor/home' });
-
-//       if (result?.error) {
-//         console.log(errors)
-//         console.error('Sign-in failed', result.error);
-//         toast.error('Sign in using google failed');
-//         return;
-//       }
-
-//       const session = await getSession();
-//       console.log(session?.user)
-
-//       if (!session || !session.user) {
-//         console.error('Session or user data is missing');
-//         toast.error('Failed to retrieve session data');
-//         return;
-//       }
-
-//       const userData = {
-//         username: session.user.name ?? '',
-//         email: session.user.email ?? '',
-//         image: session.user.image ?? '',
-//       };
-//       const authStore = role === 'student' ? studentAuth : tutorAuth;
-//       console.log("Before calling googleSignInApi");
-
-//       const googleApi = role == 'student' ? studentGoogle : tutorGoogle
-//       const response = await googleApi(userData);
-//       role == 'student' ? localStorage.setItem('authUserCheck', response.data.accessToken) : localStorage.setItem('authTutorCheck', response.data.accessToken)
-//       authStore.saveUserDetails(response.data);
-//       toast.success(response.message);
-//       role == 'student' ? router.push('/home') : router.push('/tutor/home');
-
-//     } catch (error: any) {
-//       console.log(error)
-//       toast.error(error)
-//     }
-// };
-
-const handleGoogleSignIn = async () => {
-  try {
-    // Step 1: Redirect to Google Sign-in (this does NOT return session immediately)
-    const result = await signIn("google", role == 'student' ? { callbackUrl: '/home',redirect: false, } : { callbackUrl: '/tutor/dashboard',redirect: false, });
-
-    if (result?.error) {
-      console.error("Sign-in failed", result.error);
-      toast.error("Sign in using Google failed");
-    }
-  } catch (error) {
-    console.error(error);
-    toast.error("Error during Google Sign-in");
-  }
-};
-
-// Step 2: Use useEffect to check session change and make backend call
-useEffect(() => {
-  const checkSessionAndCallBackend = async () => {
-    const session = await getSession();
-    if (!session || !session.user) return; // If session is not available, do nothing
-
-    console.log("Session found, calling backend...");
-    
-    const userData = {
-      username: session.user.name ?? "",
-      email: session.user.email ?? "",
-      image: session.user.image ?? "",
-    };
-
-    const googleApi = role == "student" ? studentGoogle : tutorGoogle;
-    const authStore = role === "student" ? studentAuth : tutorAuth;
-
+  const handleGoogleSignIn = async () => {
     try {
-      const response = await googleApi(userData);
-      // role == "student"
-      //   ? localStorage.setItem("authUserCheck", response.data.accessToken)
-      //   : localStorage.setItem("authTutorCheck", response.data.accessToken);
+      // Step 1: Redirect to Google Sign-in (this does NOT return session immediately)
+      const result = await signIn("google", role == 'student' 
+        ? { callbackUrl: '/home', redirect: false } 
+        : { callbackUrl: '/tutor/dashboard', redirect: false }
+      );
 
-      authStore.saveUserDetails(response.data);
-      toast.success(response.message, { toastId: "google-signin-success" });
-      router.push(role == "student" ? "/home" : "/tutor/dashboard");
+      if (result?.error) {
+        console.error("Sign-in failed", result.error);
+        toast.error("Sign in using Google failed");
+      }
     } catch (error) {
       console.error(error);
-      toast.error("Google authentication failed.");
+      toast.error("Error during Google Sign-in");
     }
   };
 
-  checkSessionAndCallBackend();
-}, []); // Runs when session changes
+  // Step 2: Use useEffect to check session change and make backend call
+  useEffect(() => {
+    const checkSessionAndCallBackend = async () => {
+      const session = await getSession();
+      if (!session || !session.user) return; // If session is not available, do nothing
 
+      console.log("Session found, calling backend...");
+      
+      const userData = {
+        username: session.user.name ?? "",
+        email: session.user.email ?? "",
+        image: session.user.image ?? "",
+      };
+
+      const googleApi = role == "student" ? studentGoogle : tutorGoogle;
+      const authStore = role === "student" ? studentAuth : tutorAuth;
+
+      try {
+        const response = await googleApi(userData);
+        authStore.saveUserDetails(response.data);
+        toast.success(response.message, { toastId: "google-signin-success" });
+        router.push(role == "student" ? "/home" : "/tutor/dashboard");
+      } catch (error) {
+        console.error(error);
+        toast.error("Google authentication failed.");
+      }
+    };
+
+    checkSessionAndCallBackend();
+  }, []); // Runs when session changes
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 overflow-hidden">
@@ -176,47 +139,94 @@ useEffect(() => {
         {/* Right section - Signup form */}
         <div className="w-full md:w-1/2 p-8">
           <div className="h-full flex flex-col">
-            <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">Sign Up as {role === 'tutor' ? 'Tutor' : 'Student'}</h2>
+            <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
+              Sign Up as {role === 'tutor' ? 'Tutor' : 'Student'}
+            </h2>
 
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6 max-w-sm mx-auto w-full">
               <div className="flex-1 space-y-6">
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Full Name"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black"
-                />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black"
-                />
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black"
-                />
+                {/* Username Input */}
+                <div>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Full Name"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.username 
+                        ? 'border-red-500' 
+                        : 'border-gray-200'
+                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                  />
+                  {errors.username && (
+                    <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                  )}
+                </div>
 
-                {errors && (
-                  <p className="text-red-500 text-sm text-center">{errors}</p>
+                {/* Email Input */}
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.email 
+                        ? 'border-red-500' 
+                        : 'border-gray-200'
+                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Password Input */}
+                <div>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.password 
+                        ? 'border-red-500' 
+                        : 'border-gray-200'
+                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                  />
+                  {errors.password && (
+                    <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                  )}
+                </div>
+
+                {/* Confirm Password Input */}
+                <div>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-3 border ${
+                      errors.confirmPassword 
+                        ? 'border-red-500' 
+                        : 'border-gray-200'
+                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
+
+                {/* General Error Message */}
+                {errors.general && (
+                  <p className="text-red-500 text-sm text-center">{errors.general}</p>
                 )}
 
+                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -230,17 +240,22 @@ useEffect(() => {
                 </button>
               </div>
 
-                <button 
-                  type="button" 
-                  onClick={handleGoogleSignIn} 
-                  className="w-full flex items-center justify-center gap-2 py-2 mt-3   rounded-lg text-gray-500 hover:bg-gray-100 transition-all"
-                >
-                  <FcGoogle size={32} />
-                  Sign Up with Google
-                </button>
+              {/* Google Sign-In Button */}
+              <button 
+                type="button" 
+                onClick={handleGoogleSignIn} 
+                className="w-full flex items-center justify-center gap-2 py-2 mt-3 rounded-lg text-gray-500 hover:bg-gray-100 transition-all"
+              >
+                <FcGoogle size={32} />
+                Sign Up with Google
+              </button>
 
+              {/* Login Link */}
               <div className="text-center text-sm text-gray-500 mt-6">
-                <a href={role === 'tutor' ? '/tutor/login' : '/login'} className="hover:text-purple-600 hover:underline">
+                <a 
+                  href={role === 'tutor' ? '/tutor/login' : '/login'} 
+                  className="hover:text-purple-600 hover:underline"
+                >
                   Already have an account? Sign in
                 </a>
               </div>
@@ -253,4 +268,3 @@ useEffect(() => {
 };
 
 export default SignupForm;
-

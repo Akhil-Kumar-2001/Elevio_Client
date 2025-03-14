@@ -4,7 +4,7 @@ import React from 'react'
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import useAuthStore from '@/store/adminAuthStore';
-import AdminSidebar from '@/components/adminsidebar';
+import AdminSidebar from '@/components/admin/adminsidebar';
 
 const CourseDashboard = () => {
   const courses = [

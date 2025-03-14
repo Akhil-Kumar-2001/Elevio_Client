@@ -45,4 +45,38 @@ export type resetPasswordType = {
       skills: string[];
     };
   }
+
+  export interface Tutor {
+    _id: string;
+    username: string;
+    email: string;
+    role: string;
+    status: number;
+    isVerified: string;
+    profile: {
+      profilePicture:string;
+      skills: string[];
+      documents: { name: string; url: string }[]; // Adjust based on actual document structure
+      bio: string;
+      experience: string;
+      qualification: string;
+    };
+  }
+
+  export interface TutorType {
+    username: string;
+    email: string;
+    profile: {
+      bio?: string;
+      profilePicture?: string;
+      qualification?: string;
+      experience?: string;
+      skills?: string[];
+      documents?: {
+        fileUrl: string;
+        type: "id_verification" | "experience_certificate" | string;
+      }[];
+    };
+  }
+  
   

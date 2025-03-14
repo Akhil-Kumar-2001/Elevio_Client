@@ -4,11 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Table from '../../../components/table';
 import { getPendingTutors, getTutors, updateTutorStatus } from '@/app/service/admin/adminApi';
-import AdminSidebar from '@/components/adminsidebar';
+import AdminSidebar from '@/components/admin/adminsidebar';
+import { useRouter } from 'next/navigation';
 
 
 const TutorManagement = () => {
-
+  const router= useRouter()
   interface TutorType {
     _id: string;
     username: string;
@@ -42,22 +43,9 @@ const TutorManagement = () => {
     }
   };
 
-//   const handleBlockUnblockUser = async (userId: string, currentStatus: number) => {
-//     try {
-//         const newStatus = currentStatus === 1 ? -1 : 1;
-//         const response = await updateTutorStatus(userId);
-        
-//         if (response && response.success) {
-//             toast.success(newStatus === 1 ? 'Tutor unblocked successfully' : 'Tutor blocked successfully');
-//             setTutors(tutors.map(tutor => 
-//                 tutor._id === userId ? { ...tutor, status: newStatus } : tutor
-//             ));
-//         }
-//     } catch (error) {
-//         toast.error('Failed to update tutor status');
-//     }
-// };
-
+const viewProfile = (tutorId: string)=>{
+  router.push(`/admin/tutor-details/${tutorId}`)
+}
 
   useEffect(() => {
     fetchTutors();
@@ -88,8 +76,8 @@ const TutorManagement = () => {
             <Table 
               columnArray={tableColumn} 
               dataArray={tutors} 
-              // actions={true}
-              // onBlockUser={handleBlockUnblockUser}
+              pageRole={'tutor-profile'}
+              pageFunction={viewProfile}
             />
           </div>
         </div>

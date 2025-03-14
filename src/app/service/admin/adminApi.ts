@@ -73,4 +73,59 @@ export const getPendingTutors = async () =>{
     }
 }
 
+export const getTutor = async (id: string) => {
+    try {
+        const response = await adminAxiosInstance.get(`/admin/get-tutor/${id}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+};
+
+export const rejectTutorVerification = async(id:string) =>{
+    try {
+        const response = await adminAxiosInstance.patch(`/admin/reject-tutor`,{id})
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+export const approveTutorVerification = async(id:string) =>{
+    try {
+        const response = await adminAxiosInstance.patch(`/admin/approve-tutor`,{id})
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const createCategory = async(name:string) =>{
+    try {
+        const response = await adminAxiosInstance.post(`/admin/create-category`,{name});
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getCategories = async() =>{
+    try {
+        const response = await adminAxiosInstance.get(`/admin/categories`);
+        console.log(response.data)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export const updateCategoryStatus = async (id: string) => {
+    try {
+        const response = await adminAxiosInstance.patch(`${API_URI}/admin/updatecategorystatus`, { id });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error);
+    }
+};
+
 

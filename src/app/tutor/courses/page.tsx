@@ -1,73 +1,74 @@
 import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
-import withAuth from '@/HOC/tutorProtectedRoutes';
+import { Eye, Plus } from 'lucide-react';
+import Link from 'next/link';
 import React from 'react';
 
 const InstructorDashboard = () => {
+  const courses = [
+    { id: 1, name: "Introduction to JavaScript", category: "Programming", status: "Published", students: 5 },
+    { id: 2, name: "Advanced React Development", category: "Web Development", status: "Published", students: 3 },
+    { id: 3, name: "UI/UX Design Principles", category: "Design", status: "Pending", students: 2 },
+    { id: 4, name: "Data Science Fundamentals", category: "Data", status: "Published", students: 2 }
+  ];
+
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Top Navigation Bar */}
-      <Navbar  />
-      
+      <Navbar />
+
       {/* Main Content Area with Sidebar and Content */}
       <div className="flex flex-grow">
-
-        {/* Sidebar - Increased width from w-36 to w-56 */}
+        {/* Sidebar */}
         <TutorSidebar />
-        
+
         {/* Main Content */}
-        <div className="flex-grow p-6 bg-white">
-          <h1 className="text-xl font-medium mb-6 text-gray-800">Instructor Dashboard</h1>
-          
-          {/* Stats Cards */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
-            {/* Total courses card */}
-            <div className="border border-gray-200 rounded p-4 bg-white">
-              <div className="text-sm text-gray-600 mb-2">Total courses</div>
-              <div className="text-xl font-medium text-gray-800">4</div>
-            </div>
-            
-            {/* Total Students card */}
-            <div className="border border-gray-200 rounded p-4 bg-white">
-              <div className="text-sm text-gray-600 mb-2">Total Students</div>
-              <div className="text-xl font-medium text-gray-800">12</div>
-            </div>
-            
-            {/* Total Earnings card */}
-            <div className="border border-gray-200 rounded p-4 bg-white">
-              <div className="text-sm text-gray-600 mb-2">Total Earnings</div>
-              <div className="text-xl font-medium text-gray-800">₹ 7250</div>
-            </div>
+        <div className="flex-1 p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-xl font-medium text-gray-800">Course List</h1>
+            <Link href={"/tutor/dummy"} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700">
+              <Plus size={16} />
+              <span>Add Course</span>
+            </Link>
           </div>
-          
-          {/* Action Cards */}
-          <div className="grid grid-cols-3 gap-6">
-            {/* Create new course card */}
-            <div className="border border-gray-200 rounded p-4 bg-white">
-              <div className="text-sm font-medium mb-1 text-gray-800">Create new course</div>
-              <div className="text-xs text-gray-600 mb-3">Start creating a new course for your students</div>
-              <button className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">
-                Create Course
-              </button>
-            </div>
-            
-            {/* View All courses card */}
-            <div className="border border-gray-200 rounded p-4 bg-white">
-              <div className="text-sm font-medium mb-1 text-gray-800">View All courses</div>
-              <div className="text-xs text-gray-600 mb-3">Manage your existing courses</div>
-              <button className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
-                View Courses
-              </button>
-            </div>
-            
-            {/* View Earnings card */}
-            <div className="border border-gray-200 rounded p-4 bg-white">
-              <div className="text-sm font-medium mb-1 text-gray-800">View Earnings</div>
-              <div className="text-xs text-gray-600 mb-3">Check your earnings</div>
-              <button className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1 rounded">
-                View Earnings
-              </button>
-            </div>
+
+
+          <div className="bg-white rounded-md overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-100 border-b">
+                <tr>
+                  <th className="py-3 px-4 text-left font-medium text-gray-700">Course Name</th>
+                  <th className="py-3 px-4 text-left font-medium text-gray-700">Category</th>
+                  <th className="py-3 px-4 text-left font-medium text-gray-700">Status</th>
+                  <th className="py-3 px-4 text-left font-medium text-gray-700">Students</th>
+                  <th className="py-3 px-4 text-center font-medium text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courses.map((course) => (
+                  <tr key={course.id} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-800">{course.name}</td>
+                    <td className="py-3 px-4 text-gray-600">{course.category}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${course.status === "Published"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                        }`}>
+                        {course.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">{course.students}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex justify-center">
+                        <button className="p-1 rounded hover:bg-gray-100" title="View Course">
+                          <Eye size={18} className="text-gray-600" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -75,4 +76,4 @@ const InstructorDashboard = () => {
   );
 };
 
-export default InstructorDashboard
+export default InstructorDashboard;

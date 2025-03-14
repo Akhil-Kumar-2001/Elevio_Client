@@ -23,14 +23,12 @@ const TutorSidebar = () => {
   const pathname = usePathname();
   const { logout } = useAuthStore();
 
-  // const [expanded, setExpanded] = useState<boolean>(true);
   const [expanded, setExpanded] = useState<boolean>(() => {
     return JSON.parse(localStorage.getItem("sidebarExpanded") ?? "true");
   });
   
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  // Ensure localStorage is accessed only on the client
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedSidebarState = localStorage.getItem("sidebarExpanded");
@@ -38,16 +36,15 @@ const TutorSidebar = () => {
     }
   }, []);
 
-  // Prevent hydration error by only setting localStorage in useEffect
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth <= 768; // Adjust width as needed
+      const mobile = window.innerWidth <= 768; 
       setIsMobile(mobile);
-      if (mobile) setExpanded(false); // Auto-collapse on mobile
+      if (mobile) setExpanded(false); 
       else setExpanded(JSON.parse(localStorage.getItem("sidebarExpanded") ?? "true"));
     };
 
-    handleResize(); // Run on mount
+    handleResize(); 
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
@@ -71,11 +68,11 @@ const TutorSidebar = () => {
 
   return (
     <aside 
-      className={`h-screen border-r border-gray-200 bg-white transition-all duration-300 
+      className={`h-full border-r border-gray-200 bg-white transition-all duration-300 
         ${expanded ? 'w-56' : 'w-16'}`}
     >
       <div className="flex flex-col items-center md:items-start h-full relative">
-        {/* Dashboard with Toggle Button (Hidden on Mobile) */}
+        
         <div 
           className={`flex items-center justify-between w-full px-4 py-4 cursor-pointer 
             ${pathname === "/tutor/dashboard" ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100'}`}
@@ -85,7 +82,6 @@ const TutorSidebar = () => {
             <FiGrid className="w-6 h-6" />
             {expanded && <span className="ml-3 text-sm font-bold">Dashboard</span>}
           </div>
-          {/* Hide toggle button on mobile */}
           {!isMobile && (
             <button className="ml-auto" onClick={toggleSidebar}>
               {expanded ? <FiChevronLeft className="w-5 h-5" /> : <FiChevronRight className="w-5 h-5" />}
@@ -93,12 +89,13 @@ const TutorSidebar = () => {
           )}
         </div>
 
-        {/* Sidebar Menu Items */}
         {menuItems.slice(1).map(({ name, icon: Icon, path }) => (
           <div
             key={name}
             className={`flex items-center w-full px-4 py-4 cursor-pointer transition-all 
-              ${pathname === path ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+              ${(pathname.startsWith(path) || (path === "/tutor/courses" && pathname === "/tutor/dummy")) 
+                ? 'bg-black text-white' 
+                : 'text-gray-700 hover:bg-gray-100'}`}
             onClick={() => router.push(path)}
           >
             <Icon className="w-6 h-6" />
@@ -106,7 +103,6 @@ const TutorSidebar = () => {
           </div>
         ))}
 
-        {/* Logout Button */}
         <div
           className="flex items-center w-full px-4 py-4 text-gray-700 transition duration-300 ease-in-out 
             hover:bg-red-500 hover:bg-opacity-20 hover:text-red-400 cursor-pointer"

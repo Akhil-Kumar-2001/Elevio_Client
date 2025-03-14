@@ -54,9 +54,13 @@ export const config = {
     '/profile/:path*',
     '/tutor/dashboard',
     '/tutor/verification',
+    '/tutor/course',
+    '/tutor/profile',
     '/tutor/home',
     '/admin/dashboard',
     '/admin/studentsmanagement',
     '/admin/tutormanagement',
+    '/admin/tutorverification',
+
   ],
 };
