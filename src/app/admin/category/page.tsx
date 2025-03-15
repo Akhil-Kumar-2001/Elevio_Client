@@ -6,6 +6,7 @@ import AdminSidebar from '@/components/admin/adminsidebar';
 import { getCategories, createCategory, updateCategoryStatus } from '@/app/service/admin/adminApi';
 import Table from '@/components/table';
 import ConfirmModal from '@/components/admin/confirmModal';
+import Pagination from '@/components/admin/paginaiton';
 
 const CourseDashboard = () => {
     interface CategoryType {
@@ -20,10 +21,19 @@ const CourseDashboard = () => {
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
-    
+
+    // 
+
+    const [data, setData] = useState<any[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // 
+
+
     // State for confirmation modal
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState<{id: string, status: number, name: string} | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<{ id: string, status: number, name: string } | null>(null);
 
     const tableColumn = [
         { header: "Name", field: "name" },
@@ -43,20 +53,22 @@ const CourseDashboard = () => {
     const fetchCategory = async () => {
         setLoading(true);
         try {
-            const categoryData = await getCategories();
-            if (categoryData && categoryData.success) {
-                const formattedCategories = categoryData.data.map((cat: CategoryType) => ({
+            const response = await getCategories(currentPage, 10); // 10 items per page
+            if (response && response.success) {
+                const formattedCategories = response.data.map((cat: CategoryType) => ({
                     ...cat,
-                    statusText: cat.status === 1 ? "Active" : "Blocked" // Convert status to text
+                    statusText: cat.status === 1 ? "Active" : "Blocked",
                 }));
                 setCategory(formattedCategories);
+                setTotalPages(response.totalPages); // Update total pages
             }
         } catch (error) {
-            toast.error('Failed to fetch categories');
+            toast.error("Failed to fetch categories");
         } finally {
             setLoading(false);
         }
     };
+
 
     // Open confirmation modal instead of directly updating status
     const handleBlockUnblockClick = (categoryId: string, currentStatus: number) => {
@@ -74,7 +86,7 @@ const CourseDashboard = () => {
     // Handle category block/unblock and update the state
     const confirmBlockUnblock = async () => {
         if (!selectedCategory) return;
-        
+
         try {
             const newStatus = selectedCategory.status === 1 ? -1 : 1;
             const response = await updateCategoryStatus(selectedCategory.id);
@@ -130,7 +142,7 @@ const CourseDashboard = () => {
 
     useEffect(() => {
         fetchCategory();
-    }, []);
+    }, [currentPage]);
 
     // Modal props
     const modalTitle = selectedCategory?.status === 1 ? 'Block Category' : 'Unblock Category';
@@ -163,6 +175,7 @@ const CourseDashboard = () => {
                         actions={true}
                         onBlockUser={handleBlockUnblockClick}
                     />
+                    <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
                 </div>
             </div>
 
