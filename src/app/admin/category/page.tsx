@@ -34,6 +34,7 @@ const CategoryPage = () => {
     const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
     const [selectedDeleteCategory, setSelectedDeleteCategory] = useState<{ id: string, name: string } | null>(null);
 
+
     const tableColumn = [
         { header: "Name", field: "name" },
         { header: "Created Date", field: "createdAt" },
@@ -52,14 +53,18 @@ const CategoryPage = () => {
     const fetchCategory = async () => {
         setLoading(true);
         try {
+
             const response = await getCategories(currentPage, 5);
             if (response && response.success) {
                 const formattedCategories = response.data.categories.map((cat: CategoryType) => ({
+
                     ...cat,
                     statusText: cat.status === 1 ? "Active" : "Blocked",
                 }));
                 setCategory(formattedCategories);
+
                 setTotalPages(Math.ceil(response.data.totalRecord / 5));
+
             }
         } catch (error) {
             toast.error("Failed to fetch categories");
@@ -68,7 +73,8 @@ const CategoryPage = () => {
         }
     };
 
-    // Handle block/unblock
+
+    // Open confirmation modal instead of directly updating status
     const handleBlockUnblockClick = (categoryId: string, currentStatus: number) => {
         const categoryToUpdate = category.find(cat => cat._id === categoryId);
         if (categoryToUpdate) {
@@ -158,6 +164,15 @@ const CategoryPage = () => {
     useEffect(() => {
         fetchCategory();
     }, [currentPage]);
+
+
+    // Modal props
+    const modalTitle = selectedCategory?.status === 1 ? 'Block Category' : 'Unblock Category';
+    const modalMessage = selectedCategory?.status === 1
+        ? `Are you sure you want to block the category "${selectedCategory?.name}"?`
+        : `Are you sure you want to unblock the category "${selectedCategory?.name}"?`;
+    const modalConfirmText = selectedCategory?.status === 1 ? 'Block' : 'Unblock';
+
 
     return (
         <div className="flex flex-col h-screen">

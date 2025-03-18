@@ -1,6 +1,7 @@
 import React from "react";
 
 interface PaginationProps {
+
     totalPages: number;
     currentPage: number;
     onPageChange: (page: number) => void;
@@ -88,3 +89,4 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, currentPage, onPage
 };
 
 export default Pagination;
+

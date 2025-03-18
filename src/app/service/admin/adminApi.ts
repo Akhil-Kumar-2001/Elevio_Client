@@ -110,8 +110,10 @@ export const createCategory = async(name:string) =>{
 
 export const getCategories = async (page: number, limit: number) => {
     try {
+
         const response = await adminAxiosInstance.get(`/admin/categories?page=${page}&limit=${limit}`);
         return await response.data
+
     } catch (error) {
         console.error("Error fetching categories", error);
         return null;
