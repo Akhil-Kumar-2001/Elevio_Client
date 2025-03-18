@@ -108,24 +108,36 @@ export const createCategory = async(name:string) =>{
     }
 }
 
-export const getCategories = async() =>{
+export const getCategories = async (page: number, limit: number) => {
     try {
-        const response = await adminAxiosInstance.get(`/admin/categories`);
-        console.log(response.data)
-        return response.data;
-    } catch (error:unknown) {
-        handleAxiosError(error)
+        const response = await adminAxiosInstance.get(`/admin/categories?page=${page}&limit=${limit}`);
+        return await response.data
+    } catch (error) {
+        console.error("Error fetching categories", error);
+        return null;
     }
-}
+};
+
 
 
 export const updateCategoryStatus = async (id: string) => {
     try {
-        const response = await adminAxiosInstance.patch(`${API_URI}/admin/updatecategorystatus`, { id });
+        const response = await adminAxiosInstance.patch(`/admin/updatecategorystatus`, { id });
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error);
     }
 };
+
+export const deleteCategory = async (id: string) => {
+    try {
+        console.log("Category id from delete",id)
+        const response = await adminAxiosInstance.delete(`/admin/delete-category`,{ data: { id } });
+        return await response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+};
+
 
 

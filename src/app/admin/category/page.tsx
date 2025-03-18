@@ -3,27 +3,36 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import AdminSidebar from '@/components/admin/adminsidebar';
-import { getCategories, createCategory, updateCategoryStatus } from '@/app/service/admin/adminApi';
+import { getCategories, createCategory, updateCategoryStatus, deleteCategory } from '@/app/service/admin/adminApi';
 import Table from '@/components/table';
 import ConfirmModal from '@/components/admin/confirmModal';
+import Pagination from '@/components/admin/paginaiton';
 
-const CourseDashboard = () => {
+const CategoryPage = () => {
     interface CategoryType {
         _id: string;
         name: string;
         status: number;  // 1 for Active, -1 for Blocked
         createdAt: string;
-        statusText?: string; // New field for readable status
+        statusText?: string;
     }
 
     const [category, setCategory] = useState<CategoryType[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
-    
-    // State for confirmation modal
+
+    // Pagination
+    const [totalPages, setTotalPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // Confirmation modals
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState<{id: string, status: number, name: string} | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<{ id: string, status: number, name: string } | null>(null);
+
+    // Delete confirmation modal
+    const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
+    const [selectedDeleteCategory, setSelectedDeleteCategory] = useState<{ id: string, name: string } | null>(null);
 
     const tableColumn = [
         { header: "Name", field: "name" },
@@ -39,26 +48,27 @@ const CourseDashboard = () => {
         }
     ];
 
-    // Fetch categories and format status before setting the state
+    // Fetch categories
     const fetchCategory = async () => {
         setLoading(true);
         try {
-            const categoryData = await getCategories();
-            if (categoryData && categoryData.success) {
-                const formattedCategories = categoryData.data.map((cat: CategoryType) => ({
+            const response = await getCategories(currentPage, 5);
+            if (response && response.success) {
+                const formattedCategories = response.data.categories.map((cat: CategoryType) => ({
                     ...cat,
-                    statusText: cat.status === 1 ? "Active" : "Blocked" // Convert status to text
+                    statusText: cat.status === 1 ? "Active" : "Blocked",
                 }));
                 setCategory(formattedCategories);
+                setTotalPages(Math.ceil(response.data.totalRecord / 5));
             }
         } catch (error) {
-            toast.error('Failed to fetch categories');
+            toast.error("Failed to fetch categories");
         } finally {
             setLoading(false);
         }
     };
 
-    // Open confirmation modal instead of directly updating status
+    // Handle block/unblock
     const handleBlockUnblockClick = (categoryId: string, currentStatus: number) => {
         const categoryToUpdate = category.find(cat => cat._id === categoryId);
         if (categoryToUpdate) {
@@ -71,18 +81,15 @@ const CourseDashboard = () => {
         }
     };
 
-    // Handle category block/unblock and update the state
     const confirmBlockUnblock = async () => {
         if (!selectedCategory) return;
-        
+
         try {
             const newStatus = selectedCategory.status === 1 ? -1 : 1;
             const response = await updateCategoryStatus(selectedCategory.id);
 
             if (response && response.success) {
                 toast.success(newStatus === 1 ? 'Category unblocked successfully' : 'Category blocked successfully');
-
-                // Update category state after blocking/unblocking
                 setCategory(category.map(cat =>
                     cat._id === selectedCategory.id ? {
                         ...cat,
@@ -96,7 +103,30 @@ const CourseDashboard = () => {
         }
     };
 
-    // Handle creating a new category
+    // Handle delete category
+    const handleDeleteCategory = (categoryId: string, categoryName: string) => {
+        setSelectedDeleteCategory({ id: categoryId, name: categoryName });
+        setIsDeleteConfirmModalOpen(true);
+    };
+
+    const confirmDeleteCategory = async () => {
+        if (!selectedDeleteCategory) return;
+
+        try {
+            const response = await deleteCategory(selectedDeleteCategory.id);
+            if (response && response.success) {
+                toast.success(response.message);
+                setCategory(category.filter(cat => cat._id !== selectedDeleteCategory.id));
+            }
+        } catch (error) {
+            toast.error("Failed to delete category");
+        } finally {
+            setIsDeleteConfirmModalOpen(false);
+            setSelectedDeleteCategory(null);
+        }
+    };
+
+    // Handle create category
     const handleCreateCategory = async () => {
         if (!newCategoryName.trim()) {
             toast.error('Category name is required');
@@ -107,8 +137,6 @@ const CourseDashboard = () => {
             let response = await createCategory(newCategoryName);
             if (response.success) {
                 toast.success(response.message);
-
-                // Update category list without refresh
                 setCategory(prevCategories => [
                     ...prevCategories,
                     {
@@ -119,7 +147,6 @@ const CourseDashboard = () => {
                         statusText: "Active"
                     }
                 ]);
-
                 setIsModalOpen(false);
                 setNewCategoryName("");
             }
@@ -130,14 +157,7 @@ const CourseDashboard = () => {
 
     useEffect(() => {
         fetchCategory();
-    }, []);
-
-    // Modal props
-    const modalTitle = selectedCategory?.status === 1 ? 'Block Category' : 'Unblock Category';
-    const modalMessage = selectedCategory?.status === 1
-        ? `Are you sure you want to block the category "${selectedCategory?.name}"?`
-        : `Are you sure you want to unblock the category "${selectedCategory?.name}"?`;
-    const modalConfirmText = selectedCategory?.status === 1 ? 'Block' : 'Unblock';
+    }, [currentPage]);
 
     return (
         <div className="flex flex-col h-screen">
@@ -149,12 +169,8 @@ const CourseDashboard = () => {
                 <div className="flex-1 bg-black text-white overflow-auto p-8">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-medium text-white">All Categories</h2>
-                        <button
-                            className="bg-black border border-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition duration-300"
-                            onClick={() => setIsModalOpen(true)}
-                        >
-                            Add Category
-                        </button>
+                        <button className="bg-black border border-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
+                            onClick={() => setIsModalOpen(true)}>Add Category</button>
                     </div>
 
                     <Table
@@ -162,12 +178,14 @@ const CourseDashboard = () => {
                         dataArray={category}
                         actions={true}
                         onBlockUser={handleBlockUnblockClick}
+                        onDeleteCategory={handleDeleteCategory}
                     />
+                    <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
                 </div>
             </div>
 
-            {/* Create Category Modal */}
-            {isModalOpen && (
+             {/* Create Category Modal */}
+             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md animate-fade-in z-50">
                     <div className="bg-gray-900 p-6 rounded-2xl shadow-lg w-96 h-[250px] border border-gray-700 flex flex-col justify-between">
                         <h2 className="text-white text-2xl font-semibold">Create New Category</h2>
@@ -196,24 +214,27 @@ const CourseDashboard = () => {
                 </div>
             )}
 
-            {/* Using the reusable ConfirmModal for Block/Unblock */}
+            {/* Confirm Modal for Block/Unblock */}
             <ConfirmModal
                 isOpen={isConfirmModalOpen}
-                onClose={() => {
-                    setIsConfirmModalOpen(false);
-                    setSelectedCategory(null);
-                }}
-                onConfirm={() => {
-                    confirmBlockUnblock();
-                    setIsConfirmModalOpen(false);
-                    setSelectedCategory(null);
-                }}
-                title={modalTitle}
-                message={modalMessage}
-                confirmText={modalConfirmText}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={confirmBlockUnblock}
+                title={selectedCategory?.status === 1 ? 'Block Category' : 'Unblock Category'}
+                message={`Are you sure you want to ${selectedCategory?.status === 1 ? 'block' : 'unblock'} "${selectedCategory?.name}"?`}
+                confirmText={selectedCategory?.status === 1 ? 'Block' : 'Unblock'}
+            />
+
+            {/* Confirm Modal for Delete */}
+            <ConfirmModal
+                isOpen={isDeleteConfirmModalOpen}
+                onClose={() => setIsDeleteConfirmModalOpen(false)}
+                onConfirm={confirmDeleteCategory}
+                title="Delete Category"
+                message={`Are you sure you want to delete "${selectedDeleteCategory?.name}"?`}
+                confirmText="Delete"
             />
         </div>
     );
 };
 
-export default CourseDashboard;
+export default CategoryPage;

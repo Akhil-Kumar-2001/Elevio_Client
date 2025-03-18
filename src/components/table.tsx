@@ -1,4 +1,5 @@
 import React from "react";
+import { Lock, Unlock, Trash2 } from "lucide-react"; // Importing icons
 
 interface Column {
   field: string;
@@ -11,26 +12,25 @@ interface TableProps {
   dataArray: any[];
   actions?: boolean;
   onBlockUser?: (userId: string, currentStatus: number) => void;
-  pageRole?: string;
-  pageFunction?: (tutorId: string) => void;
+  onDeleteCategory?: (categoryId: string, categoryName: string) => void;
 }
 
 const formatDate = (dateString: string) => {
-  if (!dateString) return "N/A";
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     year: "numeric",
-    month: "long",
-    day: "numeric",
+    month: "short",
+    day: "2-digit",
   });
 };
 
-const Table: React.FC<TableProps> = ({ columnArray, dataArray, actions = false, onBlockUser, pageRole, pageFunction }) => {
+
+const Table: React.FC<TableProps> = ({ columnArray, dataArray, actions = false, onBlockUser, onDeleteCategory }) => {
   return (
     <div className="bg-black border border-gray-700 rounded-sm">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-gray-700">
+          <tr className="border-b border-gray-700 text-white">
             {columnArray.map((column) => (
               <th key={column.field} className="text-left p-4">{column.header}</th>
             ))}
@@ -43,30 +43,37 @@ const Table: React.FC<TableProps> = ({ columnArray, dataArray, actions = false, 
               <tr key={index} className="border-b border-gray-800 hover:bg-gray-900 transition duration-300">
                 {columnArray.map((column) => (
                   <td key={column.field} className="p-4">
-                    {column.field === "createdAt" || column.field === "updatedAt"
-                      ? formatDate(row[column.field])
-                      : column.render
-                      ? column.render(row)
-                      : row[column.field] || "N/A"}
+                    {column.field === "createdAt" ? formatDate(row[column.field]) : row[column.field]}
                   </td>
                 ))}
                 {actions && (
-                  <td className="p-4">
-                    <button
-                      onClick={() => onBlockUser && onBlockUser(row._id, row.status)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        row.status === -1 ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
-                      }`}
-                    >
-                      {row.status === -1 ? "Unblock" : "Block"}
-                    </button>
-                  </td>
-                )}
-                {pageRole === "tutor-profile" && pageFunction && (
-                  <td>
-                    <button onClick={() => pageFunction(row._id)} className="text-blue-500 hover:underline">
-                      View Details
-                    </button>
+                  <td className="p-4 flex space-x-6">
+                    {/* Block/Unblock Button */}
+                    {onBlockUser && (
+                      <button
+                        onClick={() => onBlockUser(row._id, row.status)}
+                        className={`transition transform hover:scale-110 ${
+                          row.status === -1
+                            ? "text-green-400 drop-shadow-[0_0_8px_#00ff00]" // Green glow when unblocked
+                            : "text-red-400 drop-shadow-[0_0_8px_#8b0000]"  // Red glow when blocked
+                        }`}
+                      >
+                        {row.status === -1 ? <Unlock size={22} /> : <Lock size={22} />}
+                      </button>
+                    )}
+                    
+                    {/* Delete Button */}
+                    {onDeleteCategory && (
+                      <button
+                        onClick={() => onDeleteCategory(row._id, row.name)}
+                        className="text-red-600 transition transform hover:scale-110"
+                      >
+                        <Trash2
+                          size={22}
+                          className="drop-shadow-[0_0_8px_#8b0000]" /* Dark Red Glow Effect */
+                        />
+                      </button>
+                    )}
                   </td>
                 )}
               </tr>
