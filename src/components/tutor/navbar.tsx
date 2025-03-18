@@ -58,7 +58,6 @@ const Navbar = () => {
     }
     try {
       const response = await getTutor(tutorId);
-      console.log("Image function in navbar", response.data.profile?.profilePicture);
       setImage(response.data.profile?.profilePicture || null);
       setDemom(response.data.username.charAt(0).toUpperCase())
       // tutor?.username ? tutor.username.charAt(0).toUpperCase()

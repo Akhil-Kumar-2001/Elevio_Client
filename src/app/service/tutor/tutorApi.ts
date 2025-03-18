@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, Tutor, TutorType, TutorVerificationFormData, userType } from "@/types/types";
+import { basicType, CourseData, Tutor, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
 
@@ -131,12 +131,29 @@ export const verifyTutor = async (formData:TutorVerificationFormData) => {
 
 export const updateTutor = async(id:string,formData:TutorType) =>{
     try {
-        console.log("Tutor is from tutor api",id)
-        console.log("form data from tutor api",formData)
         const response = await userAxiosInstance.patch(`/tutor/update-profile`,{id,formData})
          return response.data;
     } catch (error:unknown) {
         handleAxiosError(error); 
+    }
+}
+
+export const getCategories = async() =>{
+    try {
+        const response = await userAxiosInstance.get(`/tutor/get-categories`)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const createCourse = async(courseData:CourseData) =>{
+    try {
+        const response = await userAxiosInstance.post(`tutor/create-course`,courseData);
+        console.log(response.data)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
     }
 }
 

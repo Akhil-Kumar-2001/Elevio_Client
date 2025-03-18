@@ -78,5 +78,15 @@ export type resetPasswordType = {
       }[];
     };
   }
+
+  export interface CourseData {
+    tutorId: string;
+    title: string;
+    subtitle:string;
+    price: number;
+    category: string;
+    imageThumbnail: string;
+    description: string;
+  }
   
   

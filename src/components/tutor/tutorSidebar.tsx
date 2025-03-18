@@ -93,9 +93,7 @@ const TutorSidebar = () => {
           <div
             key={name}
             className={`flex items-center w-full px-4 py-4 cursor-pointer transition-all 
-              ${(pathname.startsWith(path) || (path === "/tutor/courses" && pathname === "/tutor/dummy")) 
-                ? 'bg-black text-white' 
-                : 'text-gray-700 hover:bg-gray-100'}`}
+              ${pathname.startsWith(path) ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100'}`}
             onClick={() => router.push(path)}
           >
             <Icon className="w-6 h-6" />
