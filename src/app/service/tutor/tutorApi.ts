@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, CourseData, Tutor, TutorType, TutorVerificationFormData, userType } from "@/types/types";
+import { basicType, Course, CourseData, Tutor, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
 
@@ -149,8 +149,36 @@ export const getCategories = async() =>{
 
 export const createCourse = async(courseData:CourseData) =>{
     try {
-        const response = await userAxiosInstance.post(`tutor/create-course`,courseData);
+        const response = await userAxiosInstance.post(`/tutor/create-course`,courseData);
         console.log(response.data)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export const getCourses = async(page: number, limit: number) =>{
+    try {
+        const response = await userAxiosInstance.get(`/tutor/courses?page=${page}&limit=${limit}`);
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getCourseDetails = async(courseId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/tutor/get-category?id=${courseId}`)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const updateCourse = async(id:string,editedCourse:Course) =>{
+    try {
+        const response = await userAxiosInstance.post(`/tutor/edit-course`,{id,editedCourse})
         return response.data
     } catch (error:unknown) {
         handleAxiosError(error)

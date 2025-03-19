@@ -1,5 +1,5 @@
 import React from "react";
-import { Lock, Unlock, Trash2, Eye } from "lucide-react"; // Importing icons
+import { Lock, Unlock, Trash2, Eye } from "lucide-react";
 
 interface Column {
   field: string;
@@ -37,68 +37,68 @@ const Table: React.FC<TableProps> = ({
   pageFunction,
 }) => {
   return (
-    <div className="bg-black border border-gray-700 rounded-sm">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-gray-700 text-white">
+    <div className="bg-white rounded-md overflow-hidden">
+      <table className="w-full table-fixed">
+        <thead className="bg-gray-100 border-b">
+          <tr>
             {columnArray.map((column) => (
-              <th key={column.field} className="text-left p-4">{column.header}</th>
+              <th key={column.field} className="py-3 px-4 text-left font-medium text-gray-700">
+                {column.header}
+              </th>
             ))}
-            {(actions || pageRole) && <th className="text-left p-4">Actions</th>}
+            {(actions || pageRole) && <th className="tpy-3 px-4 text-left font-medium text-gray-700">Actions</th>
+            }
           </tr>
         </thead>
-        <tbody className="text-gray-300">
+        <tbody>
           {dataArray.length > 0 ? (
             dataArray.map((row, index) => (
-              <tr key={index} className="border-b border-gray-800 hover:bg-gray-900 transition duration-300">
+              <tr key={index} className="border-b hover:bg-gray-50">
                 {columnArray.map((column) => (
-                  <td key={column.field} className="p-4">
-                    {column.field === "createdAt" ? formatDate(row[column.field]) : row[column.field]}
+                  <td key={column.field} className="py-3 px-4 text-gray-800">
+                    {column.render ? column.render(row) : row[column.field]}
                   </td>
                 ))}
-                {/* Actions */}
                 {(actions || pageRole) && (
-                  <td className="p-4 flex space-x-6">
-                    {/* Block/Unblock Button */}
+                  <td className="px-4 py-2 border">
+                  <div className="flex gap-2 items-center">
                     {onBlockUser && (
                       <button
                         onClick={() => onBlockUser(row._id, row.status)}
                         className={`transition transform hover:scale-110 ${
                           row.status === -1
-                            ? "text-green-400 drop-shadow-[0_0_8px_#00ff00]" // Green glow when unblocked
-                            : "text-red-400 drop-shadow-[0_0_8px_#8b0000]"  // Red glow when blocked
+                            ? "text-green-400 drop-shadow-[0_0_8px_#00ff00]"
+                            : "text-red-400 drop-shadow-[0_0_8px_#8b0000]"
                         }`}
                       >
-                        {row.status === -1 ? <Unlock size={22} /> : <Lock size={22} />}
+                        {row.status === -1 ? <Unlock /> : <Lock />}
                       </button>
                     )}
-
-                    {/* Delete Button */}
                     {onDeleteCategory && (
                       <button
                         onClick={() => onDeleteCategory(row._id, row.name)}
                         className="text-red-600 transition transform hover:scale-110"
                       >
-                        <Trash2 size={22} className="drop-shadow-[0_0_8px_#8b0000]" />
+                        <Trash2 />
                       </button>
                     )}
-
-                    {/* View Details (Eye Icon) */}
-                    {pageRole === "tutor-profile" && pageFunction && (
+                    {pageRole === "course-details" && pageFunction && (
                       <button
                         onClick={() => pageFunction(row._id)}
                         className="text-blue-500 transition transform hover:scale-110"
                       >
-                        <Eye size={22} />
+                        <Eye />
                       </button>
                     )}
-                  </td>
+                  </div>
+                </td>
+                
                 )}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columnArray.length + (actions || pageRole ? 1 : 0)} className="text-center p-4 text-gray-500">
+              <td colSpan={columnArray.length + (actions || pageRole ? 1 : 0)} className="text-center py-4">
                 No data available
               </td>
             </tr>

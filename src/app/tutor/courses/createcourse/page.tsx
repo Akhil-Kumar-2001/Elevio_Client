@@ -87,7 +87,7 @@ const AddCourseForm = () => {
 
       console.log('Course Data:', courseData);
       await createCourse(courseData);
-      router.push('/tutor/courses/add-section');
+      router.push('/tutor/courses/createcourse/section');
     } catch (error) {
       console.error('Error creating course:', error);
     }

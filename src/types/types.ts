@@ -88,5 +88,48 @@ export type resetPasswordType = {
     imageThumbnail: string;
     description: string;
   }
+
+  export interface Course {
+    _id: string;
+    tutorId: string;
+    title: string;
+    price: number;
+    subtitle: string;
+    description: string;
+    category: string | { _id: string, name: string }; // Allow category to be either an ID or an object with a name
+    totalDuration: number;
+    totalLectures: number;
+    totalSections: number;
+    isBlocked: boolean;
+    status: string;
+    rejectedReason: string;
+    imageThumbnail: string;
+    createdAt: string;
+    updatedAt: string;
+}
+  export interface ICourse {
+    _id: string;
+    tutorId: string;
+    title: string;
+    price: number;
+    subtitle: string;
+    description: string;
+    category:string;
+    totalDuration: number;
+    totalLectures: number;
+    totalSections: number;
+    isBlocked: boolean;
+    status: string;
+    rejectedReason: string;
+    imageThumbnail: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Category {
+  _id: string; 
+  name: string;
+  status?: number;
+}
   
   

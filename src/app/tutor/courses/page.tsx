@@ -1,75 +1,103 @@
+'use client'
+
 import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
+import Table from '../../../components/tutor/tutorTable';
+import Pagination from '@/components/tutor/pagenation';
 import { Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getCourses, getCategories } from '@/app/service/tutor/tutorApi';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const InstructorDashboard = () => {
-  const courses = [
-    { id: 1, name: "Introduction to JavaScript", category: "Programming", status: "Published", students: 5 },
-    { id: 2, name: "Advanced React Development", category: "Web Development", status: "Published", students: 3 },
-    { id: 3, name: "UI/UX Design Principles", category: "Design", status: "Pending", students: 2 },
-    { id: 4, name: "Data Science Fundamentals", category: "Data", status: "Published", students: 2 }
+
+  const router = useRouter();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]); 
+
+  // ✅ Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories();
+      if (response && response.success) {
+        setCategories(response.data); 
+      }
+    } catch (error) {
+      toast.error('Failed to fetch categories');
+    }
+  };
+
+  // ✅ Fetch courses from API
+  const fetchCourses = async () => {
+    setLoading(true);
+    try {
+      const response = await getCourses(currentPage, 5);
+      if (response && response.success) {
+        setCourses(response.data.courses);
+        setTotalPages(Math.ceil(response.data.totalRecord / 5));
+      }
+    } catch (error) {
+      toast.error('Failed to fetch courses');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Fetch categories and courses when component mounts
+  useEffect(() => {
+    fetchCategories();
+    fetchCourses();
+  }, [currentPage]);
+
+  const viewProfile = (courseId: string) => {
+    router.push(`/tutor/courses/course-details/${courseId}`)
+  };
+
+  // ✅ Updated category field to display category name instead of ID
+  const columns = [
+    { field: 'title', header: 'Course Name' },
+    { 
+      field: 'category', 
+      header: 'Category', 
+      render: (row: any) => {
+        const categoryName = categories.find(cat => cat._id === row.category)?.name || 'Unknown';
+        return <span>{categoryName}</span>;
+      }
+    },
+    {
+      field: 'status',
+      header: 'Status',
+      render: (row: any) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-medium ${row.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+            }`}
+        >
+          {row.status}
+        </span>
+      ),
+    },
   ];
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      {/* Top Navigation Bar */}
       <Navbar />
-
-      {/* Main Content Area with Sidebar and Content */}
       <div className="flex flex-grow">
-        {/* Sidebar */}
         <TutorSidebar />
-
-        {/* Main Content */}
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-xl font-medium text-gray-800">Course List</h1>
-            <Link href={"/tutor/courses/createcourse"} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700">
+            <Link href={'/tutor/courses/createcourse'} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700">
               <Plus size={16} />
               <span>Add Course</span>
             </Link>
           </div>
-
-
-          <div className="bg-white rounded-md overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-100 border-b">
-                <tr>
-                  <th className="py-3 px-4 text-left font-medium text-gray-700">Course Name</th>
-                  <th className="py-3 px-4 text-left font-medium text-gray-700">Category</th>
-                  <th className="py-3 px-4 text-left font-medium text-gray-700">Status</th>
-                  <th className="py-3 px-4 text-left font-medium text-gray-700">Students</th>
-                  <th className="py-3 px-4 text-center font-medium text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses.map((course) => (
-                  <tr key={course.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 text-gray-800">{course.name}</td>
-                    <td className="py-3 px-4 text-gray-600">{course.category}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${course.status === "Published"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                        }`}>
-                        {course.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">{course.students}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex justify-center">
-                        <button className="p-1 rounded hover:bg-gray-100" title="View Course">
-                          <Eye size={18} className="text-gray-600" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table columnArray={columns} dataArray={courses} pageRole={'course-details'} pageFunction={viewProfile} />
+          <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
         </div>
       </div>
     </div>
