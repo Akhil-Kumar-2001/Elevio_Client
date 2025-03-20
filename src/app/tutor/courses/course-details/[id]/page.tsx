@@ -412,7 +412,7 @@ const CourseDetailPage = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => router.push(`/tutor/courses/createcourse/section/${course._id}`)}
+                          onClick={() => router.push(`/tutor/courses/course-details/section/${course._id}`)}
                           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
                         >
                           Manage Content

@@ -1,5 +1,6 @@
 import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
+import Link from 'next/link';
 import React from 'react';
 
 const InstructorDashboard = () => {
@@ -45,18 +46,18 @@ const InstructorDashboard = () => {
             <div className="border border-gray-200 rounded p-4 bg-white">
               <div className="text-sm font-medium mb-1 text-gray-800">Create new course</div>
               <div className="text-xs text-gray-600 mb-3">Start creating a new course for your students</div>
-              <button className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">
+              <Link href={"/tutor/courses/createcourse"} className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">
                 Create Course
-              </button>
+              </Link>
             </div>
             
             {/* View All courses card */}
             <div className="border border-gray-200 rounded p-4 bg-white">
               <div className="text-sm font-medium mb-1 text-gray-800">View All courses</div>
               <div className="text-xs text-gray-600 mb-3">Manage your existing courses</div>
-              <button className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
+              <Link href={"/tutor/courses"} className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
                 View Courses
-              </button>
+              </Link>
             </div>
             
             {/* View Earnings card */}

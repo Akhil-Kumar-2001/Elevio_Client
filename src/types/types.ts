@@ -132,4 +132,26 @@ export interface Category {
   status?: number;
 }
   
+export interface ISectionData {
+  title: string,
+  description: string,
+}
   
+export interface ISectionData {
+  title: string;
+  description: string;
+}
+
+export interface Section {
+  _id: string;
+  title: string;
+  description: string;
+}
+
+export interface Lecture {
+  _id: string;
+  title: string;
+  videoUrl?: string;
+  courseId: string;
+  sectionId: string;
+}
