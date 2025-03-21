@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Table from '../../../components/table';
-import { getPendingTutors, getTutors, updateTutorStatus } from '@/app/service/admin/adminApi';
+import { getPendingTutors, } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/admin/adminsidebar';
 import { useRouter } from 'next/navigation';
 

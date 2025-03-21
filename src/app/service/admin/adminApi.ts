@@ -133,7 +133,6 @@ export const updateCategoryStatus = async (id: string) => {
 
 export const deleteCategory = async (id: string) => {
     try {
-        console.log("Category id from delete",id)
         const response = await adminAxiosInstance.delete(`/admin/delete-category`,{ data: { id } });
         return await response.data
     } catch (error:unknown) {
@@ -141,5 +140,67 @@ export const deleteCategory = async (id: string) => {
     }
 };
 
+export const getPendingCourses = async(page: number, limit: number) =>{
+    try {
+        const response = await adminAxiosInstance.get(`/admin/pending-course?page=${page}&limit=${limit}`);
+        console.log(response)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
 
+export const getCategory = async () => {
+    try {
+        const response = await adminAxiosInstance.get(`/admin/get-categories`)
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getCourseDetails = async(id:string) =>{
+    try {
+        const response = await adminAxiosInstance.get(`/admin/course-details/${id}`)
+        console.log("course details",response)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getSectionsByCourse = async(id:string) =>{
+    try {
+        const response = await adminAxiosInstance.get(`/admin/sections/${id}`)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getLecturesBySection = async(id:string) =>{
+    try {
+        const response = await adminAxiosInstance.get(`/admin/lectures/${id}`)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const rejectCourseVerification = async(courseId:string,reason:string)=>{
+    try {
+        const response = await adminAxiosInstance.patch(`/admin/reject-course/${courseId}`,{reason});
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+export const approveCourseVerification = async(courseId:string)=>{
+    try {
+        const response = await adminAxiosInstance.patch(`/admin/approve-course/${courseId}`);
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
 

@@ -36,12 +36,10 @@ const CourseDetailPage = () => {
     try {
       setLoading(true);
       const response = await getCourseDetails(id as string);
-      console.log('Fetched course details:', response); // Debug log
       if (response && response.success) {
-        const newCourseData = { ...response.data }; // Deep copy
+        const newCourseData = { ...response.data }; 
         setCourse(newCourseData);
         setEditedCourse(newCourseData);
-        console.log('Updated course state:', newCourseData); // Debug log
       } else {
         toast.error('Failed to fetch course details');
         router.push('/tutor/courses');

@@ -15,6 +15,7 @@ interface TableProps {
   onDeleteCategory?: (categoryId: string, categoryName: string) => void;
   pageRole?: string;
   pageFunction?: (tutorId: string) => void;
+  pageCourseFunction?: (courseId: string) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -35,6 +36,7 @@ const Table: React.FC<TableProps> = ({
   onDeleteCategory,
   pageRole,
   pageFunction,
+  pageCourseFunction,
 }) => {
   return (
     <div className="bg-black border border-gray-700 rounded-sm">
@@ -92,6 +94,16 @@ const Table: React.FC<TableProps> = ({
                         <Eye size={22} />
                       </button>
                     )}
+
+                    {pageRole === "Course-preview" && pageCourseFunction && (
+                      <button
+                        onClick={() => pageCourseFunction(row._id)}
+                        className="text-blue-500 transition transform hover:scale-110"
+                      >
+                        <Eye size={22} />
+                      </button>
+                    )}
+
                   </td>
                 )}
               </tr>

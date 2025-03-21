@@ -228,7 +228,8 @@ export const getLecturesBySection = async (sectionId: string) => {
 
 export const updateSection = async (sectionId: string, data: ISectionData) => {
     try {
-        const response = await userAxiosInstance.patch(`/tutor/edit-sections/${sectionId}`)
+        console.log("==========>",data)
+        const response = await userAxiosInstance.patch(`/tutor/edit-sections/${sectionId}`,data)
         return response.data;
     }catch(error:unknown){
         handleAxiosError(error)

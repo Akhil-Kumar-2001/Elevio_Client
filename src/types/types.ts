@@ -155,3 +155,32 @@ export interface Lecture {
   courseId: string;
   sectionId: string;
 }
+
+// types/types.ts
+export interface ILecture {
+  _id: string;
+  sectionId: string;
+  courseId: string;
+  title: string;
+  videoUrl?: string;
+  duration: number;
+  order: number;
+  status: "processing" | "processed";
+  isPreview?: boolean;
+}
+
+export interface ISection {
+  _id: string;
+  courseId: string;
+  title: string;
+  description: string;
+  order: number;
+  totalLectures?: number;
+  totalDuration?: number;
+  isPublished?: boolean;
+}
+
+export interface ICategory {
+  _id: string;
+  name: string;
+}
