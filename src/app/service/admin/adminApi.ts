@@ -187,9 +187,9 @@ export const getLecturesBySection = async(id:string) =>{
     }
 }
 
-export const rejectCourseVerification = async(courseId:string,reason:string)=>{
+export const rejectCourseVerification = async(courseId:string,tutorId:string,reason:string)=>{
     try {
-        const response = await adminAxiosInstance.patch(`/admin/reject-course/${courseId}`,{reason});
+        const response = await adminAxiosInstance.patch(`/admin/reject-course/${courseId}`,{tutorId,reason});
         return response.data
     } catch (error:unknown) {
         handleAxiosError(error)

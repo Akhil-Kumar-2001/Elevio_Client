@@ -11,9 +11,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface CourseVerificationModalProps {
   courseId: string | null;
   type: 'approve' | 'reject';
+  tutorId:string | null;
 }
 
-const CourseVerificationModal: React.FC<CourseVerificationModalProps> = ({ courseId, type }) => {
+const CourseVerificationModal: React.FC<CourseVerificationModalProps> = ({ courseId,tutorId, type }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +42,14 @@ const CourseVerificationModal: React.FC<CourseVerificationModalProps> = ({ cours
           setLoading(false);
           return;
         }
-        const response = await rejectCourseVerification(courseId, reason);
+
+        if (!tutorId) {
+          toast.error('Please provide a tutorId for rejection');
+          setLoading(false);
+          return;
+        }
+
+        const response = await rejectCourseVerification(courseId,tutorId, reason);
         if (response && response.success) {
           toast.success('Course rejected successfully');
           router.push('/admin/courseverification');

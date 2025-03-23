@@ -8,6 +8,7 @@ import Navbar from '@/components/tutor/navbar';
 import axios from 'axios';
 import { createCourse, getCategories } from '@/app/service/tutor/tutorApi';
 import useAuthStore from '@/store/tutorAuthStore';
+import { toast } from 'react-toastify';
 
 const AddCourseForm = () => {
   const router = useRouter();
@@ -86,8 +87,11 @@ const AddCourseForm = () => {
       };
 
       console.log('Course Data:', courseData);
-      await createCourse(courseData);
-      router.push('/tutor/courses');
+      const response =await createCourse(courseData);
+      if(response.success){
+        toast.success(response.message)
+        router.push('/tutor/courses');
+      }
     } catch (error) {
       console.error('Error creating course:', error);
     }

@@ -235,8 +235,8 @@ const CoursePreview = () => {
                     {/* Approve and Reject Buttons on the Right */}
                     {course.status === 'pending' && (
                       <div className="flex gap-3">
-                        <CourseVerificationModal courseId={id as string} type="reject" />
-                        <CourseVerificationModal courseId={id as string} type="approve" />
+                        <CourseVerificationModal courseId={id as string} tutorId={course.tutorId} type="reject" />
+                        <CourseVerificationModal courseId={id as string} tutorId={course.tutorId} type="approve" />
                       </div>
                     )}
                   </div>
