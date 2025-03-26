@@ -79,12 +79,12 @@ const CourseContentManager = () => {
       return;
     }
 
-    setLoading(true); // Set loading state to true
+    setLoading(true);
     try {
-      const response = await applyReview(courseId); // Pass courseId to applyReview
+      const response = await applyReview(courseId);
       if (response.success) {
-        toast.success(response.message); // Use toast.success for success message
-        router.push('/tutor/courses'); // Navigate back to courses page on success
+        toast.success(response.message);
+        router.push('/tutor/courses');
       } else {
         toast.error(response.message || 'Failed to apply for review');
       }
@@ -92,7 +92,7 @@ const CourseContentManager = () => {
       console.error('Error while applying for review:', error);
       toast.error('Error while applying for review');
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
@@ -662,55 +662,54 @@ const CourseContentManager = () => {
                 <p className="text-gray-500 text-center">Please select a course to manage its content.</p>
               ) : (
                 <>
-                  <button
-                    onClick={() => setShowAddSection(!showAddSection)}
-                    className="mb-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
-                  >
-                    {showAddSection ? 'Cancel' : 'Add Section'}
-                  </button>
-
-                  {showAddSection && (
-                    <div className="mb-10 p-6 bg-gray-50 rounded-lg">
-                      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add New Section</h2>
-                      <div className="space-y-4">
-                        <input
-                          type="text"
-                          value={newSectionTitle}
-                          onChange={(e) => setNewSectionTitle(e.target.value)}
-                          placeholder="Section Title"
-                          className="w-full px-4 py-3 border text-gray-700 bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"
-                          disabled={loading}
-                        />
-                        <textarea
-                          value={newSectionDesc}
-                          onChange={(e) => setNewSectionDesc(e.target.value)}
-                          placeholder="Section Description"
-                          className="w-full px-4 py-3 border text-gray-700 bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none h-32 transition-all"
-                          disabled={loading}
-                        />
-                        <div className="flex gap-3">
-                          <button
-                            onClick={handleAddSection}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-all"
-                            disabled={loading || !newSectionTitle || !newSectionDesc}
-                          >
-                            {loading ? 'Adding...' : 'Add Section'}
-                          </button>
-                          <button
-                            onClick={() => setShowAddSection(false)}
-                            className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
-                            disabled={loading}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   <div>
                     <h2 className="text-2xl font-semibold text-gray-800 mb-6">Course Sections</h2>
                     <div>{renderSections()}</div>
+                    <button
+                      onClick={() => setShowAddSection(!showAddSection)}
+                      className="mt-6 px-4 py-2 border border-gray-700 text-black bg-transparent rounded-lg hover:bg-purple-50 transition-all flex items-center gap-2"
+                    >
+                      <Plus className="w-5 h-5" />
+                      <span>Section</span>
+                    </button>
+                    {showAddSection && (
+                      <div className="mt-6 p-6 bg-gray-50 rounded-lg">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add New Section</h2>
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            value={newSectionTitle}
+                            onChange={(e) => setNewSectionTitle(e.target.value)}
+                            placeholder="Section Title"
+                            className="w-full px-4 py-3 border text-gray-700 bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all"
+                            disabled={loading}
+                          />
+                          <textarea
+                            value={newSectionDesc}
+                            onChange={(e) => setNewSectionDesc(e.target.value)}
+                            placeholder="Section Description"
+                            className="w-full px-4 py-3 border text-gray-700 bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none h-32 transition-all"
+                            disabled={loading}
+                          />
+                          <div className="flex gap-3">
+                            <button
+                              onClick={handleAddSection}
+                              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-all"
+                              disabled={loading || !newSectionTitle || !newSectionDesc}
+                            >
+                              {loading ? 'Adding...' : 'Add Section'}
+                            </button>
+                            <button
+                              onClick={() => setShowAddSection(false)}
+                              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all"
+                              disabled={loading}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end mt-8 gap-4">

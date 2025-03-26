@@ -110,13 +110,10 @@ export const googleSignInApi = async (userData: basicType) => {
 
 export const getTutor = async (id: string) => {
     try {
-        const response = await userAxiosInstance.get(`/tutor/get-tutor/${id}`, {
-            withCredentials: true,
-        });
+        const response = await userAxiosInstance.get(`/tutor/get-tutor/${id}`);
         return response.data;
-    } catch (error) {
-        console.error("Error fetching tutor:", error);
-        return null;
+    } catch (error:unknown) {
+        handleAxiosError(error)
     }
 };
 

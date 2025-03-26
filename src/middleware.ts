@@ -50,17 +50,25 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/home',
+    "/mylearning",
     '/courses/:path*',
-    '/profile/:path*',
+    '/profile',
     '/tutor/dashboard',
     '/tutor/verification',
-    '/tutor/course',
+    '/tutor/pending-page',
     '/tutor/profile',
+    '/tutor/courses',
+    "/tutor/courses/createcourse",
+    "/tutor/courses/create-details/:path*",
     '/tutor/home',
     '/admin/dashboard',
     '/admin/studentsmanagement',
     '/admin/tutormanagement',
     '/admin/tutorverification',
+    '/admin/tutor-details/:path',
+    '/admin/category',
+    '/admin/courseverification',
+    '/admin/course-preview/:path',
 
   ],
 };

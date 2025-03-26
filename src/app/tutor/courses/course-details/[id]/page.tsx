@@ -8,7 +8,7 @@ import { getCourseDetails, updateCourse, getCategories } from '@/app/service/tut
 import { toast } from 'react-toastify';
 import { Course, Category } from '@/types/types';
 import Image from 'next/image';
-import { Camera } from 'lucide-react';
+import { Camera, Edit, FileText, CheckCircle, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
 const CourseDetailPage = () => {
@@ -18,6 +18,7 @@ const CourseDetailPage = () => {
   const [editMode, setEditMode] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // State for modal visibility
 
   const [course, setCourse] = useState<Course | null>(null);
   const [editedCourse, setEditedCourse] = useState<Partial<Course> | null>(null);
@@ -37,7 +38,7 @@ const CourseDetailPage = () => {
       setLoading(true);
       const response = await getCourseDetails(id as string);
       if (response && response.success) {
-        const newCourseData = { ...response.data }; 
+        const newCourseData = { ...response.data };
         setCourse(newCourseData);
         setEditedCourse(newCourseData);
       } else {
@@ -162,16 +163,13 @@ const CourseDetailPage = () => {
       }
 
       const response = await updateCourse(id as string, courseToUpdate as Course);
-      console.log('Update response:', response); // Debug log
       if (response && response.success) {
         toast.success('Course updated successfully');
         
-        // Immediately update the course state with editedCourse to reflect changes in UI
         const updatedCourse = { ...course, ...courseToUpdate } as Course;
         setCourse(updatedCourse);
-        setEditedCourse(updatedCourse); // Sync editedCourse with the updated data
+        setEditedCourse(updatedCourse);
         
-        // Re-fetch from server to ensure consistency (optional, but keeps data in sync)
         await fetchCourseDetails();
         
         setEditMode(false);
@@ -185,6 +183,49 @@ const CourseDetailPage = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleListCourse = async () => {
+    if (!course || !courseId) return;
+
+    setSubmitting(true);
+    try {
+      const updatedCourseData = {
+        ...course,
+        status: "listed"
+      };
+      
+      const response = await updateCourse(courseId, updatedCourseData);
+      if (response && response.success) {
+        toast.success('Course listed successfully');
+        setCourse(updatedCourseData);
+        setEditedCourse(updatedCourseData);
+        await fetchCourseDetails();
+      } else {
+        toast.error('Failed to list course');
+      }
+    } catch (error) {
+      console.error('Error listing course:', error);
+      toast.error('Failed to list course');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Function to show the confirmation modal
+  const handleShowConfirmModal = () => {
+    setShowConfirmModal(true);
+  };
+
+  // Function to close the confirmation modal
+  const handleCloseConfirmModal = () => {
+    setShowConfirmModal(false);
+  };
+
+  // Function to confirm and list the course
+  const handleConfirmListCourse = async () => {
+    handleCloseConfirmModal(); // Close the modal
+    await handleListCourse(); // Proceed with listing the course
   };
 
   const getCategoryName = (category: any) => {
@@ -208,13 +249,19 @@ const CourseDetailPage = () => {
           <div className="h-full overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-xl font-medium text-gray-800">Course Details</h1>
-              <button
-                onClick={() => router.push('/tutor/courses')}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
-                type="button"
-              >
-                Back to Courses
-              </button>
+              <div className="group relative">
+                <button
+                  onClick={() => router.push('/tutor/courses')}
+                  className="p-2.5 bg-gray-500 text-white rounded-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-200"
+                  type="button"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 top-12 right-0 bg-gray-500 text-white text-xs rounded py-1 px-3 whitespace-nowrap z-50 min-w-max">
+                  Back to Courses
+                  <div className="absolute top-[-4px] right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-500" />
+                </div>
+              </div>
             </div>
 
             {loading ? (
@@ -247,7 +294,7 @@ const CourseDetailPage = () => {
                         />
                         <label
                           htmlFor="course-image"
-                          className="bg-white text-blue-600 px-4 py-2 rounded-md text-sm cursor-pointer hover:bg-blue-600 hover:text-white transition-colors duration-300 flex items-center gap-2"
+                          className="bg-white text-blue-600 px-4 py-2 rounded-md text-sm cursor-pointer hover:bg-blue-600 hover:text-white transition-colors duration-200 flex items-center gap-2"
                         >
                           {imageUploading ? "Uploading..." : (
                             <>
@@ -343,32 +390,48 @@ const CourseDetailPage = () => {
                           name="description"
                           value={editedCourse?.description || ''}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           rows={5}
                         />
                       </div>
 
                       <div className="mb-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-2">Course Status</h2>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${course.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
-                        >
-                          {course.status}
-                        </span>
+                        <div className="group relative inline-block">
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              course.status === 'published'
+                                ? 'bg-green-100 text-green-800'
+                                : course.status === 'accepted'
+                                ? 'bg-blue-100 text-blue-800'
+                                : course.status === 'rejected'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {course.status}
+                          </span>
+                          {course.status === 'rejected' && course.rejectedReason && (
+                            <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 top-1/2 left-full ml-3 -translate-y-1/2 bg-red-600 text-white text-sm rounded-lg p-4 w-80 z-50">
+                              <p className="whitespace-pre-wrap leading-relaxed">{course.rejectedReason}</p>
+                              <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full w-0 h-0 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-red-600" />
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex space-x-4">
                         <button
                           type="submit"
                           disabled={submitting}
-                          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-green-300"
+                          className="px-6 py-2.5 bg-green-600 text-white font-medium text-sm rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-300 transition-colors duration-200"
                         >
                           {submitting ? 'Saving...' : 'Save Changes'}
                         </button>
                         <button
                           type="button"
                           onClick={handleEditToggle}
-                          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                          className="px-6 py-2.5 bg-gray-600 text-white font-medium text-sm rounded-lg shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                         >
                           Cancel
                         </button>
@@ -393,28 +456,74 @@ const CourseDetailPage = () => {
 
                       <div className="mb-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-2">Course Status</h2>
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${course.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
-                        >
-                          {course.status}
-                        </span>
+                        <div className="group relative inline-block">
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              course.status === 'listed'
+                                ? 'bg-green-100 text-green-800'
+                                : course.status === 'accepted'
+                                ? 'bg-blue-100 text-blue-800'
+                                : course.status === 'rejected'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {course.status}
+                          </span>
+                          {course.status === 'rejected' && course.rejectedReason && (
+                            <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 top-1/2 left-full ml-3 -translate-y-1/2 bg-red-600 text-white text-sm rounded-lg p-4 w-80 z-50">
+                              <p className="whitespace-pre-wrap leading-relaxed">{course.rejectedReason}</p>
+                              <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full w-0 h-0 border-t-4 border-b-4 border-r-4 border-t-transparent border-b-transparent border-r-red-600" />
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex space-x-4">
-                        <button
-                          type="button"
-                          onClick={handleEditToggle}
-                          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-700"
-                        >
-                          Edit Course Details
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => router.push(`/tutor/courses/course-details/section/${course._id}`)}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                        >
-                          Manage Content
-                        </button>
+                        <div className="group relative">
+                          <button
+                            type="button"
+                            onClick={handleEditToggle}
+                            className="p-2.5 bg-gray-800 text-white rounded-full shadow-sm hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 transition-colors duration-200"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 -top-10 left-0 bg-gray-800 text-white text-xs rounded py-1 px-3 whitespace-nowrap z-50 min-w-max">
+                            Edit Course Details
+                            <div className="absolute bottom-[-4px] left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-800" />
+                          </div>
+                        </div>
+
+                        <div className="group relative">
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/tutor/courses/course-details/section/${course._id}`)}
+                            className="p-2.5 bg-blue-600 text-white rounded-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                          >
+                            <FileText className="w-5 h-5" />
+                          </button>
+                          <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 -top-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs rounded py-1 px-3 whitespace-nowrap z-50 min-w-max">
+                            Manage Content
+                            <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600" />
+                          </div>
+                        </div>
+
+                        {course.status === 'accepted' && (
+                          <div className="group relative">
+                            <button
+                              type="button"
+                              onClick={handleShowConfirmModal} // Show the confirmation modal instead of directly listing
+                              disabled={submitting}
+                              className="p-2.5 bg-green-600 text-white rounded-full shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-300 transition-colors duration-200"
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                            <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 -top-10 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-xs rounded py-1 px-3 whitespace-nowrap z-50 min-w-max">
+                              {submitting ? 'Listing...' : 'List Course'}
+                              <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-green-600" />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -428,6 +537,33 @@ const CourseDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Confirm Listing</h2>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to list this course? This action will make the course publicly available.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCloseConfirmModal}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmListCourse}
+                disabled={submitting}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-300 transition-colors duration-200"
+              >
+                {submitting ? 'Listing...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -22,6 +22,7 @@ const TutorVerificationDetails = () => {
             if (response.data) setTutor(response.data)
         } catch (error) {
             console.log("error while getting tutor details", error)
+            router.push('/not-found');
         }
     }
 
@@ -163,3 +164,4 @@ const TutorVerificationDetails = () => {
 }
 
 export default TutorVerificationDetails;
+

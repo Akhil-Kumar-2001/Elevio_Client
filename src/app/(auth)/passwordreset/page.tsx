@@ -5,13 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Eye, EyeOff } from 'lucide-react'; // Add this import
 import { resetPassword as StudentResetPassword } from '@/app/service/user/userApi';
-import { resetPassword as TutorResetPassword } from '@/app/service/tutor/tutorApi';
 
-interface ResetPasswordPageProps {
-    role: 'student' | 'tutor';
-}
-
-const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
+const ResetPasswordPage: React.FC = () => {
     const [formData, setFormData] = useState({
         password: '',
         confirmPassword: ''
@@ -29,7 +24,7 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
     }, []);
 
     const router = useRouter();
-    const authImage = role === 'student' ? '/images/StudentLogin.png' : '/images/TutorLogin.png';
+    const authImage = '/images/StudentLogin.png';
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -61,12 +56,11 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
         setLoading(true);
 
         try {
-            const resetApi = role === 'student' ? StudentResetPassword : TutorResetPassword;
-            const response = await resetApi(formData.password, email);
+            const response = await StudentResetPassword(formData.password, email);
             if (response) {
                 toast.success(response.message);
+                router.back();
             }
-            role === 'student' ? router.push('/login') : router.push('/tutor/login');
         } catch (error) {
             setErrors('Failed to reset password. Please try again.');
         } finally {
@@ -85,7 +79,7 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
                 <div className="hidden md:flex md:w-1/2 items-center justify-center p-12">
                     <img
                         src={authImage}
-                        alt={role === 'student' ? "Student studying" : "Tutor teaching"}
+                        alt="Student studying"
                         className="w-full h-auto"
                     />
                 </div>
@@ -166,4 +160,4 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
     );
 };
 
-export default ResetPasswordPage;                                   
+export default ResetPasswordPage;

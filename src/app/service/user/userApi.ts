@@ -1,7 +1,8 @@
 import axios from "axios";
-import { basicType, userType } from "@/types/types";
+import { basicType, EditStudentType, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import userAxiosInstance from "./userAxiosInstance";
+import exp from "constants";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -90,11 +91,55 @@ export const resetPassword = async(password:string,email:string) =>{
 
 export const googleSignInApi = async (userData:basicType) =>{
         try {
-            console.log("before api call")
             const response = await axios.post(`${API_URI}/student/callback`,userData,{withCredentials:true});
-            console.log(response)
             return response.data;
         } catch (error:unknown) {
             handleAxiosError(error);
         }
 }
+
+export const getListedCourses = async () => {
+    try {
+      const response = await userAxiosInstance.get(`/student/listed-courses`)
+      console.log(response.data)
+      return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  };
+
+  export const getStudent = async (id:string) => {
+    try {
+        const response = await userAxiosInstance.get(`/student/get-student/${id}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error) 
+    }
+  }
+
+  export const updateStudent = async (id:string,formData:EditStudentType)=>{
+    try {
+        const response = await userAxiosInstance.patch(`/student/edit-profile/${id}`,{formData});
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
+  export const addToCart = async (userId:string,courseId:string)=>{
+    try {
+        const response = await userAxiosInstance.post(`/student/addtocart/${courseId}`,{userId});
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
+  export const cartData = async (studentId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/cart/${studentId}`);
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }

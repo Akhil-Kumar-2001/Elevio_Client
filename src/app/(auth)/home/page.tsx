@@ -1,32 +1,27 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 import useAuthStore from '@/store/userAuthStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-
+import Navbar from '@/components/student/navbar';
+import HeroSection from '@/components/student/heroSection'; // Import the HeroSection component
+import SubscriptionBanner from '@/components/student/subscriptionBanner';
+import WhatToLearnNext from '@/components/student/courseList';
+import Footer from '@/components/student/footer';
 
 const Homepage = () => {
   const { logout } = useAuthStore();
   const router = useRouter();
-
-  const handleLogout = () => {
-    logout(); // Clear user authentication state
-    localStorage.removeItem('authUserCheck');
-    toast.success('Logged out successfully!');
-    router.push('/login'); // Redirect to login page
-  };
   return (
-    <div>
-      <h1>Hey this is home</h1>
-      <button 
-        onClick={handleLogout} 
-        className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-      >
-        Logout
-      </button>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <HeroSection />
+      <SubscriptionBanner />
+      <WhatToLearnNext />
+      <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Homepage
+export default Homepage;

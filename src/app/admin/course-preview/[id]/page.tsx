@@ -34,7 +34,7 @@ const CoursePreview = () => {
     } catch (error) {
       console.error('Error fetching course details:', error);
       toast.error('Failed to fetch course details');
-      router.push('/admin/courseverification');
+      router.push('/not-found');
     }
   };
 

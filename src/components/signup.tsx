@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { FcGoogle } from 'react-icons/fc';
+import { Eye, EyeOff } from 'lucide-react'; // Add this import
 import { getSession, signIn } from 'next-auth/react';
 
 import { validateSignupForm, SignupFormData } from '../app/utits/validationzod';
@@ -23,14 +24,14 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
     password: '',
     confirmPassword: '',
   });
-
-  const router = useRouter();
-
-  const studentAuth = useStudentAuthStore();
-  const tutorAuth = useTutorAuthStore();
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false); // Add state for password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Add state for confirm password visibility
+
+  const router = useRouter();
+  const studentAuth = useStudentAuthStore();
+  const tutorAuth = useTutorAuthStore();
 
   const imageSrc = role === 'student' ? '/images/StudentLogin.png' : '/images/TutorLogin.png';
 
@@ -38,7 +39,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear the specific field error when user starts typing
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -75,7 +75,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
 
   const handleGoogleSignIn = async () => {
     try {
-      // Step 1: Redirect to Google Sign-in (this does NOT return session immediately)
       const result = await signIn("google", role == 'student' 
         ? { callbackUrl: '/home', redirect: false } 
         : { callbackUrl: '/tutor/dashboard', redirect: false }
@@ -91,11 +90,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
     }
   };
 
-  // Step 2: Use useEffect to check session change and make backend call
   useEffect(() => {
     const checkSessionAndCallBackend = async () => {
       const session = await getSession();
-      if (!session || !session.user) return; // If session is not available, do nothing
+      if (!session || !session.user) return;
 
       console.log("Session found, calling backend...");
       
@@ -120,7 +118,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
     };
 
     checkSessionAndCallBackend();
-  }, []); // Runs when session changes
+  }, []);
+
+  // Add toggle functions
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 overflow-hidden">
@@ -184,9 +186,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                 </div>
 
                 {/* Password Input */}
-                <div>
+                <div className="relative flex items-center">
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     placeholder="Password"
                     value={formData.password}
@@ -195,17 +197,29 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                       errors.password 
                         ? 'border-red-500' 
                         : 'border-gray-200'
-                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12`}
                   />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-4 p-1 text-gray-600 hover:text-gray-800 focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5 stroke-[1.5]" />
+                    ) : (
+                      <Eye className="w-5 h-5 stroke-[1.5]" />
+                    )}
+                  </button>
                   {errors.password && (
                     <p className="text-red-500 text-sm mt-1">{errors.password}</p>
                   )}
                 </div>
 
                 {/* Confirm Password Input */}
-                <div>
+                <div className="relative flex items-center">
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     placeholder="Confirm Password"
                     value={formData.confirmPassword}
@@ -214,8 +228,20 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                       errors.confirmPassword 
                         ? 'border-red-500' 
                         : 'border-gray-200'
-                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12`}
                   />
+                  <button
+                    type="button"
+                    onClick={toggleConfirmPasswordVisibility}
+                    className="absolute right-4 p-1 text-gray-600 hover:text-gray-800 focus:outline-none"
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-5 h-5 stroke-[1.5]" />
+                    ) : (
+                      <Eye className="w-5 h-5 stroke-[1.5]" />
+                    )}
+                  </button>
                   {errors.confirmPassword && (
                     <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
                   )}

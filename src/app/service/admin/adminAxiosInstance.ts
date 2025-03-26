@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import useAuthStore from '@/store/adminAuthStore';
 
 const adminAxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL ,
   withCredentials: true, // Ensures cookies are sent with requests
 });
 console.log("Axios Base URL:", process.env.NEXT_PUBLIC_API_URI);
