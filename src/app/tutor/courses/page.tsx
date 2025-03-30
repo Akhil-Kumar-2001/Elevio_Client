@@ -10,8 +10,9 @@ import React, { useEffect, useState } from 'react';
 import { getCourses, getCategories } from '@/app/service/tutor/tutorApi';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import useAuthStore from '@/store/tutorAuthStore';
 
-const InstructorDashboard = () => {
+const Courses = () => {
 
   const router = useRouter();
   const [courses, setCourses] = useState([]);
@@ -19,6 +20,8 @@ const InstructorDashboard = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]); 
+  const {user} = useAuthStore()
+  const tutorId = user?.id
 
   // ✅ Fetch categories from API
   const fetchCategories = async () => {
@@ -36,7 +39,11 @@ const InstructorDashboard = () => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const response = await getCourses(currentPage, 5);
+      if(!tutorId){
+        console.log("tutor id is no availabe")
+        return
+      }
+      const response = await getCourses(tutorId,currentPage, 5);
       if (response && response.success) {
         setCourses(response.data.courses);
         setTotalPages(Math.ceil(response.data.totalRecord / 5));
@@ -104,4 +111,4 @@ const InstructorDashboard = () => {
   );
 };
 
-export default InstructorDashboard;
+export default Courses;

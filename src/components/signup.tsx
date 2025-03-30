@@ -7,7 +7,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { Eye, EyeOff } from 'lucide-react'; // Add this import
 import { getSession, signIn } from 'next-auth/react';
 
-import { validateSignupForm, SignupFormData } from '../app/utits/validationzod';
+import { validateSignupForm, SignupFormData } from '../app/utils/validationzod';
 import { googleSignInApi as studentGoogle, userSignup } from '@/app/service/user/userApi';
 import { googleSignInApi as tutorGoogle, tutorSignup } from '@/app/service/tutor/tutorApi';
 import useTutorAuthStore from '@/store/tutorAuthStore';

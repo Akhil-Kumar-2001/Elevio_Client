@@ -155,10 +155,16 @@ export const createCourse = async (courseData: CourseData) => {
 }
 
 
-export const getCourses = async (page: number, limit: number) => {
+export const getCourses = async (tutorId:string,page: number, limit: number) => {
     try {
-        const response = await userAxiosInstance.get(`/tutor/courses?page=${page}&limit=${limit}`);
-        return response.data
+        console.log("Tutor id in courses",tutorId)
+        const response = await userAxiosInstance.get(`/tutor/courses`, {
+            params: {
+                tutorId, 
+                page,
+                limit
+            }
+        });        return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
     }

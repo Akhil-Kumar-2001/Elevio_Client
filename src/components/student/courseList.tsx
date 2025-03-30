@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getListedCourses, addToCart } from '../../app/service/user/userApi'; // Adjust path to your API file
 import { FrontendCourse } from '@/types/types'; // Adjust path to your types file
 import useAuthStore from '@/store/userAuthStore';
+import { useCartCountStore } from '@/store/cartCountStore';
 import { toast } from 'react-toastify';
 
 // Ensure FrontendCourse type includes _id
@@ -15,6 +16,7 @@ const WhatToLearnNext = () => {
   const [error, setError] = useState<string | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // Track which card is being hovered
   const { user } = useAuthStore();
+  const { incrementCartCount } = useCartCountStore()
 
   const userId = user?.id
 
@@ -52,8 +54,8 @@ const WhatToLearnNext = () => {
       console.log(response)
       if(response){
         toast.success(response.message)
+        incrementCartCount();
       }
-      console.log("Course added to cart:", response);
     } catch (error) {
       console.log("Error adding course to cart:", error);
       setError('Failed to add course to cart');

@@ -51,7 +51,7 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-50 to-blue-100 shadow-md">
+      <header className="bg-gradient-to-r pt-20 from-blue-50 to-blue-100 shadow-md">
         <div className="w-full px-16 py-6">
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
             My Learning

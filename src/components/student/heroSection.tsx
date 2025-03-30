@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 const HeroSection = () => {
   return (
-    <section className="flex items-center justify-between py-10 px-16 bg-blue-50">
+    <section className="flex items-center justify-between pt-32 py-10 px-16 bg-blue-50">
       {/* Left Side: Text Content */}
       <div className="flex-1 pr-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
