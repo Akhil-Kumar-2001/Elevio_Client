@@ -23,6 +23,12 @@ userAxiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (error.response?.status === 403) {
+      console.warn("403 Forbidden detected. Logging out...");
+      useAuthStore.getState().logout(); 
+      return Promise.reject(error);
+    }
+
     if (error.response) {
       const statusCode = error.response.status;
 

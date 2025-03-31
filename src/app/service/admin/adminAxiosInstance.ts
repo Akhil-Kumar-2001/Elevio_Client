@@ -23,6 +23,12 @@ adminAxiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
+    if (error.response?.status === 403) {
+      console.warn("403 Forbidden detected. Logging out...");
+      useAuthStore.getState().logout(); // 🔹 Logout user
+      return Promise.reject(error);
+    }
     
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
