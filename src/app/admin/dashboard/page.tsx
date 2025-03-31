@@ -1,9 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
-import useAuthStore from '@/store/adminAuthStore';
 import AdminSidebar from '@/components/admin/adminsidebar';
 
 const CourseDashboard = () => {
@@ -13,8 +10,6 @@ const CourseDashboard = () => {
     { title: "Python", instructor: "Akhil", date: "04/01/2025", price: "₹1099" }
   ];
 
-  const { logout } = useAuthStore();
-  const router = useRouter();
   
   return (
     <div className="flex flex-col h-screen">

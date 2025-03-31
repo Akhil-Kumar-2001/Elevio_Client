@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { TokenPayload } from './types/types';
-import { decode } from 'punycode';
 
 export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();

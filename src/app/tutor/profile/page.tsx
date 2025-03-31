@@ -5,11 +5,9 @@ import React, { useEffect, useState } from "react";
 import { GraduationCap, Briefcase, Code, X, Edit, Camera } from "lucide-react";
 import { getTutor, updateTutor } from "@/app/service/tutor/tutorApi";
 import useAuthStore from "@/store/tutorAuthStore";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Tutor } from "@/types/types";
 
 const ProfileSettings = () => {
   interface TutorType {
@@ -27,8 +25,7 @@ const ProfileSettings = () => {
       }[];
     };
   }
-  
-  const router = useRouter();
+
   const { user } = useAuthStore();
   const tutorId = user?.id;
 

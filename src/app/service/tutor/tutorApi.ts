@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, Course, CourseData, ISectionData, Tutor, TutorType, TutorVerificationFormData, userType } from "@/types/types";
+import { basicType, Course, CourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
 
@@ -23,10 +23,8 @@ export const tutorSignup = async (userData: basicType) => {
     try {
         const response = await axios.post(`${API_URI}/tutor/signup`, { ...userData });
         return response.data
-    } catch (error: any) {
-        toast.error(error?.response?.data?.message);
-
-        // toast.error(error.response)
+    } catch (error: unknown) {
+        handleAxiosError(error)
     }
 }
 
@@ -36,8 +34,8 @@ export const otpPost = async (otp: string, email: string) => {
         console.log(response)
         return response.data;
     }
-    catch (error: any) {
-        toast.error(error?.response?.data?.message)
+    catch (error: unknown) {
+        handleAxiosError(error)
     }
 }
 
@@ -45,8 +43,8 @@ export const resendOtp = async (email: string) => {
     try {
         const response = await axios.post(`${API_URI}/tutor/resend-otp`, { email })
         return response;
-    } catch (error) {
-        console.log(error)
+    } catch (error:unknown) {
+        handleAxiosError(error)
     }
 }
 

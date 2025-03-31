@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, SortAsc, SortDesc, X } from 'lucide-react';
 import useAuthStore from '@/store/userAuthStore';
+import { useRouter } from 'next/navigation';
 import { useCartCountStore } from '@/store/cartCountStore';
 import { addToCart, getCategories, getCourses } from '@/app/service/user/userApi';
 import { toast } from 'react-toastify';
 import Navbar from '@/components/student/navbar';
 import CoursesLoading from '@/components/student/coursesLoading';
 import Pagination from '@/components/student/pagination';
+import Image from 'next/image';
 
 interface ExtendedFrontendCourse {
   _id: string;
@@ -21,6 +23,7 @@ interface ExtendedFrontendCourse {
 }
 
 const Courses = () => {
+  const router = useRouter()
   const [courses, setCourses] = useState<ExtendedFrontendCourse[]>([]);
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +116,7 @@ const Courses = () => {
     if (categories.length > 0) {
       fetchCourses(); // Fetch courses after categories are available
     }
-  }, [categories,currentPage]);
+  }, [categories, currentPage]);
 
   const handleAddToCart = async (courseId: string) => {
     if (!userId) {
@@ -138,6 +141,11 @@ const Courses = () => {
   const handleWishlist = () => {
     toast.info("Wish list feature Coming Soooon....")
   }
+
+  // New function to handle navigation to course details page
+  const navigateToCourseDetails = (courseId: string) => {
+    router.push(`/coursePreview/${courseId}`);
+  };
 
   // Toggle filter sidebar
   const toggleFilters = () => {
@@ -394,12 +402,21 @@ const Courses = () => {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              {/* Image */}
-              <img
-                src={course.image}
-                alt={course.title}
-                className="w-full h-40 object-cover rounded-t-lg"
-              />
+              {/* Next.js Image component instead of img tag */}
+              <div 
+                onClick={() => navigateToCourseDetails(course._id)}
+                className="relative w-full h-40 cursor-pointer"
+              >
+                <Image
+                  src={course.image}
+                  alt={course.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  style={{ objectFit: 'cover' }}
+                  className="rounded-t-lg"
+                  priority={index < 4} // Only prioritize loading for the first 4 images
+                />
+              </div>
               {/* Card Content */}
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
@@ -461,9 +478,8 @@ const Courses = () => {
             </div>
           ))}
         </div>
-        
-        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
 
+        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
 
         {filterCourses().length === 0 && (
           <div className="text-center py-8">

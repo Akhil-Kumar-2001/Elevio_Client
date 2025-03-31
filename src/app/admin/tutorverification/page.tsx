@@ -37,6 +37,7 @@ const TutorManagement = () => {
         setTutors(tutorData.data);
       }
     } catch (error) {
+      console.log(error)
       toast.error('Failed to fetch tutors');
     } finally {
       setLoading(false);

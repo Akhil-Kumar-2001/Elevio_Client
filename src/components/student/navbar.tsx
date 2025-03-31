@@ -33,6 +33,7 @@ const Navbar = () => {
         setError('Failed to fetch student details');
       }
     } catch (error) {
+      console.log(error)
       setError('Failed to fetch student details');
     } finally {
       setLoading(false);
@@ -64,6 +65,7 @@ const Navbar = () => {
           setError('Failed to fetch profile image');
         }
       } catch (error) {
+        console.log(error)
         setError('Failed to fetch profile image');
       } finally {
         setLoading(false);

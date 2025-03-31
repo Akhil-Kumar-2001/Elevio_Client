@@ -3,7 +3,6 @@ import { persist } from 'zustand/middleware';
 import userAxiosInstance from '@/app/service/user/userAxiosInstance';
 import { getSession, signIn, signOut } from 'next-auth/react';
 import { toast } from 'react-toastify';
-import { googleSignInApi } from '@/app/service/user/userApi';
 import axios from 'axios';
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;

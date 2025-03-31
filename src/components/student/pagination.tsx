@@ -15,7 +15,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, currentPage, onPage
         }
         
         // For larger sets, show a window around current page
-        let pages = [1];
+        const pages = [1];
         
         // Calculate range to show around current page
         const start = Math.max(2, currentPage - 1);

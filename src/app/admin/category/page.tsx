@@ -67,6 +67,7 @@ const CategoryPage = () => {
 
             }
         } catch (error) {
+            console.log(error)
             toast.error("Failed to fetch categories");
         } finally {
             setLoading(false);
@@ -125,6 +126,7 @@ const CategoryPage = () => {
                 setCategory(category.filter(cat => cat._id !== selectedDeleteCategory.id));
             }
         } catch (error) {
+            console.log(error)
             toast.error("Failed to delete category");
         } finally {
             setIsDeleteConfirmModalOpen(false);
@@ -140,7 +142,7 @@ const CategoryPage = () => {
         }
 
         try {
-            let response = await createCategory(newCategoryName);
+            const response = await createCategory(newCategoryName);
             if (response.success) {
                 toast.success(response.message);
                 setCategory(prevCategories => [

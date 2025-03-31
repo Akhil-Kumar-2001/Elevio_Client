@@ -36,6 +36,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({ tutorId, type }) 
       }
       setIsOpen(false);
     } catch (error) {
+      console.log(error)
       toast.error(`Error ${type}ing tutor`);
     }
   };

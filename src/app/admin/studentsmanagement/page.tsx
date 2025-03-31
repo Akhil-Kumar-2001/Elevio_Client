@@ -63,6 +63,7 @@ const StudentsManagement = () => {
         ));
       }
     } catch (error) {
+      console.log(error)
       toast.error('Failed to update student status');
     }
   };

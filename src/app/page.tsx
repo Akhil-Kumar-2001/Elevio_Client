@@ -1,7 +1,5 @@
 import React from 'react';
 import Link from "next/link";
-import Footer from '@/components/footer';
-// import Features from '@/Component/footerSection';
 
 const EducationLanding = () => {
   return (

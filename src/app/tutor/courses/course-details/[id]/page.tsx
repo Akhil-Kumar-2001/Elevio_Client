@@ -60,6 +60,7 @@ const CourseDetailPage = () => {
         setCategories(response.data);
       }
     } catch (error) {
+      console.log(error)
       toast.error('Failed to load categories');
     }
   };

@@ -4,6 +4,8 @@ import { FrontendCourse } from '@/types/types'; // Adjust path to your types fil
 import useAuthStore from '@/store/userAuthStore';
 import { useCartCountStore } from '@/store/cartCountStore';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation'; // Import useNavigate hook
+import Image from 'next/image';
 
 // Ensure FrontendCourse type includes _id
 interface ExtendedFrontendCourse extends FrontendCourse {
@@ -11,14 +13,16 @@ interface ExtendedFrontendCourse extends FrontendCourse {
 }
 
 const WhatToLearnNext = () => {
+  const router = useRouter()
   const [courses, setCourses] = useState<ExtendedFrontendCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // Track which card is being hovered
   const { user } = useAuthStore();
-  const { incrementCartCount } = useCartCountStore()
+  const { incrementCartCount } = useCartCountStore();
+  // const navigate = useNavigate(); // Initialize the navigate function
 
-  const userId = user?.id
+  const userId = user?.id;
 
   const fetchCourses = async () => {
     try {
@@ -35,6 +39,7 @@ const WhatToLearnNext = () => {
       setCourses(mappedCourses.slice(0, 4)); // Limit to 4 courses
       setLoading(false);
     } catch (err) {
+      console.log(error)
       setError('Failed to load courses');
       setLoading(false);
     }
@@ -51,15 +56,24 @@ const WhatToLearnNext = () => {
     }
     try {
       const response = await addToCart(userId, courseId);
-      console.log(response)
-      if(response){
-        toast.success(response.message)
+      console.log(response);
+      if (response) {
+        toast.success(response.message);
         incrementCartCount();
       }
     } catch (error) {
       console.log("Error adding course to cart:", error);
       setError('Failed to add course to cart');
     }
+  };
+
+  const handleWishlist = () => {
+    toast.info("Wish list feature Coming Soooon....");
+  };
+
+  // New function to handle navigation to course details page
+  const navigateToCourseDetails = (courseId: string) => {
+    router.push(`/coursePreview/${courseId}`);
   };
 
   if (loading) {
@@ -102,12 +116,15 @@ const WhatToLearnNext = () => {
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            {/* Image */}
-            <img
-              src={course.image}
-              alt={course.title}
-              className="w-full h-40 object-cover rounded-t-lg"
-            />
+            <div className="relative w-full h-40 cursor-pointer" onClick={() => navigateToCourseDetails(course._id)}>
+              <Image
+                src={course.image}
+                alt={course.title}
+                layout="fill"
+                objectFit="cover"
+                className="rounded-t-lg"
+              />
+            </div>
             {/* Card Content */}
             <div className="p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
@@ -123,6 +140,7 @@ const WhatToLearnNext = () => {
                     Add to cart
                   </button>
                   <button
+                    onClick={handleWishlist}
                     className="p-2 border border-purple-600 rounded-full hover:bg-purple-100 transition-colors"
                     aria-label="Add to Wishlist"
                   >

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const HeroSection = () => {
   return (
@@ -15,7 +16,7 @@ const HeroSection = () => {
           Gain new skills and knowledge from our expert-led courses.<br />
           Learn at your own pace, anytime and anywhere.
         </p>
-        <button className="flex items-center px-6 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+        <Link href={`/courses`} className="flex items-center px-6 py-3 bg-blue-500 w-44 text-white rounded-full hover:bg-blue-600 transition">
           Start learning
           <svg
             className="ml-2 w-5 h-5"
@@ -31,7 +32,7 @@ const HeroSection = () => {
               d="M9 5l7 7-7 7"
             />
           </svg>
-        </button>
+        </Link>
       </div>
 
       {/* Right Side: Image */}

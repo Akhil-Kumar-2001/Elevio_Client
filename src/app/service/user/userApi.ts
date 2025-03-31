@@ -2,7 +2,6 @@ import axios from "axios";
 import { basicType, EditStudentType, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import userAxiosInstance from "./userAxiosInstance";
-import exp from "constants";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -193,6 +192,43 @@ export const getCourses = async (page: number, limit: number) => {
         console.log("pagenation data",response.data)
         return response.data
     } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getPurchasedCourses = async (userId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/purchased-courses/${userId}`)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getCourseDetails = async (courseId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/getCourse/${courseId}`)
+        console.log(response)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getSectionsByCourse = async(courseId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/sections/${courseId}`)
+        return response.data
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getLecturesBySection = async(courseId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/lectures/${courseId}`)
+        return response.data
+    } catch (error:unknown) {
         handleAxiosError(error)
     }
 }

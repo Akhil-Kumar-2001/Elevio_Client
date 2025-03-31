@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
 import Navbar from '@/components/tutor/navbar';
 import axios from 'axios';

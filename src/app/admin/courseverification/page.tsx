@@ -61,6 +61,7 @@ const CourseVerification = () => {
         setTotalPages(Math.ceil(courseData.data.totalRecord / 5));
       }
     } catch (error) {
+      console.log(error)
       toast.error('Failed to fetch tutors');
     } finally {
       setLoading(false);

@@ -7,8 +7,6 @@ import {
   MessageSquare,
   Calendar,
   ChevronRight,
-  Bell,
-  Settings,
   LogOut,
   Edit,
   Lock,

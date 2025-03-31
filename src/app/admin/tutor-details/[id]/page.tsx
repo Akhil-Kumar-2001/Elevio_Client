@@ -2,11 +2,9 @@
 
 import AdminSidebar from "@/components/admin/adminsidebar";
 import { useParams } from 'next/navigation'
-import { CheckCircle, XCircle } from "lucide-react";
-import { approveTutorVerification, getTutor, rejectTutorVerification } from "@/app/service/admin/adminApi";
+import {  getTutor } from "@/app/service/admin/adminApi";
 import { useEffect, useState } from "react";
 import { Tutor } from "@/types/types";
-import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import VerificationModal from "@/components/admin/verificationConfirmModal";
 

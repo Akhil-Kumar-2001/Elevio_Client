@@ -4,7 +4,7 @@ import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
 import Table from '../../../components/tutor/tutorTable';
 import Pagination from '@/components/tutor/pagenation';
-import { Eye, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { getCourses, getCategories } from '@/app/service/tutor/tutorApi';
@@ -31,6 +31,7 @@ const Courses = () => {
         setCategories(response.data); 
       }
     } catch (error) {
+      console.log(error)
       toast.error('Failed to fetch categories');
     }
   };
@@ -49,6 +50,7 @@ const Courses = () => {
         setTotalPages(Math.ceil(response.data.totalRecord / 5));
       }
     } catch (error) {
+      console.log(error)
       toast.error('Failed to fetch courses');
     } finally {
       setLoading(false);

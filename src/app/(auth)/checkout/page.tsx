@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/cartStore";
 import useAuthStore from "@/store/userAuthStore"
 import { removeItem, createOrder, verifyPayment } from "@/app/service/user/userApi";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 
 interface RazorpayResponse {
@@ -134,12 +135,12 @@ const Checkout: React.FC = () => {
               response.razorpay_payment_id,
               response.razorpay_signature
             );
-            console.log("verification",verification)
+            console.log("verification", verification)
 
             if (verification.status === "success") {
               setCartItems([]); // Clear cart on success
               toast.success("Payment completed successfully!");
-               router.push("/cart");
+              router.push("/cart");
             } else {
               toast.error("Payment verification failed");
             }
@@ -186,13 +187,15 @@ const Checkout: React.FC = () => {
                 ) : (
                   cartItems.map((course, index) => (
                     <div key={index} className="flex items-center space-x-4">
-                      <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
-                        <img
+                      <div className="relative w-32 h-20">
+                        <Image
                           src={course.courseImage}
                           alt={course.courseTitle}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover rounded-lg"
                         />
                       </div>
+
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{course.courseTitle}</p>
                       </div>

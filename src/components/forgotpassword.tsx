@@ -45,6 +45,7 @@ const ForgotPassword: React.FC<ForgotPasswordPageProps> = ({ role }) => {
       toast.success(response.message)
       role === 'student'? router.push(`/forgototp?email=${response.email}`) : router.push(`/tutor/forgototp?email=${response.email}`) 
     } catch (error) {
+      console.log(error)
       setErrors('Failed to send reset link. Please try again.');
     } finally {
       setLoading(false);

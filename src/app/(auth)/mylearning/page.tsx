@@ -1,52 +1,56 @@
-// src/pages/Profile.jsx
 'use client'
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BookOpen, Clock, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/student/navbar';
 import Footer from '@/components/student/footer';
+import useAuthStore from '@/store/userAuthStore';
+import { ICourse } from '@/types/types';
+import { getPurchasedCourses } from '@/app/service/user/userApi';
+import Image from 'next/image';
 
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  progress: number;
-  duration: string;
-  rating: number;
-  image: string;
-}
+const MyLearning = () => {
+  const router = useRouter()
+  const [courses, setCourses] = useState<ICourse[]>([]);
+  const { user } = useAuthStore();
+  const userId = user?.id;
 
-const courses: Course[] = [
-  {
-    id: 1,
-    title: "Complete Web Development Course",
-    description: "Master modern web development with this comprehensive course covering HTML, CSS, JavaScript, and more.",
-    progress: 65,
-    duration: "48 hours",
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&q=80&w=400&h=300",
-  },
-  {
-    id: 2,
-    title: "Advanced JavaScript Masterclass",
-    description: "Deep dive into advanced JavaScript concepts, design patterns, and modern ES6+ features.",
-    progress: 30,
-    duration: "32 hours",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1579403124614-197f69d8187b?auto=format&fit=crop&q=80&w=400&h=300",
-  },
-  {
-    id: 3,
-    title: "UI/UX Design Fundamentals",
-    description: "Learn the principles of user interface and experience design to create beautiful, functional websites.",
-    progress: 15,
-    duration: "24 hours",
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&q=80&w=400&h=300",
-  },
-];
+  const purchasedCourses = async () => {
+    if (!userId) {
+      console.log("User id is not available");
+      return;
+    }
+    try {
+      const response = await getPurchasedCourses(userId);
+      if (response.success) {
+        setCourses(response.data);
+      }
+    } catch (error) {
+      console.log("Error while getting Purchased Courses:", error);
+    }
+  };
 
-const Profile = () => {
+  useEffect(() => {
+    purchasedCourses();
+  }, [userId]);
+
+  const NavigateToCourse = (courseId: string) => {
+    router.push(`/coursePreview/${courseId}`)
+  }
+
+  // Helper function to calculate rating (you might want to get this from backend)
+  const calculateRating = () => {
+    // This is a placeholder - ideally this should come from backend
+    return Math.random() * (5 - 4) + 4; // Random rating between 4 and 5
+  };
+
+  // Helper function to calculate progress (you might want to get this from backend)
+  const calculateProgress = () => {
+    // This is a placeholder - ideally this should come from backend
+    return Math.floor(Math.random() * 100); // Random progress between 0 and 100
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -61,71 +65,80 @@ const Profile = () => {
 
       {/* Main Content */}
       <main className="w-full px-16 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            >
-              {/* Image */}
-              <div className="relative h-48">
-                <img
-                  src={course.image}
-                  alt={course.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
-                  {course.progress}% Complete
+        {(courses ?? []).length === 0 ? (
+          <div className="text-center text-gray-600 py-10">
+            No courses purchased yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course) => (
+              <div
+                key={course._id}
+                className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              >
+                {/* Image */}
+                <div className="relative h-48">
+                  <Image
+                    src={course.imageThumbnail}
+                    alt={course.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }}
+                    className="rounded-t-lg"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                    {calculateProgress()}% Complete
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                    {course.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {course.description}
+                  </p>
+
+                  {/* Progress Bar */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs mb-2">
+                      <span className="text-gray-600 font-medium">Progress</span>
+                      <span className="font-semibold text-blue-600">
+                        {calculateProgress()}%
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-blue-700 rounded-full transition-all duration-500"
+                        style={{ width: `${calculateProgress()}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Course Stats */}
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span>{course.totalDuration} hours</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Star className="w-4 h-4 text-yellow-400" />
+                      <span>{calculateRating().toFixed(1)}</span>
+                    </div>
+                  </div>
+
+                  {/* Continue Learning Button */}
+                  <button onClick={() => NavigateToCourse(course._id)} className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-2 px-4 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-900 transition-all duration-300 flex items-center justify-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    Continue Learning
+                  </button>
                 </div>
               </div>
-
-              {/* Card Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
-                  {course.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {course.description}
-                </p>
-
-                {/* Progress Bar */}
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs mb-2">
-                    <span className="text-gray-600 font-medium">Progress</span>
-                    <span className="font-semibold text-blue-600">
-                      {course.progress}%
-                    </span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-blue-700 rounded-full transition-all duration-500"
-                      style={{ width: `${course.progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Course Stats */}
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <span>{course.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Star className="w-4 h-4 text-yellow-400" />
-                    <span>{course.rating}</span>
-                  </div>
-                </div>
-
-                {/* Continue Learning Button */}
-                <button className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-2 px-4 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-900 transition-all duration-300 flex items-center justify-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Continue Learning
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <Footer />
@@ -133,4 +146,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default MyLearning;

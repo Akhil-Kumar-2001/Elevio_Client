@@ -10,7 +10,6 @@ import useAuthStore from '@/store/tutorAuthStore';
 import { ISectionData, Lecture, Section } from '@/types/types';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Link from 'next/link';
 
 const CourseContentManager = () => {
   const router = useRouter();

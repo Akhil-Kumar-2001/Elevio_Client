@@ -67,6 +67,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
         ? router.push(`/otp?email=${response.email}`) 
         : router.push(`/tutor/otp?email=${response.email}`);
     } catch (error) {
+      console.log(error)
       setErrors({ general: 'Signup failed. Please try again.' });
     } finally {
       setLoading(false);

@@ -62,6 +62,7 @@ const ResetPasswordPage: React.FC = () => {
                 router.back();
             }
         } catch (error) {
+            console.log(error)
             setErrors('Failed to reset password. Please try again.');
         } finally {
             setLoading(false);

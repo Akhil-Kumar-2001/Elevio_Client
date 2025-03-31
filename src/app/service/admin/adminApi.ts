@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, userType } from "@/types/types";
+import {  userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import adminAxiosInstance from "./adminAxiosInstance";
 

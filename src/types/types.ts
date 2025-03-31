@@ -115,6 +115,7 @@ export interface ICourse {
   subtitle: string;
   description: string;
   category: string;
+  purchasedStudents:string[];
   totalDuration: number;
   totalLectures: number;
   totalSections: number;
@@ -177,6 +178,7 @@ export interface ISection {
   order: number;
   totalLectures?: number;
   totalDuration?: number;
+  lectures?: ILecture[];
   isPublished?: boolean;
 }
 
