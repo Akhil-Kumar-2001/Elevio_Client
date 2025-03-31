@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  userType } from "@/types/types";
+import { SubscriptionType, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import adminAxiosInstance from "./adminAxiosInstance";
 
@@ -13,34 +13,34 @@ export const handleAxiosError = (error: unknown) => {
         console.error("Unexpected error:", error);
         toast.error("Something went wrong. Please try again.");
     }
-  };
+};
 
 
-export const adminSignin = async(userData:userType) => {
-    try{
-        const response = await axios.post(`${API_URI}/admin/signin`,{...userData},{withCredentials:true})
+export const adminSignin = async (userData: userType) => {
+    try {
+        const response = await axios.post(`${API_URI}/admin/signin`, { ...userData }, { withCredentials: true })
         return response.data
-    } catch(error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getStudents = async() =>{
+export const getStudents = async () => {
     try {
-        const students = await adminAxiosInstance.get(`${API_URI}/admin/getstudents`,{withCredentials:true})
+        const students = await adminAxiosInstance.get(`${API_URI}/admin/getstudents`, { withCredentials: true })
         console.log(students)
         return students.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getTutors = async() =>{
+export const getTutors = async () => {
     try {
-        const tutors = await adminAxiosInstance.get(`${API_URI}/admin/gettutors`,{withCredentials:true})
+        const tutors = await adminAxiosInstance.get(`${API_URI}/admin/gettutors`, { withCredentials: true })
         console.log(tutors)
         return tutors.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -63,12 +63,12 @@ export const updateStudentStatus = async (id: string) => {
     }
 };
 
-export const getPendingTutors = async () =>{
+export const getPendingTutors = async () => {
     try {
         const response = await adminAxiosInstance.get(`/admin/pending-tutor`)
-        console.log("Pending Tutors ===>>>>>",response)
+        console.log("Pending Tutors ===>>>>>", response)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -77,35 +77,35 @@ export const getTutor = async (id: string) => {
     try {
         console.log("I enter here")
         const response = await adminAxiosInstance.get(`/admin/get-tutor/${id}`);
-        console.log("this is tutor detail pending",response.data)
+        console.log("this is tutor detail pending", response.data)
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 };
 
-export const rejectTutorVerification = async(id:string) =>{
+export const rejectTutorVerification = async (id: string) => {
     try {
-        const response = await adminAxiosInstance.patch(`/admin/reject-tutor`,{id})
+        const response = await adminAxiosInstance.patch(`/admin/reject-tutor`, { id })
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
-export const approveTutorVerification = async(id:string) =>{
+export const approveTutorVerification = async (id: string) => {
     try {
-        const response = await adminAxiosInstance.patch(`/admin/approve-tutor`,{id})
+        const response = await adminAxiosInstance.patch(`/admin/approve-tutor`, { id })
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const createCategory = async(name:string) =>{
+export const createCategory = async (name: string) => {
     try {
-        const response = await adminAxiosInstance.post(`/admin/create-category`,{name});
+        const response = await adminAxiosInstance.post(`/admin/create-category`, { name });
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -135,19 +135,19 @@ export const updateCategoryStatus = async (id: string) => {
 
 export const deleteCategory = async (id: string) => {
     try {
-        const response = await adminAxiosInstance.delete(`/admin/delete-category`,{ data: { id } });
+        const response = await adminAxiosInstance.delete(`/admin/delete-category`, { data: { id } });
         return await response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 };
 
-export const getPendingCourses = async(page: number, limit: number) =>{
+export const getPendingCourses = async (page: number, limit: number) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/pending-course?page=${page}&limit=${limit}`);
         console.log(response)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -161,48 +161,94 @@ export const getCategory = async () => {
     }
 }
 
-export const getCourseDetails = async(id:string) =>{
+export const getCourseDetails = async (id: string) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/course-details/${id}`)
-        console.log("course details",response)
+        console.log("course details", response)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getSectionsByCourse = async(id:string) =>{
+export const getSectionsByCourse = async (id: string) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/sections/${id}`)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getLecturesBySection = async(id:string) =>{
+export const getLecturesBySection = async (id: string) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/lectures/${id}`)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const rejectCourseVerification = async(courseId:string,tutorId:string,reason:string)=>{
+export const rejectCourseVerification = async (courseId: string, tutorId: string, reason: string) => {
     try {
-        const response = await adminAxiosInstance.patch(`/admin/reject-course/${courseId}`,{tutorId,reason});
+        const response = await adminAxiosInstance.patch(`/admin/reject-course/${courseId}`, { tutorId, reason });
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
-export const approveCourseVerification = async(courseId:string)=>{
+export const approveCourseVerification = async (courseId: string) => {
     try {
         const response = await adminAxiosInstance.patch(`/admin/approve-course/${courseId}`);
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
+// Get all subscriptions
+export const getSubscriptions = async () => {
+    try {
+      const response = await adminAxiosInstance.get(`/admin/subscriptions`);
+      return response.data;
+    } catch (error: unknown) {
+      return handleAxiosError(error);
+    }
+  };
+  
+  // Create a new subscription
+  export const createSubscription = async (subscriptionData: SubscriptionType) => {
+    try {
+      console.log("Creating new subscription:", subscriptionData);
+      const response = await adminAxiosInstance.post(`/admin/subscriptions`, subscriptionData);
+      toast.success("Subscription plan created successfully");
+      return response.data;
+    } catch (error: unknown) {
+      return handleAxiosError(error);
+    }
+  };
+  
+  // Update an existing subscription
+  export const updateSubscription = async (id: string, subscriptionData: Partial<SubscriptionType>) => {
+    try {
+        console.log("update data",id,subscriptionData)
+      const response = await adminAxiosInstance.patch(`/admin/subscriptions`, subscriptionData);
+      toast.success("Subscription plan updated successfully");
+      return response.data;
+    } catch (error: unknown) {
+      handleAxiosError(error);
+    }
+  };
+  
+  // Delete a subscription
+  export const deleteSubscription = async (id: string) => {
+    try {
+      console.log("Deleting subscription with ID:", id);
+      const response = await adminAxiosInstance.delete(`/admin/subscriptions/${id}`);
+      toast.success("Subscription plan deleted successfully");
+      return response.data;
+    } catch (error: unknown) {
+      handleAxiosError(error);
+    }
+  };
+  

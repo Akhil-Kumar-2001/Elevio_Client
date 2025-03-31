@@ -115,7 +115,7 @@ export interface ICourse {
   subtitle: string;
   description: string;
   category: string;
-  purchasedStudents:string[];
+  purchasedStudents: string[];
   totalDuration: number;
   totalLectures: number;
   totalSections: number;
@@ -197,8 +197,8 @@ export interface FrontendCourse {
 }
 
 export interface EditStudentType {
-  username:string;
-  profilePicture:string | null;
+  username: string;
+  profilePicture: string | null;
 }
 
 export interface CartItem {
@@ -209,4 +209,38 @@ export interface CartItem {
   courseDuration: number;
   courseLectures: number;
   courseImage: string;
+}
+
+export interface SubscriptionType {
+  _id?: string; 
+  planName: string;
+  duration: {
+    value: number;
+    unit: 'day' | 'month' | 'quarter' | 'year';
+  };
+  price: number;
+  features: string[];
+  status: boolean;
+}
+
+// Define the interface for subscription plan
+export interface Duration {
+  value: number;
+  unit: 'day' | 'month' | 'quarter' | 'year';
+}
+
+export interface SubscriptionPlan {
+  id?: string;
+  planName: string;
+  duration: Duration;
+  price: number;
+  features: string[];
+  status: boolean;
+}
+
+export interface SubscriptionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (subscription: SubscriptionType) => void;
+  initialData: SubscriptionType | null;
 }
