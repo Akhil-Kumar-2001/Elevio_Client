@@ -9,6 +9,7 @@ export const handleAxiosError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
         console.log("Axios Error:", error.response?.data?.message);
         toast.error(error.response?.data?.message);
+        return
     } else {
         console.error("Unexpected error:", error);
         toast.error("Something went wrong. Please try again.");
@@ -152,7 +153,7 @@ export const removeItem = async (id: string, studentId: string) => {
     }
 }
 
-export const createOrder = async (studentId:string,amount: number,courseIds: string[]) => {
+export const createOrder = async (studentId:string,amount: number,courseIds: string[] | string) => {
     try {
         console.log("create order",amount,courseIds)
         const response = await userAxiosInstance.post('/student/payment/create-order', { studentId,amount,courseIds });
@@ -232,3 +233,34 @@ export const getLecturesBySection = async(courseId:string) =>{
         handleAxiosError(error)
     }
 }
+
+export const getSubscriptions = async() =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/subscription`);
+        console.log("get response",response.data)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const createSubscritionOrder = async (studentId:string,amount: number,planId: string) => {
+    try {
+        console.log("create order",amount,planId)
+        const response = await userAxiosInstance.post('/student/subscription/create-order', { studentId,amount,planId });
+        console.log("order created",response)
+        return response.data; // { id, amount, currency }
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+};
+
+export const verifySubscritionPayment = async (razorpay_order_id: string, razorpay_payment_id: string, razorpay_signature: string) => {
+    try {
+        console.log("verification test",razorpay_order_id,razorpay_payment_id,razorpay_signature)
+        const response = await userAxiosInstance.post('/student/subscription/verify-payment', { razorpay_order_id, razorpay_payment_id, razorpay_signature });
+        return response.data; // { status: 'success' | 'failure', error? }
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+};
