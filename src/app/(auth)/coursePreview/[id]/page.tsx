@@ -280,9 +280,9 @@ const CoursePreview = () => {
 
   // Format price for display
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
@@ -612,7 +612,7 @@ const CoursePreview = () => {
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-xs text-gray-600">Original price</p>
                   <div className="text-sm text-gray-500 line-through">
-                    {formatPrice(course.price)}
+                    {formatPrice((course.price * 2)+1)}
                   </div>
                 </div>
               )}

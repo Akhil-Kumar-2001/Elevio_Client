@@ -479,13 +479,13 @@ const Courses = () => {
           ))}
         </div>
 
-        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
-
         {filterCourses().length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No courses match your filters.</p>
           </div>
         )}
+        <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
+
       </div>
     </div>
   );

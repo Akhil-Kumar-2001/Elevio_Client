@@ -117,6 +117,15 @@ export const getStudent = async (id: string) => {
     }
 }
 
+export const getSubscription = async (id: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/student/get-subscription-details/${id}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
 export const updateStudent = async (id: string, formData: EditStudentType) => {
     try {
         const response = await userAxiosInstance.patch(`/student/edit-profile/${id}`, { formData });
@@ -153,10 +162,10 @@ export const removeItem = async (id: string, studentId: string) => {
     }
 }
 
-export const createOrder = async (studentId:string,amount: number,courseIds: string[] | string) => {
+export const createOrder = async (studentId: string, amount: number, courseIds: string[] | string) => {
     try {
-        console.log("create order",amount,courseIds)
-        const response = await userAxiosInstance.post('/student/payment/create-order', { studentId,amount,courseIds });
+        console.log("create order", amount, courseIds)
+        const response = await userAxiosInstance.post('/student/payment/create-order', { studentId, amount, courseIds });
         return response.data; // { id, amount, currency }
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -172,11 +181,11 @@ export const verifyPayment = async (razorpay_order_id: string, razorpay_payment_
     }
 };
 
-export const getCategories = async() =>{
+export const getCategories = async () => {
     try {
         const response = await userAxiosInstance.get('/student/getcategories');
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -188,67 +197,67 @@ export const getCourses = async (page: number, limit: number) => {
                 page,
                 limit
             }
-        });        
+        });
 
-        console.log("pagenation data",response.data)
+        console.log("pagenation data", response.data)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getPurchasedCourses = async (userId:string) =>{
+export const getPurchasedCourses = async (userId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/purchased-courses/${userId}`)
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getCourseDetails = async (courseId:string) =>{
+export const getCourseDetails = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/getCourse/${courseId}`)
         console.log(response)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getSectionsByCourse = async(courseId:string) =>{
+export const getSectionsByCourse = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/sections/${courseId}`)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getLecturesBySection = async(courseId:string) =>{
+export const getLecturesBySection = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/lectures/${courseId}`)
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getSubscriptions = async() =>{
+export const getSubscriptions = async () => {
     try {
         const response = await userAxiosInstance.get(`/student/subscription`);
-        console.log("get response",response.data)
+        console.log("get response", response.data)
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const createSubscritionOrder = async (studentId:string,amount: number,planId: string) => {
+export const createSubscritionOrder = async (studentId: string, amount: number, planId: string) => {
     try {
-        console.log("create order",amount,planId)
-        const response = await userAxiosInstance.post('/student/subscription/create-order', { studentId,amount,planId });
-        console.log("order created",response)
+        console.log("create order", amount, planId)
+        const response = await userAxiosInstance.post('/student/subscription/create-order', { studentId, amount, planId });
+        console.log("order created", response)
         return response.data; // { id, amount, currency }
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -257,7 +266,7 @@ export const createSubscritionOrder = async (studentId:string,amount: number,pla
 
 export const verifySubscritionPayment = async (razorpay_order_id: string, razorpay_payment_id: string, razorpay_signature: string) => {
     try {
-        console.log("verification test",razorpay_order_id,razorpay_payment_id,razorpay_signature)
+        console.log("verification test", razorpay_order_id, razorpay_payment_id, razorpay_signature)
         const response = await userAxiosInstance.post('/student/subscription/verify-payment', { razorpay_order_id, razorpay_payment_id, razorpay_signature });
         return response.data; // { status: 'success' | 'failure', error? }
     } catch (error: unknown) {

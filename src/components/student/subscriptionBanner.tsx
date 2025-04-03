@@ -1,5 +1,6 @@
 // src/components/student/subscriptionBanner.jsx
 
+import Link from 'next/link';
 import React from 'react';
 
 const SubscriptionBanner = () => {
@@ -15,9 +16,9 @@ const SubscriptionBanner = () => {
         </div>
 
         {/* Right Side: Button */}
-        <button className="bg-white text-gray-900 font-medium py-2 px-4 rounded-full hover:bg-gray-200 transition duration-300">
+        <Link href={`/subscription`} className="bg-white text-gray-900 font-medium py-2 px-4 rounded-full hover:bg-gray-200 transition duration-300">
           Subscribe Now
-        </button>
+        </Link>
       </div>
     </div>
   );
