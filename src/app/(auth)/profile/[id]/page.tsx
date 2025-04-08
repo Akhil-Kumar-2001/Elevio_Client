@@ -22,6 +22,7 @@ import Navbar from '@/components/student/navbar';
 import { toast } from 'react-toastify';
 import { getStudent, getSubscription, updateStudent } from '@/app/service/user/userApi';
 import Spinner from '@/components/spinner';
+import Link from 'next/link';
 
 // Define the Student interface
 interface Student {
@@ -437,7 +438,7 @@ const Profile = () => {
                 <span className="text-2xl font-bold text-green-600">{completedCourses}</span>
               </div>
             </div>
-            <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl shadow-sm">
+            <Link href={`/chat`} className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="bg-purple-200 p-2 rounded-lg">
@@ -447,7 +448,7 @@ const Profile = () => {
                 </div>
                 <span className="text-2xl font-bold text-purple-600">{messages}</span>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
 

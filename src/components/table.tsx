@@ -67,11 +67,11 @@ const Table: React.FC<TableProps> = ({
                         onClick={() => onBlockUser(row._id, row.status)}
                         className={`transition transform hover:scale-110 ${
                           row.status === -1
-                            ? "text-green-400 drop-shadow-[0_0_8px_#00ff00]" // Green glow when unblocked
-                            : "text-red-400 drop-shadow-[0_0_8px_#8b0000]"  // Red glow when blocked
+                            ? "text-red-400 drop-shadow-[0_0_8px_#8b0000]" // Red glow when unblocked (click to block)
+                            : "text-green-400 drop-shadow-[0_0_8px_#00ff00]" // Green glow when blocked (click to unblock)
                         }`}
                       >
-                        {row.status === -1 ? <Unlock size={22} /> : <Lock size={22} />}
+                        {row.status === -1 ? <Lock size={22} /> : <Unlock size={22} />}
                       </button>
                     )}
 
@@ -103,7 +103,6 @@ const Table: React.FC<TableProps> = ({
                         <Eye size={22} />
                       </button>
                     )}
-
                   </td>
                 )}
               </tr>
@@ -120,5 +119,4 @@ const Table: React.FC<TableProps> = ({
     </div>
   );
 };
-
 export default Table;

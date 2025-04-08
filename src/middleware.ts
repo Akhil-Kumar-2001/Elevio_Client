@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
-  const refreshToken = req.cookies.get('refreshToken')?.value;
+  const refreshToken = req.cookies.get('refreshToken')?.value; 
   const adminRefreshToken = req.cookies.get('admin-refreshToken')?.value;
 
   let role = null;

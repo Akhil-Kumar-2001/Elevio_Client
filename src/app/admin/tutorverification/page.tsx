@@ -6,21 +6,24 @@ import Table from '../../../components/table';
 import { getPendingTutors, } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/admin/adminsidebar';
 import { useRouter } from 'next/navigation';
+import Pagination from '@/components/admin/paginaiton';
 
 
 const TutorManagement = () => {
-  const router= useRouter()
+  const router = useRouter()
   interface TutorType {
     _id: string;
     username: string;
     email: string;
     status: number;
-    role:string;
-    createdAt:string;
-}
+    role: string;
+    createdAt: string;
+  }
 
   const [tutors, setTutors] = useState<TutorType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1);
 
   const tableColumn = [
     { header: "Name", field: "username" },
@@ -32,9 +35,10 @@ const TutorManagement = () => {
   const fetchTutors = async () => {
     setLoading(true);
     try {
-      const tutorData = await getPendingTutors();
+      const tutorData = await getPendingTutors(currentPage, 5);
       if (tutorData && tutorData.success) {
-        setTutors(tutorData.data);
+        setTutors(tutorData.data.tutors);
+        setTotalPages(Math.ceil(tutorData.data.totalRecord / 5));
       }
     } catch (error) {
       console.log(error)
@@ -44,9 +48,9 @@ const TutorManagement = () => {
     }
   };
 
-const viewProfile = (tutorId: string)=>{
-  router.push(`/admin/tutor-details/${tutorId}`)
-}
+  const viewProfile = (tutorId: string) => {
+    router.push(`/admin/tutor-details/${tutorId}`)
+  }
 
   useEffect(() => {
     fetchTutors();
@@ -61,9 +65,9 @@ const viewProfile = (tutorId: string)=>{
 
       <div className="flex flex-1 overflow-hidden">
 
-      <div>
-        <AdminSidebar />
-      </div>
+        <div>
+          <AdminSidebar />
+        </div>
 
         <div className="flex-1 bg-black text-white overflow-auto">
           <div className="p-8">
@@ -74,12 +78,13 @@ const viewProfile = (tutorId: string)=>{
               {loading && <div className="text-gray-400">Loading...</div>}
             </div>
 
-            <Table 
-              columnArray={tableColumn} 
-              dataArray={tutors} 
+            <Table
+              columnArray={tableColumn}
+              dataArray={tutors}
               pageRole={'tutor-profile'}
               pageFunction={viewProfile}
             />
+             <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
           </div>
         </div>
       </div>

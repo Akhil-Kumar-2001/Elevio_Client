@@ -6,6 +6,7 @@ import Table from '../../../components/table';
 import { getTutors, updateTutorStatus } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/admin/adminsidebar';
 import ConfirmModal from '@/components/admin/confirmModal';
+import Pagination from '@/components/admin/paginaiton';
 
 const TutorManagement = () => {
   interface TutorType {
@@ -21,6 +22,8 @@ const TutorManagement = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTutor, setSelectedTutor] = useState<{ id: string, status: number } | null>(null);
+  const [totalPages, setTotalPages] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1);
 
   const tableColumn = [
     { header: "Name", field: "username" },
@@ -32,9 +35,10 @@ const TutorManagement = () => {
   const fetchTutors = async () => {
     setLoading(true);
     try {
-      const tutorData = await getTutors();
+      const tutorData = await getTutors(currentPage, 5);
       if (tutorData && tutorData.success) {
-        setTutors(tutorData.data);
+        setTutors(tutorData.data.tutors);
+        setTotalPages(Math.ceil(tutorData.data.totalRecord / 5));
       }
     } catch (error) {
       toast.error('Failed to fetch tutors');
@@ -51,14 +55,14 @@ const TutorManagement = () => {
 
   const handleBlockUnblockUser = async () => {
     if (!selectedTutor) return;
-    
+
     try {
       const newStatus = selectedTutor.status === 1 ? -1 : 1;
       const response = await updateTutorStatus(selectedTutor.id);
-      
+
       if (response && response.success) {
         toast.success(newStatus === 1 ? 'Tutor unblocked successfully' : 'Tutor blocked successfully');
-        setTutors(tutors.map(tutor => 
+        setTutors(tutors.map(tutor =>
           tutor._id === selectedTutor.id ? { ...tutor, status: newStatus } : tutor
         ));
       }
@@ -100,9 +104,9 @@ const TutorManagement = () => {
               {loading && <div className="text-gray-400">Loading...</div>}
             </div>
 
-            <Table 
-              columnArray={tableColumn} 
-              dataArray={tutors} 
+            <Table
+              columnArray={tableColumn}
+              dataArray={tutors}
               actions={true}
               onBlockUser={(userId, currentStatus) => openConfirmModal(userId, currentStatus)}
             />
@@ -115,6 +119,7 @@ const TutorManagement = () => {
               message={modalMessage}
               confirmText={modalConfirmText}
             />
+            <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
           </div>
         </div>
       </div>

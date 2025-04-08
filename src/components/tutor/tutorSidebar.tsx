@@ -13,7 +13,7 @@ const menuItems = [
   { name: "Dashboard", icon: FiGrid, path: "/tutor/dashboard" },
   { name: "Course", icon: FiFileText, path: "/tutor/courses" },
   { name: "Students", icon: FiUsers, path: "/tutor/students" },
-  { name: "Message", icon: FiMessageSquare, path: "/tutor/messages" },
+  { name: "Message", icon: FiMessageSquare, path: "/tutor/chat" },
   { name: "Earning", icon: FiDollarSign, path: "/tutor/earnings" },
   { name: "Scheduled session", icon: FiCalendar, path: "/tutor/sessions" },
 ];

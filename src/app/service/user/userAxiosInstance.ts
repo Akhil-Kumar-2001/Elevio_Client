@@ -54,7 +54,6 @@ const refreshAccessToken = async (): Promise<string | null> => {
       
       // Get the current user from the store
       const user = useAuthStore.getState().user;
-      console.log("user in axios instance",user)
       
       // Update the store with the new token
       useAuthStore.getState().saveUserDetails({user: user as User , accessToken:newAccessToken});

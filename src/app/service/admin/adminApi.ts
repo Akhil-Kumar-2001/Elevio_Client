@@ -25,9 +25,9 @@ export const adminSignin = async (userData: userType) => {
     }
 }
 
-export const getStudents = async () => {
+export const getStudents = async (page:number,limit:number) => {
     try {
-        const students = await adminAxiosInstance.get(`${API_URI}/admin/getstudents`, { withCredentials: true })
+        const students = await adminAxiosInstance.get(`admin/getstudents?page=${page}&limit=${limit}`)
         console.log(students)
         return students.data
     } catch (error: unknown) {
@@ -35,9 +35,9 @@ export const getStudents = async () => {
     }
 }
 
-export const getTutors = async () => {
+export const getTutors = async (page:number,limit:number) => {
     try {
-        const tutors = await adminAxiosInstance.get(`${API_URI}/admin/gettutors`, { withCredentials: true })
+        const tutors = await adminAxiosInstance.get(`/admin/gettutors?page=${page}&limit=${limit}`)
         console.log(tutors)
         return tutors.data
     } catch (error: unknown) {
@@ -56,16 +56,16 @@ export const updateTutorStatus = async (id: string) => {
 
 export const updateStudentStatus = async (id: string) => {
     try {
-        const response = await adminAxiosInstance.patch(`${API_URI}/admin/updatestudentstatus`, { id, status }, { withCredentials: true });
+        const response = await adminAxiosInstance.patch(`/admin/updatestudentstatus`, { id, status });
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error);
     }
 };
 
-export const getPendingTutors = async () => {
+export const getPendingTutors = async (page:number,limit:number) => {
     try {
-        const response = await adminAxiosInstance.get(`/admin/pending-tutor`)
+        const response = await adminAxiosInstance.get(`/admin/pending-tutor?page=${page}&limit=${limit}`)
         console.log("Pending Tutors ===>>>>>", response)
         return response.data
     } catch (error: unknown) {
@@ -207,9 +207,9 @@ export const approveCourseVerification = async (courseId: string) => {
 }
 
 // Get all subscriptions
-export const getSubscriptions = async () => {
+export const getSubscriptions = async (page:number,limit:number) => {
     try {
-      const response = await adminAxiosInstance.get(`/admin/subscriptions`);
+      const response = await adminAxiosInstance.get(`/admin/subscriptions?page=${page}&limit=${limit}`);
       return response.data;
     } catch (error: unknown) {
       return handleAxiosError(error);

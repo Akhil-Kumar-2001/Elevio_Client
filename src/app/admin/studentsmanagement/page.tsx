@@ -6,6 +6,8 @@ import Table from '../../../components/table';
 import { getStudents, updateStudentStatus } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/admin/adminsidebar';
 import ConfirmModal from '@/components/admin/confirmModal';
+import Pagination from '@/components/admin/paginaiton';
+
 
 const StudentsManagement = () => {
   interface StudentType {
@@ -16,11 +18,13 @@ const StudentsManagement = () => {
     role: string;
     createdAt: string;
   }
-  
+
   const [students, setStudents] = useState<StudentType[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<{ id: string, status: number } | null>(null);
+  const [totalPages, setTotalPages] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1);
 
   const tableColumn = [
     { header: "Name", field: "username" },
@@ -32,9 +36,10 @@ const StudentsManagement = () => {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const studentData = await getStudents();
+      const studentData = await getStudents(currentPage, 5);
       if (studentData && studentData.success) {
-        setStudents(studentData.data);
+        setStudents(studentData.data.students);
+        setTotalPages(Math.ceil(studentData.data.totalRecord / 5));
       }
     } catch (error) {
       toast.error('Failed to fetch students');
@@ -51,14 +56,14 @@ const StudentsManagement = () => {
 
   const handleBlockUnblockUser = async () => {
     if (!selectedStudent) return;
-    
+
     try {
       const response = await updateStudentStatus(selectedStudent.id);
-      
+
       if (response && response.success) {
         const newStatus = selectedStudent.status === 1 ? -1 : 1;
         toast.success(newStatus === 1 ? 'Student unblocked successfully' : 'Student blocked successfully');
-        setStudents(students.map(student => 
+        setStudents(students.map(student =>
           student._id === selectedStudent.id ? { ...student, status: newStatus } : student
         ));
       }
@@ -98,12 +103,13 @@ const StudentsManagement = () => {
               {loading && <div className="text-gray-400">Loading...</div>}
             </div>
 
-            <Table 
-              columnArray={tableColumn} 
-              dataArray={students} 
+            <Table
+              columnArray={tableColumn}
+              dataArray={students}
               actions={true}
               onBlockUser={(userId, currentStatus) => openConfirmModal(userId, currentStatus)}
             />
+            <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
 
             <ConfirmModal
               isOpen={modalOpen}

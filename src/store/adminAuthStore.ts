@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import adminAxiosInstance from '@/app/service/admin/adminAxiosInstance';
 export interface User {
-  id: string;
+  email: string;
   role: string;
 }
 

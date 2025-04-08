@@ -244,3 +244,11 @@ export interface SubscriptionModalProps {
   onSave: (subscription: SubscriptionType) => void;
   initialData: SubscriptionType | null;
 }
+
+export type UserMinimal = {
+  _id: string;
+  username: string;
+  profilePicture?: string;
+  role: "Student" | "Tutor";
+};
+
