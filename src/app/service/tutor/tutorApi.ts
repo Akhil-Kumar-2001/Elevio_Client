@@ -2,6 +2,7 @@ import axios from "axios";
 import { basicType, Course, CourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
+import exp from "node:constants";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -10,7 +11,6 @@ export const handleAxiosError = (error: unknown) => {
         console.log("Axios Error:", error.response?.data?.message);
         toast.error(error.response?.data?.message);
     } else {
-        // console.error("Unexpected error:", error);
         toast.error("Something went wrong. Please try again.");
     }
 };
@@ -43,7 +43,7 @@ export const resendOtp = async (email: string) => {
     try {
         const response = await axios.post(`${API_URI}/tutor/resend-otp`, { email })
         return response;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -110,7 +110,7 @@ export const getTutor = async (id: string) => {
     try {
         const response = await userAxiosInstance.get(`/tutor/get-tutor/${id}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 };
@@ -153,16 +153,16 @@ export const createCourse = async (courseData: CourseData) => {
 }
 
 
-export const getCourses = async (tutorId:string,page: number, limit: number) => {
+export const getCourses = async (tutorId: string, page: number, limit: number) => {
     try {
-        console.log("Tutor id in courses",tutorId)
+        console.log("Tutor id in courses", tutorId)
         const response = await userAxiosInstance.get(`/tutor/courses`, {
             params: {
-                tutorId, 
+                tutorId,
                 page,
                 limit
             }
-        });        return response.data
+        }); return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
     }
@@ -229,29 +229,27 @@ export const getLecturesBySection = async (sectionId: string) => {
 
 export const updateSection = async (sectionId: string, data: ISectionData) => {
     try {
-        console.log("==========>",data)
-        const response = await userAxiosInstance.patch(`/tutor/edit-sections/${sectionId}`,data)
+        const response = await userAxiosInstance.patch(`/tutor/edit-sections/${sectionId}`, data)
         return response.data;
-    }catch(error:unknown){
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
-  };
+};
 
 export const deleteSection = async (sectionId: string) => {
     try {
         const response = await userAxiosInstance.delete(`/tutor/delete-sections/${sectionId}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 };
 
 export const updateLecture = async (lectureId: string, data: { title: string }) => {
     try {
-        console.log("this is from the lecture update api",lectureId,data)
-        const response = await userAxiosInstance.patch(`/tutor/edit-lecture/${lectureId}`,data);
+        const response = await userAxiosInstance.patch(`/tutor/edit-lecture/${lectureId}`, data);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error);
     }
 };
@@ -260,30 +258,46 @@ export const deleteLecture = async (lectureId: string) => {
     try {
         const response = await userAxiosInstance.delete(`/tutor/delete-lecture/${lectureId}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 };
 
 export const uploadLectureVideo = async (formData: FormData): Promise<{ videoUrl: string }> => {
     try {
-      const response = await userAxiosInstance.post('/tutor/lectures/upload-video', formData,);
-      return response.data; // Expecting { videoUrl: string }
-    } catch (error:unknown) {
+        const response = await userAxiosInstance.post('/tutor/lectures/upload-video', formData,);
+        return response.data; // Expecting { videoUrl: string }
+    } catch (error: unknown) {
         handleAxiosError(error)
         return { videoUrl: '' };
     }
-  };
+};
 
-  export const applyReview = async(courseId:string)=>{
+export const applyReview = async (courseId: string) => {
     try {
-        console.log("coure id for review",courseId)
-        const response = await userAxiosInstance.patch('/tutor/apply-review',{courseId});
+        const response = await userAxiosInstance.patch('/tutor/apply-review', { courseId });
         return response.data
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
+    }
+}
+
+export const getNotifications = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/notifications`);
+        return response.data;
+    }catch(error:unknown){
+        handleAxiosError(error);
     }
   }
 
+  export const readNotification = async (id:string) => {
+    try {
+        const response = await userAxiosInstance.patch(`/tutor/notifications/${id}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error);
+    }
+  }
 
 
