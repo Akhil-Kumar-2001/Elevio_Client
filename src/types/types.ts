@@ -252,3 +252,13 @@ export type UserMinimal = {
   role: "Student" | "Tutor";
 };
 
+export interface NotificationType {
+  _id: string;
+  content: string;
+  createdAt: string;
+  isRead: boolean;
+  receiverId: string;
+  updatedAt: string;
+  __v: number;
+}
+

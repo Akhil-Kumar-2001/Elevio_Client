@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import userAuthStore from "@/store/userAuthStore";
 import tutorAuthStore from "@/store/tutorAuthStore";
+import adminAuthStore from "@/store/adminAuthStore";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 
@@ -20,10 +21,10 @@ export const useSocketContext = () => {
 export const SocketContextProvider = ({ children }: { children: ReactNode }) => {
   const tutor = tutorAuthStore();
   const student = userAuthStore();
+  const admin = adminAuthStore();
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
   const [onlineUser, setOnlineUser] = useState<any[]>([]);
-  const userId = tutor.user?.id || student.user?.id;
-
+  const userId = tutor.user?.id || student.user?.id || admin.user?.id;
   useEffect(() => {
     if (!userId) {
       if (socket) {
