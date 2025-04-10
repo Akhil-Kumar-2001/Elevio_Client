@@ -7,6 +7,7 @@ interface Message {
   createdAt: string;
   senderId: string;
   receiverId: string;
+  imageUrl?: string;
 }
 
 interface ConversationState {

@@ -33,15 +33,27 @@ export const createChat = async (id:string) =>{
     }
 }
 
-export const sendMessage = async(reciverId:string,message:string,role:string) =>{
+
+// chatService.ts
+export const sendMessage = async (
+    receiverId: string,
+    message: string,
+    role: string,
+    imageUrl?: string
+  ) => {
+    console.log("Image url",imageUrl)
     try {
-        const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
-        const response = await axiosInstance.post(`/chat/send/${reciverId}`,{message});
-        return response.data
-    } catch (error:unknown) {
-        handleAxiosError(error)
+      const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
+      const response = await axiosInstance.post(`/chat/send/${receiverId}`, {
+        message,
+        imageUrl // Add imageUrl to the request payload
+      });
+      return response.data;
+    } catch (error: unknown) {
+      handleAxiosError(error);
+      throw error; // Re-throw the error so the calling function can handle it
     }
-}
+  };
 
 export const getMessages = async(reciverId:string,role:string) =>{
     try {
