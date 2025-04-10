@@ -49,7 +49,7 @@ const ProfileSettings = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // Hardcoded Cloudinary cloud name
-  const CLOUDINARY_CLOUD_NAME = "dhhzuean5";
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   useEffect(() => {
     const fetchTutorDetails = async () => {
@@ -94,12 +94,12 @@ const ProfileSettings = () => {
       // Create a FormData instance
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "tutor_documents"); 
+      formData.append("upload_preset", "Profile_Picture"); 
       formData.append("folder", "tutor_profiles"); 
 
       // Upload to Cloudinary
       const uploadResponse = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
         formData,
         {
           onUploadProgress: (progressEvent) => {

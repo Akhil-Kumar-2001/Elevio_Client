@@ -80,9 +80,8 @@ const Courses = () => {
     try {
       const response = await getCourses(currentPage, 8);
       if (response) {
-        setTotalPages(Math.ceil(response.data.totalRecord / 5));
+        setTotalPages(Math.floor(response.data.totalRecord / 5));
       }
-      console.log("course data in the component:", response);
 
       const mappedCourses: ExtendedFrontendCourse[] = response.data.courses.map((course: any) => {
         // Find category name by matching category ID

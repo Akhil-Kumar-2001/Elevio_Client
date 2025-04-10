@@ -17,13 +17,12 @@ const Subscription = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasSubscriptions, setHasSubscriptions] = useState(false); // Track if any subscriptions exist
-  const itemsPerPage = 3;
 
   // Fetch subscriptions from the backend
-  const fetchSubscriptionData = async (page: number = currentPage) => {
+  const fetchSubscriptionData = async () => {
     try {
       setIsLoading(true);
-      const data = await getSubscriptions(page, itemsPerPage);
+      const data = await getSubscriptions(currentPage, 3);
 
       if (data && data.data) {
         const fetchedSubscriptions = data.data.subscriptions || [];
@@ -31,22 +30,8 @@ const Subscription = () => {
 
         // Calculate total pages based on totalRecord
         const totalRecords = data.data.totalRecord || 0;
-        const calculatedTotalPages = Math.max(1, Math.ceil(totalRecords / itemsPerPage));
-        setTotalPages(calculatedTotalPages);
-
-        // Update hasSubscriptions based on whether any subscriptions exist
-        if (page === 1 && fetchedSubscriptions.length > 0) {
-          setHasSubscriptions(true);
-        } else if (totalRecords === 0) {
-          setHasSubscriptions(false);
-        }
-
-        // If the current page is greater than the total pages, reset to the last page
-        if (page > calculatedTotalPages) {
-          setCurrentPage(calculatedTotalPages);
-          return; // Avoid infinite loop by returning early
-        }
-
+        console.log("total records",totalRecords)
+        setTotalPages(Math.ceil(totalRecords / 3));
         setError(null);
       } else {
         setError("Failed to fetch subscription plans");
@@ -78,8 +63,8 @@ const Subscription = () => {
         const subscriptionToUpdate = { ...subscription };
         const result = await updateSubscription(subscription._id, subscriptionToUpdate);
         if (result && result.data) {
-          setCurrentPage(1); // Reset to page 1 after update
-          await fetchSubscriptionData(1);
+          setCurrentPage(1); 
+          await fetchSubscriptionData();
           setEditingSubscription(null);
           setIsModalOpen(false);
         }
@@ -90,11 +75,11 @@ const Subscription = () => {
         const result = await createSubscription(subscriptionToCreate);
         if (result && result.data && result.data._id) {
           setCurrentPage(1); // Reset to page 1 after creation
-          await fetchSubscriptionData(1);
+          await fetchSubscriptionData();
           setIsModalOpen(false);
         } else {
           setCurrentPage(1);
-          await fetchSubscriptionData(1);
+          await fetchSubscriptionData();
           setIsModalOpen(false);
         }
       }
@@ -113,7 +98,7 @@ const Subscription = () => {
         if (result) {
           console.log('Subscription deleted:', result);
           setCurrentPage(1); // Reset to page 1 after deletion
-          await fetchSubscriptionData(1);
+          await fetchSubscriptionData();
         } else {
           throw new Error('Delete subscription returned no result');
         }
@@ -266,7 +251,7 @@ const Subscription = () => {
                     onPageChange={(page: number) => setCurrentPage(page)}
                   />
                 </div>
-              )}
+               )}
             </div>
           )}
         </div>

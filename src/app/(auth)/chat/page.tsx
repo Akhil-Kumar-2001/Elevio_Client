@@ -6,13 +6,6 @@ import Navbar from '@/components/student/navbar';
 import { UserMinimal } from '@/types/types';
 import useAuthStore from '@/store/userAuthStore';
 
-// interface User {
-//   id: string;
-//   name: string;
-//   avatar: string;
-//   isOnline: boolean;
-//   lastSeen?: string;
-// }
 
 const Chat = () => {
   const { user } = useAuthStore()

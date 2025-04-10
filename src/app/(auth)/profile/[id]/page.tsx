@@ -68,10 +68,9 @@ const Profile = () => {
   const [messages, setMessages] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const CLOUDINARY_CLOUD_NAME = "dhhzuean5";
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchProfileData = async () => {
-    console.log("fetchProfileData started with id:", id);
     if (!id || Array.isArray(id)) {
       console.log("Invalid or missing student ID");
       setLoading(false);
@@ -80,9 +79,7 @@ const Profile = () => {
 
     try {
       // Fetch student data
-      console.log("Fetching student data...");
-      const studentResponse = await getStudent(id);
-      console.log("Student response:", studentResponse);
+      const studentResponse = await getStudent();
       if (studentResponse.success) {
         setStudent(studentResponse.data);
         setImage(studentResponse.data.profilePicture || null);
@@ -94,10 +91,8 @@ const Profile = () => {
       }
 
       // Fetch subscription data
-      console.log("Fetching subscription data...");
       try {
-        const subscriptionResponse = await getSubscription(id);
-        console.log("Subscription response:", subscriptionResponse);
+        const subscriptionResponse = await getSubscription();
         if (subscriptionResponse.success && subscriptionResponse.data) {
           setSubscription(subscriptionResponse.data);
         } else {
@@ -114,17 +109,14 @@ const Profile = () => {
       console.error("Critical error in fetchProfileData:", error);
       router.push('/not-found');
     } finally {
-      console.log("Setting loading to false");
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log("useEffect triggered with id:", id);
     if (id) {
       fetchProfileData();
     } else {
-      console.log("No id provided, setting loading to false");
       setLoading(false);
     }
   }, [id]);
@@ -213,12 +205,12 @@ const Profile = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'tutor_documents');
-    formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
+    formData.append('upload_preset', 'Profile_Picture');
+    formData.append('cloud_name', cloudName || '');
 
     try {
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
         {
           method: 'POST',
           body: formData,
@@ -236,8 +228,6 @@ const Profile = () => {
       toast.error('Failed to upload profile photo.');
     }
   };
-
-  console.log("Rendering with loading:", loading, "student:", student);
 
   if (loading) {
     return <Spinner />;

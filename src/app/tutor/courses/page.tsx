@@ -47,7 +47,7 @@ const Courses = () => {
       const response = await getCourses(tutorId,currentPage, 5);
       if (response && response.success) {
         setCourses(response.data.courses);
-        setTotalPages(Math.ceil(response.data.totalRecord / 5));
+        setTotalPages(Math.floor(response.data.totalRecord / 5));
       }
     } catch (error) {
       console.log(error)

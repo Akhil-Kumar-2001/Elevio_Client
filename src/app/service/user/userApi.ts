@@ -101,25 +101,24 @@ export const googleSignInApi = async (userData: basicType) => {
 export const getListedCourses = async () => {
     try {
         const response = await userAxiosInstance.get(`/student/listed-courses`)
-        console.log(response.data)
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error)
     }
 };
 
-export const getStudent = async (id: string) => {
+export const getStudent = async () => {
     try {
-        const response = await userAxiosInstance.get(`/student/get-student/${id}`);
+        const response = await userAxiosInstance.get(`/student/get-student`);
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const getSubscription = async (id: string) => {
+export const getSubscription = async () => {
     try {
-        const response = await userAxiosInstance.get(`/student/get-subscription-details/${id}`);
+        const response = await userAxiosInstance.get(`/student/get-subscription-details`);
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -221,6 +220,15 @@ export const getCourseDetails = async (courseId: string) => {
         console.log(response)
         return response.data
     } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getTutor = async(id: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/student/tutorDetails/${id}`);
+        return response.data;
+    } catch (error:unknown) {
         handleAxiosError(error)
     }
 }

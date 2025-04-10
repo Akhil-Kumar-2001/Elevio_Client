@@ -23,7 +23,7 @@ const Navbar = () => {
     if (!studentId) return;
     try {
       setLoading(true);
-      const response = await getStudent(studentId);
+      const response = await getStudent();
       if (response.success) {
         setStudent(response.data);
         setImage(response.data.profilePicture || null);
@@ -53,10 +53,10 @@ const Navbar = () => {
   useEffect(() => {
     if (!studentId) return;
 
-    const getImageTutor = async () => {
+    const getImageStudent = async () => {
       try {
         setLoading(true);
-        const response = await getStudent(studentId);
+        const response = await getStudent();
         if (response.success) {
           setStudent(response.data);
           setImage(response.data.profilePicture || null);
@@ -72,7 +72,7 @@ const Navbar = () => {
       }
     };
 
-    getImageTutor();
+    getImageStudent();
     fetchCartCount(); // Fetch initial cart count
   }, [studentId]);
 

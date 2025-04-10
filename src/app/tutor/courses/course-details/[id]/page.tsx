@@ -31,7 +31,7 @@ const CourseDetailPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // Hardcoded Cloudinary cloud name - replace with your own
-  const CLOUDINARY_CLOUD_NAME = "dhhzuean5";
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchCourseDetails = async () => {
     try {
@@ -99,11 +99,11 @@ const CourseDetailPage = () => {
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "tutor_documents");
-      formData.append("folder", "course_thumbnails");
+      formData.append("upload_preset", "Course_Thumbnail");
+      formData.append("folder", "Course-Thumbnail");
 
       const uploadResponse = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
         formData,
         {
           onUploadProgress: (progressEvent) => {

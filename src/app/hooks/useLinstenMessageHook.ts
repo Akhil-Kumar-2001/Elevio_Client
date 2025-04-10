@@ -6,16 +6,15 @@ import { useEffect } from "react";
 const useListenMessages = () => {
   // Avoid direct destructuring to handle null case
   const socketContext = useSocketContext();
-  const socket = socketContext?.socket; // Safely access socket
+  const socket = socketContext?.socket; 
 
-  // Fix typo: Use 'messages' instead of 'message'
   const { messages, setMessages } = useConversation();
 
   useEffect(() => {
-    if (!socket) return; // Guard against null/undefined socket
+    if (!socket) return; 
 
     const handleNewMessage = (newMessage: Message) => {
-        console.log("Received new message:", newMessage); // Debug log
+        console.log("Received new message:", newMessage); 
       setMessages([...messages, newMessage]);
     };
 
@@ -27,7 +26,7 @@ const useListenMessages = () => {
     };
   }, [socket, messages, setMessages]);
 
-  return null; // Optional: This hook doesn't need to return anything
+  return null; 
 };
 
 export default useListenMessages;

@@ -27,7 +27,6 @@ const WhatToLearnNext = () => {
   const fetchCourses = async () => {
     try {
       const response = await getListedCourses();
-      console.log("course data in the component:", response);
       const mappedCourses: ExtendedFrontendCourse[] = response.data.map((course: any) => ({
         _id: course._id, // Map the _id from the API response
         title: course.title,

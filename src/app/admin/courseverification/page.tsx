@@ -58,7 +58,7 @@ const CourseVerification = () => {
       console.log("coure data ===>",courseData)
       if (courseData && courseData.success) {
         setCourses(courseData.data.courses);
-        setTotalPages(Math.ceil(courseData.data.totalRecord / 5));
+        setTotalPages(Math.floor(courseData.data.totalRecord / 5));
       }
     } catch (error) {
       console.log(error)

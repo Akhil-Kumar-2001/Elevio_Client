@@ -37,6 +37,9 @@ const AddCourseForm = () => {
   const [thumbnailPreview, setThumbnailPreview] = useState('');
   const [description, setDescription] = useState('');
 
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+
   const fetchCategories = async () => {
     try {
       const response = await getCategories();
@@ -68,10 +71,10 @@ const AddCourseForm = () => {
     try {
       const formData = new FormData();
       formData.append('file', imageThumbnail);
-      formData.append('upload_preset', 'tutor_documents');
+      formData.append('upload_preset', 'Course_Thumbnail');
 
       const cloudinaryRes = await axios.post(
-        'https://api.cloudinary.com/v1_1/dhhzuean5/image/upload',
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         formData
       );
 
