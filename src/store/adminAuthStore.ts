@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import adminAxiosInstance from '@/app/service/admin/adminAxiosInstance';
+
 export interface User {
-  email: string;
-  role: string;
+  id: string;
+  role?: string;
 }
 
 export interface AuthResponse {
@@ -25,28 +26,33 @@ interface AuthState {
   logout: () => void;
 }
 
-const useAuthStore = create<AuthState>()(
+const useAdminAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
 
       saveUserDetails: (authResponse: AuthResponse) => {
         const { user, accessToken } = authResponse;
-        set({ user, token: accessToken, isAuthenticated: true });
+        
+        set({ 
+          user: user, 
+          token: accessToken, 
+          isAuthenticated: true 
+        });
+        
+        // Debug check
       },
 
       refreshAccessToken: async () => {
         try {
-          // Check if refresh token exists before calling API
           const cookies = document.cookie;
           if (!cookies.includes("refreshToken")) {
             console.warn("No refresh token found. Skipping token refresh.");
             return false;
           }
       
-          // Call refresh token API only if refreshToken exists
           const response = await adminAxiosInstance.post<RefreshTokenResponse>('/admin/refresh-token');
       
           if (response.data.success) {
@@ -63,8 +69,7 @@ const useAuthStore = create<AuthState>()(
       
       logout: async () => {
         try {
-          const response = await adminAxiosInstance.post('/admin/logout'); // Call logout API
-          console.log(response)
+          await adminAxiosInstance.post('/admin/logout');
         } catch (error) {
           console.error('Logout failed:', error);
         }
@@ -72,9 +77,9 @@ const useAuthStore = create<AuthState>()(
       }
     }),
     {
-      name: 'auth-storage', // LocalStorage key
+      name: 'admin-auth-storage',
     }
   )
 );
 
-export default useAuthStore;
+export default useAdminAuthStore;
