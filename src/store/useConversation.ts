@@ -8,6 +8,7 @@ interface Message {
   senderId: string;
   receiverId: string;
   imageUrl?: string;
+  isDeleted?:boolean
 }
 
 interface ConversationState {

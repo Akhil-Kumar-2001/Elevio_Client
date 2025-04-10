@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
-import { Send, Image as ImageIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react'; // Added useRef
+import { Send, Image as ImageIcon, Trash2, CheckSquare } from 'lucide-react';
 import { UserMinimal } from '@/types/types';
-import { getMessages, sendMessage } from '@/app/service/shared/chatService';
+import { getMessages, sendMessage, deleteMessages } from '@/app/service/shared/chatService';
 import useConversation from '@/store/useConversation';
 import useListenMessages from '@/app/hooks/useLinstenMessageHook';
 import { useSocketContext } from '@/context/SocketContext';
+import useListenDeleteMessages from '@/app/hooks/useListenDeletedHook';
 
 interface ExtendedUserMinimal extends UserMinimal {
   isOnline?: boolean;
@@ -19,6 +20,7 @@ interface Message {
   senderId: string;
   receiverId: string;
   imageUrl?: string;
+  isDeleted?: boolean;
 }
 
 interface ChatWindowProps {
@@ -33,12 +35,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+  const [isSelecting, setIsSelecting] = useState(false);
   const { onlineUser = [] } = useSocketContext() || {};
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-  //calling the new message listening hook
+  // Create a ref for the input element
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useListenMessages();
+  useListenDeleteMessages();
 
   // Handle image selection and preview
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,22 +60,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   };
 
+  // Toggle message selection (only allow selecting sent messages)
+  const handleSelectMessage = (messageId: string) => {
+    const message = messages.find((msg) => msg._id === messageId);
+    if (message && message.senderId === currentUserId && !message.isDeleted) {
+      if (selectedMessageIds.includes(messageId)) {
+        setSelectedMessageIds(selectedMessageIds.filter((id) => id !== messageId));
+      } else {
+        setSelectedMessageIds([...selectedMessageIds, messageId]);
+      }
+    }
+  };
+
   // Send message with optional image
   const handlesendMessage = async () => {
     if ((!newMessage.trim() && !selectedImage) || !selectedUser) return;
-
     try {
       setIsLoading(true);
       let imageUrl = '';
 
-      // Upload image to Cloudinary if selected
       if (selectedImage) {
         const formData = new FormData();
         formData.append('file', selectedImage);
-        formData.append('upload_preset', 'Chat_images'); // Replace with your preset
+        formData.append('upload_preset', 'Chat_images');
 
         const uploadResponse = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, // Replace with your cloud name
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
           {
             method: 'POST',
             body: formData,
@@ -80,17 +97,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         imageUrl = uploadData.secure_url;
       }
 
-      // Send message using your existing API call
       const response = await sendMessage(selectedUser._id, newMessage, role, imageUrl);
 
       if (response?.success) {
         const tempMessage: Message = {
-          _id: response.data?._id || Date.now().toString(), // Use backend ID if available
+          _id: response.data?._id || Date.now().toString(),
           message: newMessage,
           createdAt: new Date().toISOString(),
           senderId: currentUserId,
           receiverId: selectedUser._id,
           ...(imageUrl && { imageUrl }),
+          isDeleted: false,
         };
 
         setMessages([...messages, tempMessage]);
@@ -98,13 +115,44 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         setSelectedImage(null);
         setImagePreview(null);
 
-        await handleGetMessages(); // Refresh messages
+        await handleGetMessages();
+        // Refocus the input after sending
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
       } else {
         throw new Error('Failed to send message');
       }
     } catch (error) {
       console.error('Error sending message:', error);
       alert('Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Delete selected messages
+  const handleDeleteMessages = async () => {
+    if (selectedMessageIds.length === 0 || !selectedUser) return;
+
+    try {
+      setIsLoading(true);
+      const response = await deleteMessages(selectedUser._id, selectedMessageIds, role);
+
+      if (response?.success) {
+        setSelectedMessageIds([]);
+        setIsSelecting(false);
+        await handleGetMessages();
+        // Refocus the input after deleting
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      } else {
+        throw new Error('Failed to delete messages');
+      }
+    } catch (error) {
+      console.error('Error deleting messages:', error);
+      alert('Failed to delete messages. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -117,8 +165,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     try {
       setIsLoading(true);
       const response = await getMessages(selectedUser._id, role);
-      console.log("messages in the component", response);
-
       if (response.success && Array.isArray(response.data)) {
         setMessages(response.data);
       }
@@ -152,10 +198,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     return Array.isArray(onlineUser) && onlineUser.includes(userId);
   };
 
-  // Fetch messages when selected user changes
+  // Focus input on mount and after certain actions
   useEffect(() => {
-    if (selectedUser) {
-      handleGetMessages();
+    if (inputRef.current && selectedUser) {
+      inputRef.current.focus();
     }
   }, [selectedUser]);
 
@@ -195,6 +241,41 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             </p>
           </div>
         </div>
+        {/* Selection mode toggle and action buttons */}
+        <div className="flex items-center space-x-2">
+          {isSelecting ? (
+            <>
+              <button
+                onClick={handleDeleteMessages}
+                className="p-2 bg-red-600 text-white rounded-full shadow-md hover:bg-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                disabled={isLoading || selectedMessageIds.length === 0}
+                title="Delete selected messages"
+              >
+                <Trash2 className="w-5 h-5" />
+                {selectedMessageIds.length > 0 && (
+                  <span className="ml-2 text-sm">{selectedMessageIds.length}</span>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setIsSelecting(false);
+                  setSelectedMessageIds([]);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow-md hover:bg-gray-300 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setIsSelecting(true)}
+              className="p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
+              title="Select messages"
+            >
+              <CheckSquare className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Message Display */}
@@ -210,33 +291,49 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         ) : (
           messages.map((message) => {
             const isReceivedMessage = message.receiverId === currentUserId;
+            const isDeleted = message.isDeleted || false;
 
             return (
               <div
                 key={message._id}
-                className={`flex ${isReceivedMessage ? 'justify-start' : 'justify-end'}`}
+                className={`flex ${isReceivedMessage ? 'justify-start' : 'justify-end'} items-center`}
               >
+                {isSelecting && !isDeleted && message.senderId === currentUserId && (
+                  <input
+                    type="checkbox"
+                    checked={selectedMessageIds.includes(message._id)}
+                    onChange={() => handleSelectMessage(message._id)}
+                    className="mr-2"
+                  />
+                )}
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${isReceivedMessage
                       ? 'bg-white border border-gray-200'
                       : 'bg-indigo-600 text-white'
-                    }`}
+                    } ${isDeleted ? 'opacity-50' : ''}`}
                 >
-                  {message.imageUrl && (
-                    <img
-                      src={message.imageUrl}
-                      alt="Shared image"
-                      className="max-w-full rounded-lg mb-2"
-                    />
-                  )}
-                  {message.message && (
-                    <p className={isReceivedMessage ? 'text-gray-900' : 'text-white'}>
-                      {message.message}
+                  {isDeleted ? (
+                    <p className={isReceivedMessage ? 'text-gray-500 italic' : 'text-white italic'}>
+                      Message is deleted
                     </p>
+                  ) : (
+                    <>
+                      {message.imageUrl && (
+                        <img
+                          src={message.imageUrl}
+                          alt="Shared image"
+                          className="max-w-full rounded-lg mb-2"
+                        />
+                      )}
+                      {message.message && (
+                        <p className={isReceivedMessage ? 'text-gray-900' : 'text-white'}>
+                          {message.message}
+                        </p>
+                      )}
+                    </>
                   )}
                   <p
-                    className={`text-xs mt-1 ${isReceivedMessage ? 'text-gray-500' : 'text-indigo-200'
-                      }`}
+                    className={`text-xs mt-1 ${isReceivedMessage ? 'text-gray-500' : 'text-indigo-200'}`}
                   >
                     {formatTime(message.createdAt)}
                   </p>
@@ -275,6 +372,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             />
           </label>
           <input
+            ref={inputRef} // Attach the ref to the input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -284,8 +382,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             disabled={isLoading}
           />
           <button
-            className={`p-2 bg-indigo-600 text-white rounded-full transition-colors flex items-center justify-center relative ${isLoading ? 'opacity-75 cursor-not-allowed' : 'hover:bg-indigo-700'
-              }`}
+            className={`p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center relative ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
             onClick={handlesendMessage}
             disabled={isLoading}
           >

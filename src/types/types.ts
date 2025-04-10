@@ -252,6 +252,16 @@ export type UserMinimal = {
   role: "Student" | "Tutor";
 };
 
+export interface Message {
+  _id: string;
+  message: string;
+  createdAt: string;
+  senderId: string;
+  receiverId: string;
+  imageUrl?: string;
+  isDeleted?: boolean;
+}
+
 export interface NotificationType {
   _id: string;
   content: string;

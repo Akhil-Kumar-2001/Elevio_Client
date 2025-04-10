@@ -2,7 +2,6 @@ import axios from "axios";
 import tutorAxiosInstance from '@/app/service/user/userAxiosInstance';
 import studentAxiosInstance from '@/app/service/tutor/tutorAxiosInstance';
 import { toast } from "react-toastify";
-import exp from "constants";
 
 export const handleAxiosError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -64,3 +63,17 @@ export const getMessages = async(reciverId:string,role:string) =>{
         handleAxiosError(error)
     }
 }
+
+// chatService.ts
+
+export const deleteMessages = async (receiverId:string,messageIds: string[],role:string) => {
+    try {        
+        console.log("deting ids",messageIds)
+    const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
+    const response = await  axiosInstance.delete(`/chat/delete-message/${receiverId}`,{data:{messageIds}})
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting messages:', error);
+      throw error;
+    }
+  };

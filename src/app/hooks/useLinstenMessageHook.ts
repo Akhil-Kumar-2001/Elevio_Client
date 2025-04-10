@@ -1,6 +1,7 @@
 
 import { useSocketContext } from "@/context/SocketContext";
 import useConversation from "@/store/useConversation";
+import { Message } from "@/types/types";
 import { useEffect } from "react";
 
 const useListenMessages = () => {
@@ -31,11 +32,3 @@ const useListenMessages = () => {
 
 export default useListenMessages;
 
-// Define Message interface (if not already imported elsewhere)
-interface Message {
-  _id: string;
-  message: string;
-  createdAt: string;
-  senderId: string;
-  receiverId: string;
-}

@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from 'react';
 import { Users, Circle, Search } from 'lucide-react';
 import useStudentAuthStore from '@/store/userAuthStore';
@@ -38,7 +36,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
     fetchChats();
   }, [userId]);
 
-  // Check if a user is online by their ID
   const isUserOnline = (userId: string) => {
     console.log("online users",onlineUser)
     return Array.isArray(onlineUser) && onlineUser.includes(userId);
@@ -47,13 +44,13 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
   return (
     <div className="w-80 bg-white h-full border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between mb-3 mt-2 ">
           <div className="flex items-center space-x-2">
             <Users className="w-5 h-5 text-indigo-600" />
             <h2 className="text-lg font-semibold text-gray-800">Messages</h2>
           </div>
         </div>
-        {/* <div className="relative">
+                {/* <div className="relative">
           <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -63,7 +60,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
         </div> */}
       </div>
       <div className="overflow-y-auto flex-1">
-        {users.map((user) => (
+        {users.map((user, index) => (
           <div
             key={user._id}
             onClick={() => onSelectUser(user)}
@@ -71,7 +68,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
               selectedUserId === user._id
                 ? 'bg-indigo-50'
                 : 'hover:bg-gray-50'
-            }`}
+            } ${index !== users.length - 1 ? 'border-b border-gray-200' : ''}`}
           >
             <div className="relative">
               <img
