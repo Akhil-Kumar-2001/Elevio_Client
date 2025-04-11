@@ -213,6 +213,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   }, [messages]);
 
+  useEffect(()=>{
+    handleGetMessages()
+  },[selectedUser])
+
   // Render empty state if no user selected
   if (!selectedUser) {
     return (

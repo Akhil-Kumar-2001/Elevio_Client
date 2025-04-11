@@ -250,6 +250,7 @@ export type UserMinimal = {
   username: string;
   profilePicture?: string;
   role: "Student" | "Tutor";
+  lastMessage?:string;
 };
 
 export interface Message {

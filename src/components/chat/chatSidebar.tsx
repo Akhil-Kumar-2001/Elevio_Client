@@ -23,7 +23,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
   const fetchChats = async() => {
     try {
       const response = await getChats(role);
-      console.log("chats from backend", response.data);
       if(response) {
         setUsers(response.data);
       }
@@ -50,14 +49,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
             <h2 className="text-lg font-semibold text-gray-800">Messages</h2>
           </div>
         </div>
-                {/* <div className="relative">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search users..."
-            className="w-full text-gray-700 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
-        </div> */}
       </div>
       <div className="overflow-y-auto flex-1">
         {users.map((user, index) => (
@@ -87,9 +78,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
             </div>
             <div className="ml-3 flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.username}
-                </p>
+                <div className="flex flex-col w-full">
+                  <p className="text-base font-medium text-gray-900 truncate">
+                    {user.username}
+                  </p>
+                  <p className="text-sm text-gray-600 truncate">
+                    {user.lastMessage}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
