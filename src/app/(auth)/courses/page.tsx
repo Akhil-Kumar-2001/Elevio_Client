@@ -5,7 +5,7 @@ import { Filter, SortAsc, SortDesc, X } from 'lucide-react';
 import useAuthStore from '@/store/userAuthStore';
 import { useRouter } from 'next/navigation';
 import { useCartCountStore } from '@/store/cartCountStore';
-import { addToCart, getCategories, getCourses } from '@/app/service/user/userApi';
+import { addToCart, getCategories, getCourses, getPurchasedCourses } from '@/app/service/user/userApi';
 import { toast } from 'react-toastify';
 import Navbar from '@/components/student/navbar';
 import CoursesLoading from '@/components/student/coursesLoading';
@@ -23,8 +23,9 @@ interface ExtendedFrontendCourse {
 }
 
 const Courses = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [courses, setCourses] = useState<ExtendedFrontendCourse[]>([]);
+  const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]); // Store purchased course IDs
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +36,6 @@ const Courses = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-
 
   const { user } = useAuthStore();
   const { incrementCartCount } = useCartCountStore();
@@ -75,6 +75,23 @@ const Courses = () => {
     }
   };
 
+  // Fetch purchased courses
+  const fetchPurchasedCourses = async () => {
+    if (!userId) {
+      console.log("User id is not available");
+      return;
+    }
+    try {
+      const response = await getPurchasedCourses(userId);
+      if (response.success) {
+        const purchasedCourseIds = response.data.map((course: any) => course._id);
+        setPurchasedCourses(purchasedCourseIds); // Store only the _id of purchased courses
+      }
+    } catch (error) {
+      console.log("Error while getting Purchased Courses:", error);
+    }
+  };
+
   // Fetch courses and map category names
   const fetchCourses = async () => {
     try {
@@ -109,7 +126,10 @@ const Courses = () => {
 
   useEffect(() => {
     fetchCategories(); // Fetch categories first
-  }, []);
+    if (userId) {
+      fetchPurchasedCourses(); // Fetch purchased courses only if user is logged in
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (categories.length > 0) {
@@ -125,7 +145,6 @@ const Courses = () => {
     }
     try {
       const response = await addToCart(userId, courseId);
-      console.log(response);
       if (response) {
         toast.success(response.message);
         incrementCartCount();
@@ -138,8 +157,8 @@ const Courses = () => {
   };
 
   const handleWishlist = () => {
-    toast.info("Wish list feature Coming Soooon....")
-  }
+    toast.info("Wish list feature Coming Soon....");
+  };
 
   // New function to handle navigation to course details page
   const navigateToCourseDetails = (courseId: string) => {
@@ -394,88 +413,98 @@ const Courses = () => {
 
         {/* Course Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filterCourses().map((course, index) => (
-            <div
-              key={index}
-              className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              {/* Next.js Image component instead of img tag */}
-              <div 
-                onClick={() => navigateToCourseDetails(course._id)}
-                className="relative w-full h-40 cursor-pointer"
+          {filterCourses().map((course, index) => {
+            const isPurchased = purchasedCourses.includes(course._id);
+
+            return (
+              <div
+                key={index}
+                className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                <Image
-                  src={course.image}
-                  alt={course.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  style={{ objectFit: 'cover' }}
-                  className="rounded-t-lg"
-                  priority={index < 4} // Only prioritize loading for the first 4 images
-                />
-              </div>
-              {/* Card Content */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
-                  {course.title}
-                </h3>
-                {hoveredIndex === index ? (
-                  // Hover State: Show Add to Cart button and Wishlist icon
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleAddToCart(course._id)}
-                      className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-colors"
-                    >
-                      Add to cart
-                    </button>
-                    <button
-                      onClick={handleWishlist}
-                      className="p-2 border border-purple-600 rounded-full hover:bg-purple-100 transition-colors"
-                      aria-label="Add to Wishlist"
-                    >
-                      <svg
-                        className="w-5 h-5 text-purple-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                {/* Next.js Image component instead of img tag */}
+                <div
+                  onClick={() => navigateToCourseDetails(course._id)}
+                  className="relative w-full h-40 cursor-pointer"
+                >
+                  <Image
+                    src={course.image}
+                    alt={course.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }}
+                    className="rounded-t-lg"
+                    priority={index < 4} // Only prioritize loading for the first 4 images
+                  />
+                </div>
+                {/* Card Content */}
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
+                    {course.title}
+                  </h3>
+                  {hoveredIndex === index && !isPurchased ? (
+                    // Hover State: Show Add to Cart button and Wishlist icon only if not purchased
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent navigation when clicking the button
+                          handleAddToCart(course._id);
+                        }}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-colors"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ) : (
-                  // Default State: Show rating, students, and price
-                  <>
-                    <div className="flex items-center mb-2">
-                      <span className="text-yellow-500 mr-1">★</span>
-                      <span className="text-gray-600">
-                        {course.rating}{' '}
-                        <span className="text-gray-500">({course.students} students)</span>
-                      </span>
+                        Add to cart
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent navigation when clicking the button
+                          handleWishlist();
+                        }}
+                        className="p-2 border border-purple-600 rounded-full hover:bg-purple-100 transition-colors"
+                        aria-label="Add to Wishlist"
+                      >
+                        <svg
+                          className="w-5 h-5 text-purple-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          />
+                        </svg>
+                      </button>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-800 font-medium">
-                        ₹{course.price.toFixed(2)}
-                      </span>
-                      {course.category && (
-                        <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
-                          {course.category}
+                  ) : (
+                    // Default State or Purchased State: Show rating, students, and price
+                    <>
+                      <div className="flex items-center mb-2">
+                        <span className="text-yellow-500 mr-1">★</span>
+                        <span className="text-gray-600">
+                          {course.rating}{' '}
+                          <span className="text-gray-500">({course.students} students)</span>
                         </span>
-                      )}
-                    </div>
-                  </>
-                )}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-800 font-medium">
+                          ₹{course.price.toFixed(2)}
+                        </span>
+                        {course.category && (
+                          <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
+                            {course.category}
+                          </span>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filterCourses().length === 0 && (
@@ -484,10 +513,9 @@ const Courses = () => {
           </div>
         )}
         <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
-
       </div>
     </div>
   );
-}
+};
 
 export default Courses;
