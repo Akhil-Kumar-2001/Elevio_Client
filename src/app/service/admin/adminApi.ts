@@ -171,6 +171,15 @@ export const getCourseDetails = async (id: string) => {
     }
 }
 
+export const getCagoryName = async (id:string) =>{
+    try {
+        const response = await adminAxiosInstance(`/admin/get-categoryname/${id}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
 export const getSectionsByCourse = async (id: string) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/sections/${id}`)

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/adminsidebar';
-import { getCourseDetails, getSectionsByCourse, getLecturesBySection } from '@/app/service/admin/adminApi';
+import { getCourseDetails,getCagoryName, getSectionsByCourse, getLecturesBySection } from '@/app/service/admin/adminApi';
 import { toast } from 'react-toastify';
 import { Course, ISection, ILecture } from '@/types/types';
 import CourseVerificationModal from '@/components/admin/courseVerificationModal';
@@ -16,6 +16,7 @@ const CoursePreview = () => {
   const { id } = useParams();
   const router = useRouter();
   const [course, setCourse] = useState<Course | null>(null);
+  const [categoryName,setCategoryName] = useState("")
   const [sections, setSections] = useState<SectionWithLectures[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLecture, setSelectedLecture] = useState<ILecture | null>(null);
@@ -37,6 +38,23 @@ const CoursePreview = () => {
       router.push('/not-found');
     }
   };
+  
+  const fetchCategoryName = async() => {
+    if(!course || !course.category) return;
+    try {
+      const categoryId = typeof course.category === 'string' 
+        ? course.category 
+        : course.category._id;
+        
+      const response = await getCagoryName(categoryId);
+      setCategoryName(response.data);
+    } catch (error) {
+      console.log("Error while getting category name", error);
+    }
+}
+  useEffect(()=>{
+    fetchCategoryName();
+  },[course])
 
   const fetchSectionsAndLectures = async () => {
     try {
@@ -159,7 +177,7 @@ const CoursePreview = () => {
                       <p className="text-gray-400 mb-4">{course.subtitle}</p>
                       <div className="flex items-center gap-4 mb-4">
                         <span className="bg-gray-700 text-white text-sm font-medium px-3 py-1 rounded-full">
-                          {getCategoryName(course.category)}
+                          {getCategoryName(categoryName)}
                         </span>
                         <span className="text-xl font-bold">₹{course.price}</span>
                       </div>
