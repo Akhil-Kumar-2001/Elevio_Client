@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getStudent, cartData } from '../../app/service/user/userApi';
 import { useCartCountStore } from '@/store/cartCountStore';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
   const router = useRouter();
@@ -15,9 +16,11 @@ const Navbar = () => {
   const [initial, setInitial] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown visibility
   const { user } = useAuthStore();
   const { cartCount, setCartCount } = useCartCountStore();
   const studentId = user?.id;
+  const { logout } = useAuthStore();
 
   const fetchStudentDetails = async () => {
     if (!studentId) return;
@@ -33,12 +36,19 @@ const Navbar = () => {
         setError('Failed to fetch student details');
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       setError('Failed to fetch student details');
     } finally {
       setLoading(false);
     }
   };
+
+    const handleLogout = () => {
+      logout();
+      localStorage.removeItem('authUserCheck');
+      toast.success('Logged out successfully!');
+      router.push('/login');
+    };
 
   const fetchCartCount = async () => {
     if (!studentId) return;
@@ -65,7 +75,7 @@ const Navbar = () => {
           setError('Failed to fetch profile image');
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
         setError('Failed to fetch profile image');
       } finally {
         setLoading(false);
@@ -77,6 +87,25 @@ const Navbar = () => {
   }, [studentId]);
 
   const wishlistCount = 0;
+
+  // Toggle dropdown visibility
+  const toggleDropdown = (e:React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation(); // Prevent click from bubbling up
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+// Close dropdown when clicking outside
+useEffect(() => {
+  const handleClickOutside = (e: MouseEvent) => {
+    const target = e.target as Element; // Type assertion to Element
+    if (isDropdownOpen && target.closest('.profile-dropdown') === null) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 px-10 bg-white border-b border-gray-200">
@@ -136,32 +165,63 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Profile Photo */}
-        <div
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={fetchStudentDetails}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && fetchStudentDetails()}
-        >
-          {loading ? (
-            <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
-          ) : error ? (
-            <div className="bg-blue-100 text-blue-800 rounded-full h-9 w-9 flex items-center justify-center font-semibold">?</div>
-          ) : image ? (
-            <Image
-              src={image}
-              alt="Tutor Profile"
-              width={36}
-              height={36}
-              className="rounded-full w-9 h-9 object-cover"
-            />
-          ) : (
-            <div
-              className="bg-blue-100 text-blue-800 rounded-full h-9 w-9 flex items-center justify-center font-semibold"
-              aria-label={`Profile initial: ${initial || 'Unknown'}`}
-            >
-              {initial || '?'}
+        {/* Profile Photo with Dropdown */}
+        <div className="relative profile-dropdown">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={toggleDropdown}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && toggleDropdown(e)}
+          >
+            {loading ? (
+              <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />
+            ) : error ? (
+              <div className="bg-blue-100 text-blue-800 rounded-full h-9 w-9 flex items-center justify-center font-semibold">?</div>
+            ) : image ? (
+              <Image
+                src={image}
+                alt="Tutor Profile"
+                width={36}
+                height={36}
+                className="rounded-full w-9 h-9 object-cover"
+              />
+            ) : (
+              <div
+                className="bg-blue-100 text-blue-800 rounded-full h-9 w-9 flex items-center justify-center font-semibold"
+                aria-label={`Profile initial: ${initial || 'Unknown'}`}
+              >
+                {initial || '?'}
+              </div>
+            )}
+          </div>
+
+          {/* Dropdown Menu */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50">
+              <Link
+                href={`/profile/${studentId}`}
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Profile
+              </Link>
+              <Link
+                href="/chat"
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Messages
+              </Link>
+              <div
+                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                onClick={() =>{
+                  handleLogout()  
+                  setIsDropdownOpen(false)}
+                }
+              >
+                Logout
+              </div>
             </div>
           )}
         </div>
