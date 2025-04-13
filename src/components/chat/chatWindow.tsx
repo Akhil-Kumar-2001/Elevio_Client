@@ -1,9 +1,7 @@
-'use client'
-
-import React, { useEffect, useRef, useState } from 'react'; // Added useRef
+import React, { useEffect, useRef, useState } from 'react';
 import { Send, Image as ImageIcon, Trash2, CheckSquare } from 'lucide-react';
 import { UserMinimal } from '@/types/types';
-import { getMessages, sendMessage, deleteMessages } from '@/app/service/shared/chatService';
+import { getMessages, sendMessage, deleteMessages, markMessagesAsRead } from '@/app/service/shared/chatService';
 import useConversation from '@/store/useConversation';
 import useListenMessages from '@/app/hooks/useLinstenMessageHook';
 import { useSocketContext } from '@/context/SocketContext';
@@ -21,6 +19,7 @@ interface Message {
   receiverId: string;
   imageUrl?: string;
   isDeleted?: boolean;
+  isRead?: boolean;
 }
 
 interface ChatWindowProps {
@@ -29,8 +28,10 @@ interface ChatWindowProps {
   currentUserId: string;
 }
 
+const CloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'your-cloud-name';
+
 const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUserId }) => {
-  const { messages, setMessages } = useConversation();
+  const { messages, setMessages, setLastMessageMeta, resetUnreadCount } = useConversation();
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -39,15 +40,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
   const [isSelecting, setIsSelecting] = useState(false);
   const { onlineUser = [] } = useSocketContext() || {};
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
-  // Create a ref for the input element
   const inputRef = useRef<HTMLInputElement>(null);
 
   useListenMessages();
   useListenDeleteMessages();
 
-  // Handle image selection and preview
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -60,7 +57,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   };
 
-  // Toggle message selection (only allow selecting sent messages)
   const handleSelectMessage = (messageId: string) => {
     const message = messages.find((msg) => msg._id === messageId);
     if (message && message.senderId === currentUserId && !message.isDeleted) {
@@ -72,7 +68,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   };
 
-  // Send message with optional image
   const handlesendMessage = async () => {
     if ((!newMessage.trim() && !selectedImage) || !selectedUser) return;
     try {
@@ -85,7 +80,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         formData.append('upload_preset', 'Chat_images');
 
         const uploadResponse = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          `https://api.cloudinary.com/v1_1/${CloudName}/image/upload`,
           {
             method: 'POST',
             body: formData,
@@ -96,6 +91,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         if (!uploadData.secure_url) throw new Error('Image upload failed');
         imageUrl = uploadData.secure_url;
       }
+
+      setLastMessageMeta({
+        senderId: currentUserId,
+        receiverId: selectedUser._id,
+        message: newMessage || (imageUrl ? '[Image]' : ''),
+      });
 
       const response = await sendMessage(selectedUser._id, newMessage, role, imageUrl);
 
@@ -108,6 +109,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
           receiverId: selectedUser._id,
           ...(imageUrl && { imageUrl }),
           isDeleted: false,
+          isRead: false,
         };
 
         setMessages([...messages, tempMessage]);
@@ -116,7 +118,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         setImagePreview(null);
 
         await handleGetMessages();
-        // Refocus the input after sending
         if (inputRef.current) {
           inputRef.current.focus();
         }
@@ -131,7 +132,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   };
 
-  // Delete selected messages
   const handleDeleteMessages = async () => {
     if (selectedMessageIds.length === 0 || !selectedUser) return;
 
@@ -143,7 +143,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         setSelectedMessageIds([]);
         setIsSelecting(false);
         await handleGetMessages();
-        // Refocus the input after deleting
         if (inputRef.current) {
           inputRef.current.focus();
         }
@@ -158,7 +157,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   };
 
-  // Fetch messages
   const handleGetMessages = async () => {
     if (!selectedUser) return;
 
@@ -167,45 +165,43 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
       const response = await getMessages(selectedUser._id, role);
       if (response.success && Array.isArray(response.data)) {
         setMessages(response.data);
+        await markMessagesAsRead(selectedUser._id, role);
+        resetUnreadCount(selectedUser._id);
       }
     } catch (error) {
-      console.log(error);
+      console.error('Error getting messages:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Format timestamp
   const formatTime = (timestamp: string) => {
     try {
       const date = new Date(timestamp);
       if (isNaN(date.getTime())) {
-        console.warn("Invalid date value:", timestamp);
-        return "Invalid Date";
+        console.warn('Invalid date value:', timestamp);
+        return 'Invalid Date';
       }
       return date.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
       });
     } catch (error) {
-      console.error("Error parsing timestamp:", error, "Value:", timestamp);
-      return "Invalid Date";
+      console.error('Error parsing timestamp:', error, 'Value:', timestamp);
+      return 'Invalid Date';
     }
   };
 
-  // Check if user is online
   const isUserOnline = (userId: string) => {
     return Array.isArray(onlineUser) && onlineUser.includes(userId);
   };
 
-  // Focus input on mount and after certain actions
   useEffect(() => {
     if (inputRef.current && selectedUser) {
       inputRef.current.focus();
     }
   }, [selectedUser]);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     const messageContainer = document.getElementById('message-container');
     if (messageContainer) {
@@ -213,11 +209,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     }
   }, [messages]);
 
-  useEffect(()=>{
-    handleGetMessages()
-  },[selectedUser])
+  useEffect(() => {
+    if (selectedUser) {
+      handleGetMessages();
+    }
+  }, [selectedUser]);
 
-  // Render empty state if no user selected
   if (!selectedUser) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
@@ -228,7 +225,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white">
-      {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <img
@@ -237,15 +233,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             className="w-10 h-10 rounded-full"
           />
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              {selectedUser.username}
-            </h3>
-            <p className={`text-sm ${isUserOnline(selectedUser._id) ? 'text-green-500' : 'text-gray-500'}`}>
+            <h3 className="text-lg font-semibold text-gray-900">{selectedUser.username}</h3>
+            <p
+              className={`text-sm ${isUserOnline(selectedUser._id) ? 'text-green-500' : 'text-gray-500'}`}
+            >
               {isUserOnline(selectedUser._id) ? 'Online' : 'Offline'}
             </p>
           </div>
         </div>
-        {/* Selection mode toggle and action buttons */}
         <div className="flex items-center space-x-2">
           {isSelecting ? (
             <>
@@ -282,8 +277,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         </div>
       </div>
 
-      {/* Message Display */}
-      <div id="message-container" className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50">
+      <div
+        id="message-container"
+        className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50"
+      >
         {isLoading && messages.length === 0 ? (
           <div className="flex justify-center py-4">
             <p className="text-gray-500">Loading messages...</p>
@@ -311,10 +308,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
                   />
                 )}
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${isReceivedMessage
-                      ? 'bg-white border border-gray-200'
-                      : 'bg-indigo-600 text-white'
-                    } ${isDeleted ? 'opacity-50' : ''}`}
+                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                    isReceivedMessage ? 'bg-white border border-gray-200' : 'bg-indigo-600 text-white'
+                  } ${isDeleted ? 'opacity-50' : ''}`}
                 >
                   {isDeleted ? (
                     <p className={isReceivedMessage ? 'text-gray-500 italic' : 'text-white italic'}>
@@ -336,11 +332,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
                       )}
                     </>
                   )}
-                  <p
-                    className={`text-xs mt-1 ${isReceivedMessage ? 'text-gray-500' : 'text-indigo-200'}`}
-                  >
-                    {formatTime(message.createdAt)}
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <p
+                      className={`text-xs mt-1 ${isReceivedMessage ? 'text-gray-500' : 'text-indigo-200'}`}
+                    >
+                      {formatTime(message.createdAt)}
+                    </p>
+                    {/* {!isReceivedMessage && !isDeleted && (
+                      <span
+                        className={`text-xs ${message.isRead ? 'text-indigo-200' : 'text-indigo-400'}`}
+                      >
+                        {message.isRead ? 'Read' : 'Sent'}
+                      </span>
+                    )} */}
+                  </div>
                 </div>
               </div>
             );
@@ -348,7 +353,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         )}
       </div>
 
-      {/* Input Area */}
       <div className="px-6 py-4 border-t border-gray-200 bg-white">
         {imagePreview && (
           <div className="mb-4">
@@ -376,7 +380,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             />
           </label>
           <input
-            ref={inputRef} // Attach the ref to the input
+            ref={inputRef}
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -386,7 +390,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             disabled={isLoading}
           />
           <button
-            className={`p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center relative ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+            className={`p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center relative ${
+              isLoading ? 'opacity-75 cursor-not-allowed' : ''
+            }`}
             onClick={handlesendMessage}
             disabled={isLoading}
           >

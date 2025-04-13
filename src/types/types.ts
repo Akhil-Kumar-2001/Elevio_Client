@@ -251,6 +251,8 @@ export type UserMinimal = {
   profilePicture?: string;
   role: "Student" | "Tutor";
   lastMessage?:string;
+  unreadCount?: number;
+  updatedAt:string;
 };
 
 export interface Message {

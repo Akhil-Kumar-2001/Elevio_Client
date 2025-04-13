@@ -1,4 +1,3 @@
-
 import { useSocketContext } from "@/context/SocketContext";
 import useConversation from "@/store/useConversation";
 import { Message } from "@/types/types";
@@ -40,5 +39,3 @@ const useListenDeleteMessages = () => {
 };
 
 export default useListenDeleteMessages;
-
-

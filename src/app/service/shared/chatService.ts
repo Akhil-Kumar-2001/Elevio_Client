@@ -68,12 +68,20 @@ export const getMessages = async(reciverId:string,role:string) =>{
 
 export const deleteMessages = async (receiverId:string,messageIds: string[],role:string) => {
     try {        
-        console.log("deting ids",messageIds)
     const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
     const response = await  axiosInstance.delete(`/chat/delete-message/${receiverId}`,{data:{messageIds}})
+    return response.data;
+  } catch (error:unknown) {
+    handleAxiosError(error)
+  }
+};
+
+export const markMessagesAsRead = async(receiverId:string,role:string) => {
+  try {
+      const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
+      const response = await axiosInstance.post(`/chat/mark-read/${receiverId}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting messages:', error);
-      throw error;
+      
     }
-  };
+  } 
