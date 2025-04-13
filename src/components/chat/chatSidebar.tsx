@@ -133,13 +133,13 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
                 {/* <p className="text-sm text-gray-600 truncate">{user.lastMessage}</p> */}
                 <p
                   className="text-sm text-gray-600 truncate"
-                  style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  style={{ maxWidth: '160px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                   title={user.lastMessage}
                 >
                   {user.lastMessage}
                 </p>
               </div>
-              {(user.unreadCount || unreadCounts[user._id] || 0) > 0 && (
+              {(user.unreadCount || unreadCounts[user._id] || 0) > 0 && selectedUserId !== user._id && (
                 <span className="bg-indigo-600 text-white text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center">
                   {user.unreadCount || unreadCounts[user._id]}
                 </span>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Send, Image as ImageIcon, Trash2, CheckSquare } from 'lucide-react';
 import { UserMinimal } from '@/types/types';
-import { getMessages, sendMessage, deleteMessages, markMessagesAsRead } from '@/app/service/shared/chatService';
+import { getMessages as fetchMessagesFromAPI, sendMessage, deleteMessages, markMessagesAsRead } from '@/app/service/shared/chatService';
 import useConversation from '@/store/useConversation';
 import useListenMessages from '@/app/hooks/useLinstenMessageHook';
 import { useSocketContext } from '@/context/SocketContext';
@@ -31,7 +31,15 @@ interface ChatWindowProps {
 const CloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'your-cloud-name';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUserId }) => {
-  const { messages, setMessages, setLastMessageMeta, resetUnreadCount } = useConversation();
+  const { 
+    getMessages, 
+    setMessages, 
+    addMessage,
+    setLastMessageMeta, 
+    resetUnreadCount, 
+    selectedConversation 
+  } = useConversation();
+  
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -39,6 +47,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const { onlineUser = [] } = useSocketContext() || {};
+
+  const conversationId = selectedUser?._id;
+  const messages = conversationId ? getMessages(conversationId) : [];
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -112,7 +123,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
           isRead: false,
         };
 
-        setMessages([...messages, tempMessage]);
+        addMessage(selectedUser._id, tempMessage);
         setNewMessage('');
         setSelectedImage(null);
         setImagePreview(null);
@@ -162,9 +173,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
 
     try {
       setIsLoading(true);
-      const response = await getMessages(selectedUser._id, role);
+      const response = await fetchMessagesFromAPI(selectedUser._id, role);
       if (response.success && Array.isArray(response.data)) {
-        setMessages(response.data);
+        setMessages(selectedUser._id, response.data);
         await markMessagesAsRead(selectedUser._id, role);
         resetUnreadCount(selectedUser._id);
       }
