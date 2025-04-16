@@ -7,6 +7,7 @@ import { getCourseDetails,getCagoryName, getSectionsByCourse, getLecturesBySecti
 import { toast } from 'react-toastify';
 import { Course, ISection, ILecture } from '@/types/types';
 import CourseVerificationModal from '@/components/admin/courseVerificationModal';
+import Link from 'next/link';
 
 interface SectionWithLectures extends ISection {
   lectures: ILecture[];
@@ -117,8 +118,7 @@ const CoursePreview = () => {
     <div className="flex flex-col h-screen">
       {/* Header */}
       <div className="bg-black text-white p-4 border-b border-gray-700 flex justify-between items-center">
-        <div className="text-xl font-bold">Elevio</div>
-        <div></div>
+      <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>        <div></div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">

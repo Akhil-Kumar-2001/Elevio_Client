@@ -8,6 +8,7 @@ import AdminSidebar from '@/components/admin/adminsidebar';
 import { useRouter } from 'next/navigation';
 import { Course } from '@/types/types';
 import Pagination from '@/components/admin/paginaiton';
+import Link from 'next/link';
 
 
 const CourseVerification = () => {
@@ -79,9 +80,7 @@ const CourseVerification = () => {
   return (
     <div className="flex flex-col h-screen">
       <div className="bg-black text-white p-4 border-b border-gray-700 flex justify-between items-center">
-        <div className="text-xl font-bold">Elevio</div>
-        <div></div>
-      </div>
+      <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>      </div>
 
       <div className="flex flex-1 overflow-hidden">
 

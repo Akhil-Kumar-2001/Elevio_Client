@@ -7,6 +7,7 @@ import { getStudents, updateStudentStatus } from '@/app/service/admin/adminApi';
 import AdminSidebar from '@/components/admin/adminsidebar';
 import ConfirmModal from '@/components/admin/confirmModal';
 import Pagination from '@/components/admin/paginaiton';
+import Link from 'next/link';
 
 
 const StudentsManagement = () => {
@@ -87,7 +88,7 @@ const StudentsManagement = () => {
   return (
     <div className="flex flex-col h-screen">
       <div className="bg-black text-white p-4 border-b border-gray-700 flex justify-between items-center">
-        <div className="text-xl font-bold">Elevio</div>
+      <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>
         {/* <div>...</div> */}
       </div>
 

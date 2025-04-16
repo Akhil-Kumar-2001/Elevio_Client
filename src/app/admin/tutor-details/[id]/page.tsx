@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Tutor } from "@/types/types";
 import { useRouter } from "next/navigation";
 import VerificationModal from "@/components/admin/verificationConfirmModal";
+import Link from "next/link";
 
 const TutorVerificationDetails = () => {
     const { id } = useParams()
@@ -37,8 +38,7 @@ const TutorVerificationDetails = () => {
             {/* Navbar (Top) */}
             <div className="fixed top-0 left-0 w-full border-b border-gray-800 bg-black z-50 h-16">
                 <div className="flex items-center h-full px-4">
-                    <div className="text-white text-xl font-bold">Elevio</div>
-                </div>
+                <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>                </div>
             </div>
 
             {/* Sidebar */}

@@ -7,6 +7,7 @@ import { getCategories, createCategory, updateCategoryStatus, deleteCategory } f
 import Table from '@/components/table';
 import ConfirmModal from '@/components/admin/confirmModal';
 import Pagination from '@/components/admin/paginaiton';
+import Link from 'next/link';
 
 const CategoryPage = () => {
     interface CategoryType {
@@ -179,8 +180,7 @@ const CategoryPage = () => {
     return (
         <div className="flex flex-col h-screen">
             <div className="bg-black text-white p-4 border-b border-gray-700 flex justify-between items-center">
-                <div className="text-xl font-bold">Elevio</div>
-            </div>
+            <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>            </div>
             <div className="flex flex-1 overflow-hidden">
                 <AdminSidebar />
                 <div className="flex-1 bg-black text-white overflow-auto p-8">

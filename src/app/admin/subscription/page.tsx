@@ -7,6 +7,7 @@ import SubscriptionModal from '@/components/admin/subscriptionCreationModal';
 import { getSubscriptions, createSubscription, deleteSubscription, updateSubscription } from '@/app/service/admin/adminApi';
 import { SubscriptionType } from '@/types/types';
 import Pagination from '@/components/admin/paginaiton';
+import Link from 'next/link';
 
 const Subscription = () => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionType[]>([]);
@@ -120,9 +121,7 @@ const Subscription = () => {
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Top Navbar - Now Fixed */}
       <div className="fixed top-0 left-0 w-full bg-black text-white p-4 border-b border-gray-700 flex justify-between items-center z-50 h-16">
-        <div className="text-xl font-bold">Elevio</div>
-        <div></div>
-      </div>
+      <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>      </div>
 
       {/* Main Content Area with Sidebar and Content */}
       <div className="flex flex-1 pt-16">
