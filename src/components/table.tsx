@@ -16,6 +16,7 @@ interface TableProps {
   pageRole?: string;
   pageFunction?: (tutorId: string) => void;
   pageCourseFunction?: (courseId: string) => void;
+  pageTutorEarningsFunction?: (tutorId: string) => void; // New prop for Tutor Earnings
 }
 
 const formatDate = (dateString: string) => {
@@ -37,6 +38,7 @@ const Table: React.FC<TableProps> = ({
   pageRole,
   pageFunction,
   pageCourseFunction,
+  pageTutorEarningsFunction, // Destructure new prop
 }) => {
   return (
     <div className="bg-black border border-gray-700 rounded-sm">
@@ -55,7 +57,11 @@ const Table: React.FC<TableProps> = ({
               <tr key={index} className="border-b border-gray-800 hover:bg-gray-900 transition duration-300">
                 {columnArray.map((column) => (
                   <td key={column.field} className="p-4">
-                    {column.field === "createdAt" ? formatDate(row[column.field]) : row[column.field]}
+                    {column.render
+                      ? column.render(row)
+                      : column.field === "createdAt"
+                      ? formatDate(row[column.field])
+                      : row[column.field]}
                   </td>
                 ))}
                 {/* Actions */}
@@ -85,7 +91,7 @@ const Table: React.FC<TableProps> = ({
                       </button>
                     )}
 
-                    {/* View Details (Eye Icon) */}
+                    {/* View Details (Eye Icon) for tutor-profile */}
                     {pageRole === "tutor-profile" && pageFunction && (
                       <button
                         onClick={() => pageFunction(row._id)}
@@ -95,9 +101,20 @@ const Table: React.FC<TableProps> = ({
                       </button>
                     )}
 
+                    {/* View Details (Eye Icon) for Course-preview */}
                     {pageRole === "Course-preview" && pageCourseFunction && (
                       <button
                         onClick={() => pageCourseFunction(row._id)}
+                        className="text-blue-500 transition transform hover:scale-110"
+                      >
+                        <Eye size={22} />
+                      </button>
+                    )}
+
+                    {/* View Details (Eye Icon) for tutor-earnings-profile */}
+                    {pageRole === "tutor-earnings-profile" && pageTutorEarningsFunction && (
+                      <button
+                        onClick={() => pageTutorEarningsFunction(row.tutorId)} // Pass tutorId instead of _id
                         className="text-blue-500 transition transform hover:scale-110"
                       >
                         <Eye size={22} />
@@ -119,4 +136,5 @@ const Table: React.FC<TableProps> = ({
     </div>
   );
 };
+
 export default Table;

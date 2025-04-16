@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, EditStudentType, userType } from "@/types/types";
+import { basicType, EditStudentType, review, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import userAxiosInstance from "./userAxiosInstance";
 
@@ -281,3 +281,23 @@ export const verifySubscritionPayment = async (razorpay_order_id: string, razorp
         handleAxiosError(error)
     }
 };
+
+export const getReviewsByCourse = async(id:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/reviews/${id}`);
+        console.log("course reviws",response.data)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const createReview = async(formData:review) =>{
+    try {
+        console.log("form data",formData)
+        const response = await userAxiosInstance.post(`/student/reviews`,{formData});
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
