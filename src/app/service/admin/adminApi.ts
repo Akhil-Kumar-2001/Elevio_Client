@@ -2,6 +2,7 @@ import axios from "axios";
 import { SubscriptionType, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import adminAxiosInstance from "./adminAxiosInstance";
+import exp from "constants";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -25,7 +26,7 @@ export const adminSignin = async (userData: userType) => {
     }
 }
 
-export const getStudents = async (page:number,limit:number) => {
+export const getStudents = async (page: number, limit: number) => {
     try {
         const students = await adminAxiosInstance.get(`admin/getstudents?page=${page}&limit=${limit}`)
         console.log(students)
@@ -35,7 +36,7 @@ export const getStudents = async (page:number,limit:number) => {
     }
 }
 
-export const getTutors = async (page:number,limit:number) => {
+export const getTutors = async (page: number, limit: number) => {
     try {
         const tutors = await adminAxiosInstance.get(`/admin/gettutors?page=${page}&limit=${limit}`)
         console.log(tutors)
@@ -63,10 +64,10 @@ export const updateStudentStatus = async (id: string) => {
     }
 };
 
-export const getPendingTutors = async (page:number,limit:number) => {
+export const getPendingTutors = async (page: number, limit: number) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/pending-tutor?page=${page}&limit=${limit}`)
-        console.log("Pending Tutors ===>>>>>", response)
+        console.log("Pending Tutors ===>>>>>", response.data)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -75,7 +76,8 @@ export const getPendingTutors = async (page:number,limit:number) => {
 
 export const getTutor = async (id: string) => {
     try {
-        console.log("I enter here")
+        console.log("I enter here", id)
+
         const response = await adminAxiosInstance.get(`/admin/get-tutor/${id}`);
         console.log("this is tutor detail pending", response.data)
         return response.data;
@@ -171,11 +173,11 @@ export const getCourseDetails = async (id: string) => {
     }
 }
 
-export const getCagoryName = async (id:string) =>{
+export const getCagoryName = async (id: string) => {
     try {
         const response = await adminAxiosInstance(`/admin/get-categoryname/${id}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -216,48 +218,112 @@ export const approveCourseVerification = async (courseId: string) => {
 }
 
 // Get all subscriptions
-export const getSubscriptions = async (page:number,limit:number) => {
+export const getSubscriptions = async (page: number, limit: number) => {
     try {
-      const response = await adminAxiosInstance.get(`/admin/subscriptions?page=${page}&limit=${limit}`);
-      return response.data;
+        const response = await adminAxiosInstance.get(`/admin/subscriptions?page=${page}&limit=${limit}`);
+        return response.data;
     } catch (error: unknown) {
-      return handleAxiosError(error);
+        return handleAxiosError(error);
     }
-  };
-  
-  // Create a new subscription
-  export const createSubscription = async (subscriptionData: SubscriptionType) => {
+};
+
+// Create a new subscription
+export const createSubscription = async (subscriptionData: SubscriptionType) => {
     try {
-      console.log("Creating new subscription:", subscriptionData);
-      const response = await adminAxiosInstance.post(`/admin/subscriptions`, subscriptionData);
-      toast.success("Subscription plan created successfully");
-      return response.data;
+        console.log("Creating new subscription:", subscriptionData);
+        const response = await adminAxiosInstance.post(`/admin/subscriptions`, subscriptionData);
+        toast.success("Subscription plan created successfully");
+        return response.data;
     } catch (error: unknown) {
-      return handleAxiosError(error);
+        return handleAxiosError(error);
     }
-  };
-  
-  // Update an existing subscription
-  export const updateSubscription = async (id: string, subscriptionData: Partial<SubscriptionType>) => {
+};
+
+// Update an existing subscription
+export const updateSubscription = async (id: string, subscriptionData: Partial<SubscriptionType>) => {
     try {
-        console.log("update data",id,subscriptionData)
-      const response = await adminAxiosInstance.patch(`/admin/subscriptions`, subscriptionData);
-      toast.success("Subscription plan updated successfully");
-      return response.data;
+        console.log("update data", id, subscriptionData)
+        const response = await adminAxiosInstance.patch(`/admin/subscriptions`, subscriptionData);
+        toast.success("Subscription plan updated successfully");
+        return response.data;
     } catch (error: unknown) {
-      handleAxiosError(error);
+        handleAxiosError(error);
     }
-  };
-  
-  // Delete a subscription
-  export const deleteSubscription = async (id: string) => {
+};
+
+// Delete a subscription
+export const deleteSubscription = async (id: string) => {
     try {
-      console.log("Deleting subscription with ID:", id);
-      const response = await adminAxiosInstance.delete(`/admin/subscriptions/${id}`);
-      toast.success("Subscription plan deleted successfully");
-      return response.data;
+        console.log("Deleting subscription with ID:", id);
+        const response = await adminAxiosInstance.delete(`/admin/subscriptions/${id}`);
+        toast.success("Subscription plan deleted successfully");
+        return response.data;
     } catch (error: unknown) {
-      handleAxiosError(error);
+        handleAxiosError(error);
     }
-  };
-  
+};
+
+export const getTutorsWallets = async (page: number, limit: number) => {
+    try {
+        const response = await adminAxiosInstance.get(`/admin/tutor-wallets?page=${page}&limit=${limit}`)
+        console.log("Pending Tutors ===>>>>>", response)
+        return response.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getTutorsList = async () => {
+    try {
+        const tutors = await adminAxiosInstance.get(`/admin/gettutor-list`)
+        console.log(tutors)
+        return tutors.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getDashboardDatad = async () => {
+    try {
+        const dashboardDatas = await adminAxiosInstance.get(`/admin/get-dashboard-data`);
+        return dashboardDatas.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getAdminWallet = async (page:number,limit:number) => {
+    try {
+        const response = await adminAxiosInstance.get(`/admin/wallet?page=${page}&limit=${limit}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+export const getStudentsData = async () => {
+    try {
+        const students = await adminAxiosInstance.get(`admin/getstudentsdata`)
+        console.log(students)
+        return students.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const categoryIncome = async () => {
+    try {
+        const incomes = await adminAxiosInstance.get(`/admin/category-income`);
+        return incomes.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const AdminMontlyIncomee = async () => {
+    try {
+        const incomes = await adminAxiosInstance.get(`/admin/admin-monlty-income`);
+        return incomes.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}

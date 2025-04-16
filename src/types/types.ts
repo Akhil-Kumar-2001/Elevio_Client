@@ -283,4 +283,11 @@ export interface review {
   review: string;
 }
 
-
+export interface DashboardData {
+  totalStudents: number;
+  totalTutors: number;
+  totalCourses: number;
+  tutorTotalIncome: number;
+  adminTotalIncome: number;
+  adminBalance: number;
+}
