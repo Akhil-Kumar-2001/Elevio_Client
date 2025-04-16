@@ -24,6 +24,7 @@ export type Student = {
   createdAt: string;
 };
 
+
 export interface TokenPayload {
   email: string;
   role: string;
@@ -274,4 +275,12 @@ export interface NotificationType {
   updatedAt: string;
   __v: number;
 }
+
+export interface review {
+  courseId: string;
+  userId: string;
+  rating: number;
+  review: string;
+}
+
 

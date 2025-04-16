@@ -9,8 +9,23 @@ import useAuthStore from '@/store/userAuthStore';
 import { toast } from 'react-toastify';
 import { ICourse, ISection, ILecture, TutorType } from '@/types/types';
 import Link from 'next/link';
-import { createOrder, getCourseDetails, getLecturesBySection, getSectionsByCourse, getSubscription, getTutor, verifyPayment } from '@/app/service/user/userApi';
+import { createOrder, createReview, getCourseDetails, getLecturesBySection, getReviewsByCourse, getSectionsByCourse, getStudent, getSubscription, getTutor, verifyPayment } from '@/app/service/user/userApi';
 import { createChat } from '@/app/service/shared/chatService';
+
+// Define Review interface
+interface IReview {
+  _id: string;
+  courseId: string;
+  userId: {
+    _id: string;
+    username: string;
+  };
+  rating: number;
+  review: string;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface RazorpayResponse {
   razorpay_order_id: string;
@@ -64,6 +79,11 @@ const CoursePreview = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [reviews, setReviews] = useState<IReview[]>([]);
+  const [userReview, setUserReview] = useState<{ rating: number; review: string }>({ rating: 0, review: '' });
+  const [hasReviewed, setHasReviewed] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>('Anonymous');
+  const [email, setEmail] = useState<string>('');
   const { user } = useAuthStore();
   const userId = user?.id;
   const courseIds = [id as string];
@@ -137,8 +157,8 @@ const CoursePreview = () => {
           }
         },
         prefill: {
-          name: "Student Name",
-          email: "student@example.com",
+          name: username || "Student Name",
+          email: email || "student@example.com",
         },
         theme: {
           color: "#6B46C1",
@@ -171,17 +191,17 @@ const CoursePreview = () => {
     }
   };
 
-  const fetchTutorDetails = async() => {
+  const fetchTutorDetails = async () => {
     if (!course?.tutorId) return;
     try {
-      const tutorData = await getTutor(course?.tutorId)
-      if(tutorData){
+      const tutorData = await getTutor(course.tutorId);
+      if (tutorData) {
         setTutor(tutorData.data);
       }
     } catch (error) {
-      console.log("error while retrieving tutor data")
+      console.log("Error while retrieving tutor data:", error);
     }
-  }
+  };
 
   const fetchCourseSections = async () => {
     try {
@@ -206,7 +226,7 @@ const CoursePreview = () => {
 
   const fetchSectionLectures = async (sectionId: string, setFirstAsCurrent = false) => {
     try {
-      const response = await getLecturesBySection(sectionId as string);
+      const response = await getLecturesBySection(sectionId);
       if (response.success) {
         setSections(prev =>
           prev.map(section =>
@@ -222,6 +242,85 @@ const CoursePreview = () => {
     } catch (error) {
       console.error("Error fetching lectures:", error);
       toast.error("Failed to load lectures");
+    }
+  };
+
+  const fetchUsername = async () => {
+    try {
+      const response = await getStudent();
+      if (response.success && response.data.username) {
+        setUsername(response.data.username);
+        setEmail(response.data.email);
+      }
+    } catch (error) {
+      console.error('Error fetching username:', error);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await getReviewsByCourse(id as string);
+      if (response.success) {
+        const reviewsWithUser = response.data.map((review: IReview) => ({
+          ...review,
+          user: {
+            username: review.userId.username || 'Anonymous',
+          },
+        }));
+        setReviews(reviewsWithUser || []);
+        if (userId) {
+          const userHasReviewed = response.data.some((review: IReview) => review.userId._id === userId);
+          setHasReviewed(userHasReviewed);
+        }
+      } else {
+        setReviews([]);
+      }
+    } catch (error) {
+      setReviews([]);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId || !hasPurchased()) {
+      toast.error("You must purchase the course to submit a review");
+      return;
+    }
+    if (hasReviewed) {
+      toast.error("You have already submitted a review for this course");
+      return;
+    }
+    if (userReview.rating < 1 || userReview.rating > 5) {
+      toast.error("Please select a rating between 1 and 5");
+      return;
+    }
+    if (!userReview.review.trim()) {
+      toast.error("Please enter a review");
+      return;
+    }
+    try {
+      const formData = {
+        courseId: id as string,
+        userId,
+        rating: userReview.rating,
+        review: userReview.review,
+      };
+      const response = await createReview(formData);
+      if (response.success) {
+        toast.success("Review submitted successfully");
+        setHasReviewed(true);
+        setReviews([
+          ...reviews,
+          {
+            ...response.data,
+            user: { username: response.data.userId?.username || username },
+          },
+        ]);
+        setUserReview({ rating: 0, review: '' });
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit review");
     }
   };
 
@@ -288,11 +387,10 @@ const CoursePreview = () => {
     }).format(price);
   };
 
-  // Placeholder function for initiating chat with tutor
   const handleChatWithTutor = async () => {
     const response = await createChat(course?.tutorId as string);
     if (response.success) {
-      router.push('/chat')
+      router.push('/chat');
     }
   };
 
@@ -300,13 +398,17 @@ const CoursePreview = () => {
     if (id) {
       fetchCourseDetails();
       fetchCourseSections();
-      validateSubscription()
+      fetchReviews();
+      validateSubscription();
+      fetchUsername();
     }
-  }, [id]);
-  
-  useEffect(()=>{
-    fetchTutorDetails()
-  },[course])
+  }, [id, userId]);
+
+  useEffect(() => {
+    if (course) {
+      fetchTutorDetails();
+    }
+  }, [course]);
 
   if (loading) {
     return (
@@ -323,6 +425,10 @@ const CoursePreview = () => {
       </div>
     );
   }
+
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+    : '0.0';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -359,11 +465,11 @@ const CoursePreview = () => {
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center">
                     <User className="w-4 h-4 text-gray-500 mr-1" />
-                    <span className="text-gray-700">Tutor: {tutor?.username || "John Doe"}</span>
+                    <span className="text-gray-700">Tutor: {tutor?.username || "Unknown"}</span>
                   </div>
                   <div className="flex items-center">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span className="text-gray-700">{4.8} Rating</span>
+                    <span className="text-gray-700">{averageRating} Rating</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 text-gray-500 mr-1" />
@@ -419,17 +525,6 @@ const CoursePreview = () => {
               )}
             </div>
 
-            {/* {hasPurchased() && (
-              <div className="mt-4">
-                <button
-                  onClick={handleChatWithTutor}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 w-full max-w-xs"
-                >
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  <span>Chat with Tutor</span>
-                </button>
-              </div>
-            )} */}
             {hasPurchased() && hasValidSubscription() && (
               <div className="mt-4">
                 <button
@@ -445,71 +540,98 @@ const CoursePreview = () => {
 
           <div className="mt-6 p-6 bg-white border-t">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Student Reviews</h2>
-            <div className="flex items-center mb-4">
-              <div className="flex items-center">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-5 h-5 text-yellow-400" fill="#FBBF24" />
-                ))}
-              </div>
-              <span className="ml-2 text-lg font-semibold">{4.8}</span>
-            </div>
-            <div className="space-y-6">
-              <div className="border-b pb-4">
-                <div className="flex items-center mb-2">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
-                    AJ
-                  </div>
-                  <div className="ml-3">
-                    <p className="font-medium text-gray-800">Alex Johnson</p>
-                    <div className="flex items-center">
+
+            {hasPurchased() && !hasReviewed ? (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Submit Your Review</h3>
+                <form onSubmit={handleReviewSubmit}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                    <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className="w-4 h-4 text-yellow-400" fill="#FBBF24" />
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setUserReview({ ...userReview, rating: star })}
+                          className={`w-8 h-8 flex items-center justify-center ${userReview.rating >= star ? 'text-yellow-400' : 'text-gray-300'}`}
+                        >
+                          <Star className="w-6 h-6" fill={userReview.rating >= star ? '#FBBF24' : 'none'} />
+                        </button>
                       ))}
-                      <span className="text-gray-500 text-sm ml-2">2 weeks ago</span>
                     </div>
                   </div>
-                </div>
-                <p className="text-gray-700">This course exceeded my expectations! The instructor breaks down complex concepts into easy-to-understand lessons.</p>
-              </div>
-              <div className="border-b pb-4">
-                <div className="flex items-center mb-2">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
-                    SR
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
+                    <textarea
+                      value={userReview.review}
+                      onChange={(e) => setUserReview({ ...userReview, review: e.target.value })}
+                      className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      rows={4}
+                      placeholder="Share your thoughts about the course..."
+                    ></textarea>
                   </div>
-                  <div className="ml-3">
-                    <p className="font-medium text-gray-800">Sarah Rodriguez</p>
-                    <div className="flex items-center">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className="w-4 h-4 text-yellow-400" fill="#FBBF24" />
-                      ))}
-                      <span className="text-gray-500 text-sm ml-2">1 month ago</span>
+                  <button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                  >
+                    Submit Review
+                  </button>
+                </form>
+              </div>
+            ) : hasPurchased() && hasReviewed ? (
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                <p className="text-blue-700">You have already submitted a review for this course.</p>
+              </div>
+            ) : null}
+
+            {reviews.length > 0 ? (
+              <>
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-5 h-5 ${star <= parseFloat(averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                        fill={star <= parseFloat(averageRating) ? '#FBBF24' : 'none'}
+                      />
+                    ))}
+                  </div>
+                  <span className="ml-2 text-lg text-gray-700 font-semibold">{averageRating}</span>
+                  <span className="ml-2 text-sm text-gray-600">({reviews.length} reviews)</span>
+                </div>
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <div key={review._id} className="border-b pb-4">
+                      <div className="flex items-center mb-2">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                          {review.userId?.username?.slice(0, 2).toUpperCase() || 'AN'}
+                        </div>
+                        <div className="ml-3">
+                          <p className={`font-medium ${review.userId._id === userId ? 'font-semibold underline decoration-1 underline-offset-4 decoration-blue-300 text-gray-700' : 'text-gray-800'}`}>
+                            {review.userId?.username || 'Anonymous'}
+                          </p>
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                fill={star <= review.rating ? '#FBBF24' : 'none'}
+                              />
+                            ))}
+                            <span className="text-gray-500 text-sm ml-2">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-gray-700">{review.review}</p>
                     </div>
-                  </div>
+                  ))}
                 </div>
-                <p className="text-gray-700">Very comprehensive and well-structured course. Highly recommended!</p>
-              </div>
-              <div>
-                <div className="flex items-center mb-2">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
-                    DP
-                  </div>
-                  <div className="ml-3">
-                    <p className="font-medium text-gray-800">David Park</p>
-                    <div className="flex items-center">
-                      {[1, 2, 3, 4].map((star) => (
-                        <Star key={star} className="w-4 h-4 text-yellow-400" fill="#FBBF24" />
-                      ))}
-                      <Star className="w-4 h-4 text-gray-300" stroke="#D1D5DB" />
-                      <span className="text-gray-500 text-sm ml-2">2 months ago</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-700">Good content overall. Some sections could have been more in-depth.</p>
-              </div>
-              <button className="w-full py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors mt-2">
-                Show all reviews
-              </button>
-            </div>
+              </>
+            ) : (
+              <p className="text-gray-600">No reviews yet. Be the first to share your feedback!</p>
+            )}
           </div>
         </div>
 
@@ -571,8 +693,7 @@ const CoursePreview = () => {
                           return (
                             <button
                               key={lecture._id.toString()}
-                              className={`w-full p-3 flex items-center text-left hover:bg-gray-100 transition-colors ${isActive ? 'bg-blue-50' : ''
-                                } ${!userCanAccessLecture ? 'cursor-not-allowed opacity-75' : ''}`}
+                              className={`w-full p-3 flex items-center text-left hover:bg-gray-100 transition-colors ${isActive ? 'bg-blue-50' : ''} ${!userCanAccessLecture ? 'cursor-not-allowed opacity-75' : ''}`}
                               onClick={() => handleLectureSelect(lecture, sectionIndex)}
                               disabled={!userCanAccessLecture}
                             >
