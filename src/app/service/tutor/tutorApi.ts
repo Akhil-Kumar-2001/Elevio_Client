@@ -300,4 +300,40 @@ export const getNotifications = async () => {
     }
   }
 
+  export const getMonthlyIncome = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/monthly-income`)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
+  export const getStudentSCount = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/students-count`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
+  export const getTutorTransactions = async (page:number,limit:number) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/transactions?page=${page}&limit=${limit}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
+  export const getDashboradDetails = async () =>{
+    try {
+        const response = await userAxiosInstance.get(`/tutor/dahboard-data`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
 

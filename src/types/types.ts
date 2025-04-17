@@ -291,3 +291,12 @@ export interface DashboardData {
   adminTotalIncome: number;
   adminBalance: number;
 }
+
+export interface IDashboardDetails {
+  courseCount: number;
+  totalStudents: number;
+  totalIncome: number;
+  totalTransactions: number;
+  lastTransactionDate: Date | null;
+}
+
