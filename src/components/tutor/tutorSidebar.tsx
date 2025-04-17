@@ -1,13 +1,26 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
-  FiGrid, FiFileText, FiUsers, FiMessageSquare, 
-  FiDollarSign, FiCalendar, FiLogOut, FiChevronLeft, FiChevronRight 
+  FiGrid, 
+  FiFileText, 
+  FiUsers, 
+  FiMessageSquare, 
+  FiDollarSign, 
+  FiCalendar, 
+  FiLogOut, 
+  FiChevronLeft, 
+  FiChevronRight 
 } from "react-icons/fi";
 import useAuthStore from '@/store/tutorAuthStore';
 import { toast } from 'react-toastify';
+
+// Define the prop types for TutorSidebar
+interface TutorSidebarProps {
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 const menuItems = [
   { name: "Dashboard", icon: FiGrid, path: "/tutor/dashboard" },
@@ -18,15 +31,11 @@ const menuItems = [
   { name: "Scheduled session", icon: FiCalendar, path: "/tutor/sessions" },
 ];
 
-const TutorSidebar = () => {
+const TutorSidebar = ({ expanded, setExpanded }: TutorSidebarProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const { logout } = useAuthStore();
 
-  const [expanded, setExpanded] = useState<boolean>(() => {
-    return JSON.parse(localStorage.getItem("sidebarExpanded") ?? "true");
-  });
-  
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
@@ -38,13 +47,13 @@ const TutorSidebar = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth <= 768; 
+      const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      if (mobile) setExpanded(false); 
+      if (mobile) setExpanded(false);
       else setExpanded(JSON.parse(localStorage.getItem("sidebarExpanded") ?? "true"));
     };
 
-    handleResize(); 
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
@@ -72,7 +81,6 @@ const TutorSidebar = () => {
         ${expanded ? 'w-56' : 'w-16'}`}
     >
       <div className="flex flex-col items-center md:items-start h-full relative">
-        
         <div 
           className={`flex items-center justify-between w-full px-4 py-4 cursor-pointer 
             ${pathname === "/tutor/dashboard" ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100'}`}

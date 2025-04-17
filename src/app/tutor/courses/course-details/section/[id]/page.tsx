@@ -35,6 +35,8 @@ const CourseContentManager = () => {
   const [editSectionDesc, setEditSectionDesc] = useState('');
   const [editLectureId, setEditLectureId] = useState<string | null>(null);
   const [editLectureTitle, setEditLectureTitle] = useState('');
+  const [expanded, setExpanded] = useState<boolean>(true); // Sync with TutorSidebar
+
 
   // Fetch sections from the backend when the component mounts
   useEffect(() => {
@@ -637,11 +639,11 @@ const CourseContentManager = () => {
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
-      <div className="flex flex-1 h-[calc(100vh-64px)]">
-        <div className="w-64 bg-white">
-          <TutorSidebar />
+      <div className="flex flex-1 h-[calc(100vh-64px)] pt-14">
+      <div className={` bg-white transition-all duration-300 ${expanded ? 'w-56' : 'w-16'}`}>
+        <TutorSidebar expanded={expanded} setExpanded={setExpanded} />
         </div>
-        <div className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="flex justify-center items-start min-h-full py-10 px-4">
             <div className="w-full max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-8">
               <div className="flex items-center mb-8">

@@ -19,8 +19,10 @@ const Courses = () => {
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]); 
-  const {user} = useAuthStore()
+  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
+  const [expanded, setExpanded] = useState<boolean>(true); // Sync with TutorSidebar
+
+  const { user } = useAuthStore()
   const tutorId = user?.id
 
   // ✅ Fetch categories from API
@@ -28,7 +30,7 @@ const Courses = () => {
     try {
       const response = await getCategories();
       if (response && response.success) {
-        setCategories(response.data); 
+        setCategories(response.data);
       }
     } catch (error) {
       console.log(error)
@@ -40,11 +42,11 @@ const Courses = () => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      if(!tutorId){
+      if (!tutorId) {
         console.log("tutor id is no availabe")
         return
       }
-      const response = await getCourses(tutorId,currentPage, 5);
+      const response = await getCourses(tutorId, currentPage, 5);
       if (response && response.success) {
         setCourses(response.data.courses);
         setTotalPages(Math.floor(response.data.totalRecord / 5));
@@ -70,9 +72,9 @@ const Courses = () => {
   // ✅ Updated category field to display category name instead of ID
   const columns = [
     { field: 'title', header: 'Course Name' },
-    { 
-      field: 'category', 
-      header: 'Category', 
+    {
+      field: 'category',
+      header: 'Category',
       render: (row: any) => {
         const categoryName = categories.find(cat => cat._id === row.category)?.name || 'Unknown';
         return <span>{categoryName}</span>;
@@ -95,8 +97,8 @@ const Courses = () => {
   return (
     <div className="flex flex-col h-screen bg-white">
       <Navbar />
-      <div className="flex flex-grow">
-        <TutorSidebar />
+      <div className="flex flex-grow mt-16">
+        <TutorSidebar expanded={expanded} setExpanded={setExpanded} />
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-xl font-medium text-gray-800">Course List</h1>

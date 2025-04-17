@@ -14,7 +14,7 @@ const Chat = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="h-[calc(100vh-64px)] flex"> {/* Adjust 64px based on your navbar height */}
+      <div className="h-[calc(100vh-64px)] flex flex-grow mt-14">  {/* Adjust 64px based on your navbar height */}
         <ChatSidebar
           role="Tutor"
           onSelectUser={setSelectedUser}

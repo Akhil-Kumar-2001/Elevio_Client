@@ -197,7 +197,7 @@ const ProfileSettings = () => {
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-6 py-10 pt-28">
         {/* Profile Settings - With zoom out effect */}
         <div className="bg-white shadow-sm rounded-lg p-6 mb-6 transform transition-transform duration-500 hover:scale-95 hover:shadow-xl">
           <div className="flex justify-between items-center mb-6">

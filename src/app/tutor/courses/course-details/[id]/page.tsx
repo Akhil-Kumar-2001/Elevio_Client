@@ -19,6 +19,8 @@ const CourseDetailPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false); // State for modal visibility
+  const [expanded, setExpanded] = useState<boolean>(true); // Sync with TutorSidebar
+
 
   const [course, setCourse] = useState<Course | null>(null);
   const [editedCourse, setEditedCourse] = useState<Partial<Course> | null>(null);
@@ -166,13 +168,13 @@ const CourseDetailPage = () => {
       const response = await updateCourse(id as string, courseToUpdate as Course);
       if (response && response.success) {
         toast.success('Course updated successfully');
-        
+
         const updatedCourse = { ...course, ...courseToUpdate } as Course;
         setCourse(updatedCourse);
         setEditedCourse(updatedCourse);
-        
+
         await fetchCourseDetails();
-        
+
         setEditMode(false);
         setImagePreview(null);
       } else {
@@ -195,7 +197,7 @@ const CourseDetailPage = () => {
         ...course,
         status: "listed"
       };
-      
+
       const response = await updateCourse(courseId, updatedCourseData);
       if (response && response.success) {
         toast.success('Course listed successfully');
@@ -243,10 +245,12 @@ const CourseDetailPage = () => {
 
       <div className="flex pt-16 h-full">
         <div className="fixed left-0 top-16 bottom-0 z-10 bg-white">
-          <TutorSidebar />
+          <TutorSidebar expanded={expanded} setExpanded={setExpanded} />
         </div>
 
-        <div className="flex-1 ml-64 bg-white w-full">
+        {/* <div className="flex-1 ml-64 bg-white w-full"> */}
+        <div className={`flex-1 bg-white w-ful transition-all duration-300 ${expanded ? 'pl-64' : 'pl-24'}`}>
+
           <div className="h-full overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-xl font-medium text-gray-800">Course Details</h1>
@@ -400,15 +404,14 @@ const CourseDetailPage = () => {
                         <h2 className="text-xl font-semibold text-gray-900 mb-2">Course Status</h2>
                         <div className="group relative inline-block">
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              course.status === 'published'
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${course.status === 'published'
                                 ? 'bg-green-100 text-green-800'
                                 : course.status === 'accepted'
-                                ? 'bg-blue-100 text-blue-800'
-                                : course.status === 'rejected'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : course.status === 'rejected'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                              }`}
                           >
                             {course.status}
                           </span>
@@ -459,15 +462,14 @@ const CourseDetailPage = () => {
                         <h2 className="text-xl font-semibold text-gray-900 mb-2">Course Status</h2>
                         <div className="group relative inline-block">
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              course.status === 'listed'
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${course.status === 'listed'
                                 ? 'bg-green-100 text-green-800'
                                 : course.status === 'accepted'
-                                ? 'bg-blue-100 text-blue-800'
-                                : course.status === 'rejected'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : course.status === 'rejected'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                              }`}
                           >
                             {course.status}
                           </span>
