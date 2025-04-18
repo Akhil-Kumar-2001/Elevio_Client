@@ -20,9 +20,10 @@ import useAuthStore from '@/store/userAuthStore';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/student/navbar';
 import { toast } from 'react-toastify';
-import { getStudent, getSubscription, updateStudent } from '@/app/service/user/userApi';
+import { getProgress, getPurchasedCourses, getStudent, getSubscription, updateStudent } from '@/app/service/user/userApi';
 import Spinner from '@/components/spinner';
 import Link from 'next/link';
+import { ICourse, IProgress } from '@/types/types';
 
 // Define the Student interface
 interface Student {
@@ -67,6 +68,10 @@ const Profile = () => {
   const [completedCourses, setCompletedCourses] = useState(0);
   const [messages, setMessages] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [courses, setCourses] = useState<ICourse[]>([]);
+  const [progressMap, setProgressMap] = useState<Record<string, IProgress>>({});
+
+
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
@@ -99,7 +104,7 @@ const Profile = () => {
           console.log("No subscription data found");
           setSubscription(null);
         }
-        setCompletedCourses(3); // Placeholder
+        setCompletedCourses(0); // Placeholder
         setMessages(2); // Placeholder
       } catch (subError) {
         console.log("Subscription fetch failed (non-critical):", subError);
@@ -126,6 +131,59 @@ const Profile = () => {
     { name: "Data Structure", progress: 50 },
     { name: "Machine Learning Basics", progress: 50 }
   ];
+
+  const purchasedCourses = async () => {
+    if (!id) {
+      console.log("User id is not available");
+      return;
+    }
+    try {
+      const response = await getPurchasedCourses(id as string);
+      if (response.success) {
+        setCourses(response.data);
+      }
+    } catch (error) {
+      console.log("Error while getting Purchased Courses:", error);
+    }
+  };
+
+  const fetchProgressForCourses = async () => {
+    if (!courses.length) return;
+    try {
+      const progressPromises = courses.map(course =>
+        getProgress(course._id).then(response => ({
+          courseId: course._id,
+          progress: response?.success ? response.data : null
+        }))
+      );
+      const progressResults = await Promise.all(progressPromises);
+      const progressData = progressResults.reduce((acc, { courseId, progress }) => {
+        if (progress) {
+          acc[courseId] = progress;
+        }
+        return acc;
+      }, {} as Record<string, IProgress>);
+      setProgressMap(progressData);
+    } catch (error) {
+      console.error("Error fetching progress for courses:", error);
+    }
+  };
+
+  useEffect(() => {
+    purchasedCourses();
+  }, [id]);
+
+  useEffect(() => {
+    fetchProgressForCourses();
+  }, [courses]);
+
+  useEffect(() => {
+    const completedCount = Object.values(progressMap).filter(
+      progress => progress.progressPercentage === 100 || progress.isCompleted
+    ).length;
+    
+    setCompletedCourses(completedCount);
+  }, [progressMap]);
 
   const getDaysRemaining = () => {
     if (!subscription || subscription.status !== 'active' || !subscription.endDate) {
@@ -289,11 +347,10 @@ const Profile = () => {
                 {subscription ? (
                   <div className="mt-2 flex items-center">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        subscription.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subscription.status === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                        }`}
                     >
                       {subscription.status === 'active' ? 'Active Subscription' : 'Inactive Subscription'}
                     </span>
@@ -445,21 +502,19 @@ const Profile = () => {
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex space-x-4 border-b mb-6">
             <button
-              className={`pb-4 px-4 font-medium ${
-                activeTab === 'progress'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`pb-4 px-4 font-medium ${activeTab === 'progress'
+                ? 'border-b-2 border-blue-600 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
               onClick={() => setActiveTab('progress')}
             >
               Progress
             </button>
             <button
-              className={`pb-4 px-4 font-medium ${
-                activeTab === 'schedule'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`pb-4 px-4 font-medium ${activeTab === 'schedule'
+                ? 'border-b-2 border-blue-600 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
               onClick={() => setActiveTab('schedule')}
             >
               Schedule
@@ -469,22 +524,26 @@ const Profile = () => {
           {activeTab === 'progress' && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Current Courses</h3>
-              {currentCourses.map((course, index) => (
-                <div key={index} className="bg-gray-50 p-5 rounded-xl hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-medium text-gray-900">{course.name}</span>
-                    <span className="text-sm font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                      {course.progress}% complete
-                    </span>
+              {courses.map((course, index) => {
+                const courseProgress = progressMap[course._id];
+                const progressPercentage = courseProgress?.progressPercentage || 0;
+                return (
+                  <div key={index} className="bg-gray-50 p-5 rounded-xl hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-medium text-gray-900">{course.title}</span>
+                      <span className="text-sm font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                        {progressPercentage}% complete
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500"
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500"
-                      style={{ width: `${course.progress}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

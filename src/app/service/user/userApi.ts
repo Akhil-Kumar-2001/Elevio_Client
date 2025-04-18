@@ -106,6 +106,14 @@ export const getListedCourses = async () => {
         handleAxiosError(error)
     }
 };
+export const getTopRatedCourses = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/student/top-rated`)
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+};
 
 export const getStudent = async () => {
     try {
@@ -224,11 +232,11 @@ export const getCourseDetails = async (courseId: string) => {
     }
 }
 
-export const getTutor = async(id: string) => {
+export const getTutor = async (id: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/tutorDetails/${id}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -282,20 +290,40 @@ export const verifySubscritionPayment = async (razorpay_order_id: string, razorp
     }
 };
 
-export const getReviewsByCourse = async(id:string) =>{
+export const getReviewsByCourse = async (id: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/reviews/${id}`);
-        console.log("course reviws",response.data)
+        console.log("course reviws", response.data)
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const createReview = async (formData: review) => {
+    try {
+        console.log("form data", formData)
+        const response = await userAxiosInstance.post(`/student/reviews`, { formData });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export const getProgress = async (courseId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/progress/${courseId}`);
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)
     }
 }
 
-export const createReview = async(formData:review) =>{
+export const addToProgress = async (courseId:string,lectureId:string) =>{
     try {
-        console.log("form data",formData)
-        const response = await userAxiosInstance.post(`/student/reviews`,{formData});
+        console.log("add lecture to the progress api call",courseId,lectureId)
+        const response = await userAxiosInstance.post(`/student/update-progress`,{courseId,lectureId})
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)

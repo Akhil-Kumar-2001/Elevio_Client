@@ -7,10 +7,13 @@ import { useParams, useRouter } from 'next/navigation';
 import Footer from '@/components/student/footer';
 import useAuthStore from '@/store/userAuthStore';
 import { toast } from 'react-toastify';
-import { ICourse, ISection, ILecture, TutorType } from '@/types/types';
+import { ICourse, ISection, ILecture, TutorType, IProgress } from '@/types/types';
 import Link from 'next/link';
-import { createOrder, createReview, getCourseDetails, getLecturesBySection, getReviewsByCourse, getSectionsByCourse, getStudent, getSubscription, getTutor, verifyPayment } from '@/app/service/user/userApi';
+import { createOrder, createReview, getCourseDetails, getLecturesBySection, getProgress, getReviewsByCourse, getSectionsByCourse, getStudent, getSubscription, getTutor, verifyPayment, addToProgress } from '@/app/service/user/userApi';
 import { createChat } from '@/app/service/shared/chatService';
+import ReactPlayer from 'react-player';
+import Image from 'next/image';
+import CertificateGenerator from '@/components/student/certificateGenerate';
 
 // Define Review interface
 interface IReview {
@@ -68,6 +71,10 @@ interface Subscription {
   };
 }
 
+interface ProgressTracker {
+  [lectureId: string]: boolean;
+}
+
 const CoursePreview = () => {
   const router = useRouter();
   const { id } = useParams();
@@ -87,6 +94,8 @@ const CoursePreview = () => {
   const { user } = useAuthStore();
   const userId = user?.id;
   const courseIds = [id as string];
+  const [progressTracker, setProgressTracker] = useState<ProgressTracker>({}); // Track API calls
+  const [progress, setProgress] = useState<IProgress | null>(null);
 
   const loadRazorpayScript = () => {
     return new Promise<boolean>((resolve) => {
@@ -377,7 +386,7 @@ const CoursePreview = () => {
   };
 
   const getLectureStatus = (lecture: ILecture) => {
-    return Math.random() > 0.5 ? "completed" : "not-started";
+    return progress?.completedLectures.includes(lecture._id) ? "completed" : "not-started";
   };
 
   const formatPrice = (price: number) => {
@@ -394,6 +403,76 @@ const CoursePreview = () => {
     }
   };
 
+  const handleGetProgress = async () => {
+    if (!course) return;
+    const response = await getProgress(course?._id);
+    if (response.success) {
+      console.log("progress of the course", response.data);
+      setProgress(response.data);
+    }
+  };
+
+  const handleVideoProgress = async (state: { played: number; playedSeconds: number; loaded: number; loadedSeconds: number }) => {
+    if (
+      currentLecture &&
+      course &&
+      state.played >= 0.9 &&
+      progress &&
+      !progress.completedLectures.includes(currentLecture._id) &&
+      !progressTracker[currentLecture._id]
+    ) {
+      try {
+        // Mark this lecture as having triggered the API call
+        setProgressTracker(prev => ({ ...prev, [currentLecture._id]: true }));
+
+        // Call the backend API to add lecture to progress
+        const response = await addToProgress(course._id, currentLecture._id);
+        if (response.success) {
+          toast.success('Lecture progress updated to completed!');
+
+          // Update the progress state with new completed lecture
+          setProgress(prev => prev ? ({
+            ...prev,
+            completedLectures: [...prev.completedLectures, currentLecture._id],
+            progressPercentage: response.data.progressPercentage,
+            isCompleted: response.data.isCompleted
+          }) : prev);
+
+          // Update the lecture's progress in the local state
+          setSections(prev =>
+            prev.map(section =>
+              section._id === currentLecture.sectionId
+                ? {
+                  ...section,
+                  lectures: section.lectures?.map(lecture =>
+                    lecture._id === currentLecture._id
+                      ? { ...lecture, progress: 'completed' }
+                      : lecture
+                  ),
+                }
+                : section
+            )
+          );
+        } else {
+          toast.error('Failed to update lecture progress');
+          // Revert the progress tracker if the API call fails
+          setProgressTracker(prev => ({ ...prev, [currentLecture._id]: false }));
+        }
+      } catch (error) {
+        console.error('Error updating lecture progress:', error);
+        toast.error('Failed to update lecture progress');
+        setProgressTracker(prev => ({ ...prev, [currentLecture._id]: false }));
+      }
+    }
+  };
+
+  // Reset progress tracker when switching lectures
+  useEffect(() => {
+    if (currentLecture) {
+      setProgressTracker(prev => ({ ...prev, [currentLecture._id]: false }));
+    }
+  }, [currentLecture]);
+
   useEffect(() => {
     if (id) {
       fetchCourseDetails();
@@ -407,6 +486,7 @@ const CoursePreview = () => {
   useEffect(() => {
     if (course) {
       fetchTutorDetails();
+      handleGetProgress();
     }
   }, [course]);
 
@@ -438,12 +518,15 @@ const CoursePreview = () => {
         <div className="lg:w-3/4 h-full flex flex-col">
           <div className="relative bg-black w-full" style={{ paddingTop: '56.25%' }}>
             {currentLecture ? (
-              <iframe
-                src={currentLecture.videoUrl || "/placeholder-video.mp4"}
+              <ReactPlayer
+                url={currentLecture.videoUrl || '/placeholder-video.mp4'}
                 className="absolute top-0 left-0 w-full h-full"
-                style={{ objectFit: "contain" }}
-                allowFullScreen
-              ></iframe>
+                style={{ objectFit: 'contain' }}
+                width="100%"
+                height="100%"
+                controls
+                onProgress={handleVideoProgress} // Track video progress
+              />
             ) : (
               <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white">
                 Select a lecture to start learning
@@ -459,7 +542,18 @@ const CoursePreview = () => {
 
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{course.title}</h1>
+                <div className="flex items-center gap-4">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{course.title}</h1>
+                  {progress?.isCompleted && hasPurchased() && (
+                    <Image
+                      src="/images/completed badge.jpg"
+                      alt="Course Completed Seal"
+                      width={80}
+                      height={80}
+                      className="mb-2"
+                    />
+                  )}
+                </div>
                 <p className="text-gray-600 mb-4">{course.subtitle}</p>
 
                 <div className="flex items-center gap-4 text-sm">
@@ -477,6 +571,16 @@ const CoursePreview = () => {
                   </div>
                 </div>
               </div>
+
+              {progress?.isCompleted && hasPurchased() && (
+                <div className="mb-4">
+                  <CertificateGenerator
+                    courseTitle={course.title}
+                    username={username}
+                    instructorName={tutor?.username}
+                  />
+                </div>
+              )}
 
               {!hasPurchased() && (
                 <div className="flex flex-col items-end">
@@ -529,7 +633,7 @@ const CoursePreview = () => {
               <div className="mt-4">
                 <button
                   onClick={handleChatWithTutor}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 w-full max-w-xs"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full flex items-center justify-center  shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 w-full max-w-xs transition-all duration-300 text-sm  transform hover:-translate-y-1"
                 >
                   <MessageSquare className="w-5 h-5 mr-2" />
                   <span>Chat with Tutor</span>
@@ -765,7 +869,6 @@ const CoursePreview = () => {
           )}
         </div>
       </div>
-
       <Footer />
     </div>
   );

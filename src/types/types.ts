@@ -124,6 +124,8 @@ export interface ICourse {
   status: string;
   rejectedReason: string;
   imageThumbnail: string;
+  avgRating?: number;
+  totalReviews?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -300,3 +302,15 @@ export interface IDashboardDetails {
   lastTransactionDate: Date | null;
 }
 
+
+export interface IProgress  {
+  studentId: string;
+  courseId: string;
+  completedLectures: string[];
+  lastAccessedLecture?: string;
+  progressPercentage: number;
+  isCompleted: boolean;
+  startDate: Date;
+  lastAccessDate?: Date;
+  completionDate?: Date;
+}
