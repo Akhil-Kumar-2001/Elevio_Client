@@ -6,6 +6,7 @@ import HeroSection from '@/components/student/heroSection'; // Import the HeroSe
 import SubscriptionBanner from '@/components/student/subscriptionBanner';
 import WhatToLearnNext from '@/components/student/courseList';
 import Footer from '@/components/student/footer';
+import TopRated from '@/components/student/topRatedCourse';
 
 const Homepage = () => {
 
@@ -15,6 +16,7 @@ const Homepage = () => {
       <HeroSection />
       <SubscriptionBanner />
       <WhatToLearnNext />
+      <TopRated />
       <Footer />
     </div>
   );

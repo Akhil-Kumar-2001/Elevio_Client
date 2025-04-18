@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getListedCourses, addToCart, getPurchasedCourses } from '../../app/service/user/userApi'; // Adjust path to your API file
+import { getListedCourses, addToCart, getPurchasedCourses, getTopRatedCourses } from '../../app/service/user/userApi'; // Adjust path to your API file
 import { FrontendCourse, ICourse } from '@/types/types'; // Adjust path to your types file
 import useAuthStore from '@/store/userAuthStore';
 import { useCartCountStore } from '@/store/cartCountStore';
@@ -12,7 +12,7 @@ interface ExtendedFrontendCourse extends FrontendCourse {
   _id: string; // Add _id to the type
 }
 
-const WhatToLearnNext = () => {
+const TopRated = () => {
   const router = useRouter();
   const [courses, setCourses] = useState<ExtendedFrontendCourse[]>([]);
   const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]); // Store purchased course IDs
@@ -25,7 +25,7 @@ const WhatToLearnNext = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await getListedCourses();
+      const response = await getTopRatedCourses();
       const mappedCourses: ExtendedFrontendCourse[] = response.data.map((course: ICourse) => ({
         _id: course._id, // Map the _id from the API response
         title: course.title,
@@ -95,7 +95,7 @@ const WhatToLearnNext = () => {
   if (loading) {
     return (
       <div className="w-full px-16 my-20">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">What to learn next</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Top Rated Courses</h2>
         <p>Loading courses...</p>
       </div>
     );
@@ -104,7 +104,7 @@ const WhatToLearnNext = () => {
   if (error) {
     return (
       <div className="w-full px-16 my-20">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">What to learn next</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Top Rated Courses</h2>
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -114,7 +114,7 @@ const WhatToLearnNext = () => {
     <div className="w-full px-16 my-20">
       {/* Header with "See More" link */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">What to learn next</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">Top Rated Courses</h2>
         <a
           href="/courses"
           className="text-blue-600 font-medium hover:text-blue-800 transition-colors"
@@ -211,4 +211,4 @@ const WhatToLearnNext = () => {
   );
 };
 
-export default WhatToLearnNext;
+export default TopRated;
