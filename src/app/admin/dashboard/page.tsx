@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react'
 import AdminSidebar from '@/components/admin/adminsidebar';
 import Link from 'next/link';
 import { DashboardData } from '@/types/types';
-import { categoryIncome, getDashboardDatad, AdminMontlyIncomee } from '@/app/service/admin/adminApi';
+import { categoryIncome, getDashboardDatad, AdminMontlyIncome, AdminYearlyIncome } from '@/app/service/admin/adminApi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const AdminDashboard = () => {
-
   const [dashboardData, setDashboardData] = useState<DashboardData>()
   const [categoryIncomeData, setCategoryIncomeData] = useState<{ name: string, value: number }[]>([])
-  const [adminMonthlyIncome, setadminMonthlyIncome] = useState<{ month: string, income: number }[]>([])
+  const [adminIncomeData, setAdminIncomeData] = useState<{ month?: string, year?: number, income: number }[]>([])
+  const [view, setView] = useState<"monthly" | "yearly">("monthly")
 
   // Colors for pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
@@ -28,15 +28,23 @@ const AdminDashboard = () => {
     }
   }
 
-  const fetchAdminMontlyIncome = async () => {
+  const fetchAdminIncome = async (type: "monthly" | "yearly") => {
     try {
-      const response = await AdminMontlyIncomee();
-      console.log("admin monthly income", response.data)
+      const response = type === "monthly" ? await AdminMontlyIncome() : await AdminYearlyIncome();
+      console.log(`${type} income`, response.data);
       if (response.success) {
-        setadminMonthlyIncome(response.data);
+        if (type === "monthly") {
+          const transformedData = response.data.map((item: any) => ({
+            month: item.month,
+            income: item.income || 0
+          }));
+          setAdminIncomeData(transformedData);
+        } else {
+          setAdminIncomeData(response.data);
+        }
       }
     } catch (error) {
-      console.log("Error while fetching admin monlty income", error)
+      console.log(`Error while fetching admin ${type} income`, error)
     }
   }
 
@@ -49,7 +57,7 @@ const AdminDashboard = () => {
           name: item.name,
           value: item.value / 100
         }));
-        setCategoryIncomeData(transformedData); // Store the category income data
+        setCategoryIncomeData(transformedData);
       }
     } catch (error) {
       console.log("Error while fetching the category wise income", error)
@@ -59,8 +67,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     fetchCategoryIncome();
-    fetchAdminMontlyIncome()
+    fetchAdminIncome(view);
   }, [])
+
+  useEffect(() => {
+    fetchAdminIncome(view);
+  }, [view])
 
   return (
     <div className="flex flex-col h-screen">
@@ -72,7 +84,6 @@ const AdminDashboard = () => {
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
-
         <AdminSidebar />
 
         {/* Main content */}
@@ -82,19 +93,14 @@ const AdminDashboard = () => {
 
             {/* Dashboard Summary Cards - First Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* Total Students Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-gray-400 text-xs mb-1">Total Students</div>
                 <div className="text-2xl font-bold">{dashboardData?.totalStudents}</div>
               </div>
-
-              {/* Total Tutors Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-gray-400 text-xs mb-1">Total Tutors</div>
                 <div className="text-2xl font-bold">{dashboardData?.totalTutors}</div>
               </div>
-
-              {/* Total Courses Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-gray-400 text-xs mb-1">Total Courses</div>
                 <div className="text-2xl font-bold">{dashboardData?.totalCourses}</div>
@@ -103,19 +109,14 @@ const AdminDashboard = () => {
 
             {/* Dashboard Summary Cards - Second Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* Tutor Total Income Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-gray-400 text-xs mb-1">Tutor Total Income</div>
                 <div className="text-2xl font-bold">₹ {dashboardData?.tutorTotalIncome}</div>
               </div>
-
-              {/* Admin Total Income Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-gray-400 text-xs mb-1">Admin Total Income</div>
                 <div className="text-2xl font-bold">₹ {dashboardData?.adminTotalIncome}</div>
               </div>
-
-              {/* Admin Balance Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-gray-400 text-xs mb-1">Admin Balance</div>
                 <div className="text-2xl font-bold">₹ {dashboardData?.adminBalance}</div>
@@ -124,18 +125,31 @@ const AdminDashboard = () => {
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              {/* Admin Monthly Income Chart */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
-                <div className="text-sm font-medium mb-3">Admin Monthly Income</div>
-                <div className="h-80"> {/* Increased height from h-64 to h-80 */}
+                <div className="flex justify-between items-center mb-3">
+                  <div className="text-sm font-medium">{view === "monthly" ? "Admin Monthly Income" : "Admin Yearly Income"}</div>
+                  <div>
+                    <label htmlFor="view" className="mr-2 text-sm text-gray-400">Select View:</label>
+                    <select
+                      id="view"
+                      value={view}
+                      onChange={(e) => setView(e.target.value as "monthly" | "yearly")}
+                      className="text-sm border rounded  px-2 py-1 bg-gray-800 text-white"
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={adminMonthlyIncome}
+                      data={adminIncomeData}
                       margin={{ top: 10, right: 30, left: 30, bottom: 30 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                       <XAxis
-                        dataKey="month"
+                        dataKey={view === "monthly" ? "month" : "year"}
                         stroke="#999"
                         angle={-45}
                         textAnchor="end"
@@ -154,7 +168,7 @@ const AdminDashboard = () => {
                         formatter={(value) => `₹${value}`}
                       />
                       <Legend wrapperStyle={{ paddingTop: 10 }} />
-                      <Bar dataKey="income" name="Monthly Income (₹)" fill="#00C49F" barSize={40} />
+                      <Bar dataKey="income" name={view === "monthly" ? "Monthly Income (₹)" : "Yearly Income (₹)"} fill="#00C49F" barSize={40} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -194,7 +208,6 @@ const AdminDashboard = () => {
 
             {/* Action Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* View Students Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-sm font-medium mb-1">Manage Students</div>
                 <div className="text-gray-400 text-xs mb-3">View and manage all student accounts</div>
@@ -202,8 +215,6 @@ const AdminDashboard = () => {
                   View Students
                 </Link>
               </div>
-
-              {/* View Tutors Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-sm font-medium mb-1">Manage Tutors</div>
                 <div className="text-gray-400 text-xs mb-3">View and manage tutor accounts</div>
@@ -211,8 +222,6 @@ const AdminDashboard = () => {
                   View Tutors
                 </Link>
               </div>
-
-              {/* View Finances Card */}
               <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
                 <div className="text-sm font-medium mb-1">View Finances</div>
                 <div className="text-gray-400 text-xs mb-3">Check financial reports and balance</div>

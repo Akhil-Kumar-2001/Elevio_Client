@@ -319,9 +319,18 @@ export const categoryIncome = async () => {
     }
 }
 
-export const AdminMontlyIncomee = async () => {
+export const AdminMontlyIncome = async () => {
     try {
         const incomes = await adminAxiosInstance.get(`/admin/admin-monlty-income`);
+        return incomes.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const AdminYearlyIncome = async () => {
+    try {
+        const incomes = await adminAxiosInstance.get(`/admin/admin-yearly-income`);
         return incomes.data;
     } catch (error:unknown) {
         handleAxiosError(error)
