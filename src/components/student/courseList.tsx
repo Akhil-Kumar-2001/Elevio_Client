@@ -33,6 +33,7 @@ const WhatToLearnNext = () => {
         students: course.purchasedStudents.length ,
         price: course.price,
         image: course.imageThumbnail,
+        totalReviews:course.totalReviews,
       }));
       setCourses(mappedCourses.slice(0, 4)); // Limit to 4 courses
       setLoading(false);
@@ -192,7 +193,7 @@ const WhatToLearnNext = () => {
                       <span className="text-yellow-500 mr-1">★</span>
                       <span className="text-gray-600">
                         {course.rating}{' '}
-                        <span className="text-gray-500">({course.students} students)</span>
+                        <span className="text-gray-500">({course.totalReviews} students)</span>
                       </span>
                     </div>
                     <div className="flex justify-between items-center">

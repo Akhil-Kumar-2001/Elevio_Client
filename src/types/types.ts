@@ -197,6 +197,7 @@ export interface FrontendCourse {
   image: string;
   rating: number;
   students: number;
+  totalReviews:number;
 }
 
 export interface EditStudentType {

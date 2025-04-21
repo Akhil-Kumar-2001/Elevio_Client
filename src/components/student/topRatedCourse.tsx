@@ -33,6 +33,7 @@ const TopRated = () => {
         students: course.purchasedStudents.length ,
         price: course.price,
         image: course.imageThumbnail,
+        totalReviews:course.totalReviews
       }));
       setCourses(mappedCourses.slice(0, 4)); // Limit to 4 courses
       setLoading(false);
@@ -115,12 +116,12 @@ const TopRated = () => {
       {/* Header with "See More" link */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">Top Rated Courses</h2>
-        <a
+        {/* <a
           href="/courses"
           className="text-blue-600 font-medium hover:text-blue-800 transition-colors"
         >
           See More
-        </a>
+        </a> */}
       </div>
 
       {/* Course Grid */}
@@ -192,7 +193,7 @@ const TopRated = () => {
                       <span className="text-yellow-500 mr-1">★</span>
                       <span className="text-gray-600">
                         {course.rating}{' '}
-                        <span className="text-gray-500">({course.students} students)</span>
+                        <span className="text-gray-500">({course.totalReviews} students)</span>
                       </span>
                     </div>
                     <div className="flex justify-between items-center">

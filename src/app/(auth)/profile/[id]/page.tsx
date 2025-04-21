@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -71,8 +70,6 @@ const Profile = () => {
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [progressMap, setProgressMap] = useState<Record<string, IProgress>>({});
 
-
-
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchProfileData = async () => {
@@ -126,29 +123,31 @@ const Profile = () => {
     }
   }, [id]);
 
-  const currentCourses = [
-    { name: "Advanced Web Development", progress: 75 },
-    { name: "Data Structure", progress: 50 },
-    { name: "Machine Learning Basics", progress: 50 }
-  ];
-
   const purchasedCourses = async () => {
-    if (!id) {
+    if (!id || Array.isArray(id)) {
       console.log("User id is not available");
       return;
     }
     try {
       const response = await getPurchasedCourses(id as string);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setCourses(response.data);
+      } else {
+        console.log("No purchased courses found or invalid response:", response);
+        setCourses([]); // Fallback to empty array
       }
     } catch (error) {
-      console.log("Error while getting Purchased Courses:", error);
+      console.error("Error while getting Purchased Courses:", error);
+      setCourses([]); // Fallback to empty array on error
+      toast.error('Failed to fetch purchased courses.');
     }
   };
 
   const fetchProgressForCourses = async () => {
-    if (!courses.length) return;
+    if (!courses || !Array.isArray(courses) || courses.length === 0) {
+      setProgressMap({});
+      return;
+    }
     try {
       const progressPromises = courses.map(course =>
         getProgress(course._id).then(response => ({
@@ -166,6 +165,8 @@ const Profile = () => {
       setProgressMap(progressData);
     } catch (error) {
       console.error("Error fetching progress for courses:", error);
+      setProgressMap({});
+      toast.error('Failed to fetch course progress.');
     }
   };
 
@@ -524,26 +525,30 @@ const Profile = () => {
           {activeTab === 'progress' && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Current Courses</h3>
-              {courses.map((course, index) => {
-                const courseProgress = progressMap[course._id];
-                const progressPercentage = courseProgress?.progressPercentage || 0;
-                return (
-                  <div key={index} className="bg-gray-50 p-5 rounded-xl hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-gray-900">{course.title}</span>
-                      <span className="text-sm font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                        {progressPercentage}% complete
-                      </span>
+              {courses && courses.length > 0 ? (
+                courses.map((course, index) => {
+                  const courseProgress = progressMap[course._id];
+                  const progressPercentage = courseProgress?.progressPercentage || 0;
+                  return (
+                    <div key={index} className="bg-gray-50 p-5 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium text-gray-900">{course.title}</span>
+                        <span className="text-sm font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                          {Math.round(progressPercentage)}% complete
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500"
+                          style={{ width: `${progressPercentage}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500"
-                        style={{ width: `${progressPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <p className="text-gray-500">No courses enrolled yet.</p>
+              )}
             </div>
           )}
 

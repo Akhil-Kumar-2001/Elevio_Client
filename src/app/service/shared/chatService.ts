@@ -16,7 +16,6 @@ export const getChats = async (role: string) => {
     try {
         const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
         const response = await axiosInstance.get(`/chat/getChats?role=${role}`);
-        console.log("ress",response.data)
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)

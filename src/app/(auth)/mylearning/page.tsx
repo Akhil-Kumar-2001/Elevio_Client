@@ -107,7 +107,7 @@ const MyLearning = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
-                      {progressPercentage}% Complete
+                      {Math.round(progressPercentage)}% Complete
                     </div>
                   </div>
 
@@ -125,7 +125,7 @@ const MyLearning = () => {
                       <div className="flex justify-between text-xs mb-2">
                         <span className="text-gray-600 font-medium">Progress</span>
                         <span className="font-semibold text-blue-600">
-                          {progressPercentage}%
+                          {Math.round(progressPercentage)}%
                         </span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
