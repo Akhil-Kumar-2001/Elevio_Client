@@ -336,4 +336,13 @@ export const getNotifications = async () => {
     }
   }
 
+  export const getYearlyIncome = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/yearly-income`)
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+  }
+
 

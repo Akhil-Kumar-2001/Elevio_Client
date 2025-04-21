@@ -1,30 +1,50 @@
 "use client";
 
-import { getDashboradDetails, getMonthlyIncome, getStudentSCount } from '@/app/service/tutor/tutorApi';
+import {
+  getDashboradDetails,
+  getMonthlyIncome,
+  getStudentSCount,
+  getYearlyIncome
+} from '@/app/service/tutor/tutorApi';
 import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
 import { IDashboardDetails } from '@/types/types';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
-  Cell 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const income = payload[0].value;
+    const incomeColor = income > 0 ? 'text-green-600' : 'text-red-600';
+    return (
+      <div className="bg-white p-2 border border-gray-300 shadow-lg rounded">
+        <p className="text-sm font-medium text-gray-900">{`Month: ${label}`}</p>
+        <p className={`text-sm font-medium ${incomeColor}`}>{`Income: ₹${income}`}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const InstructorDashboard = () => {
   const [dashboardData, setDashboardData] = useState<IDashboardDetails>();
-  const [monthlyIncome, setMonthlyIncome] = useState<{ name: string, income: number }[]>([]);
+  const [incomeData, setIncomeData] = useState<{ month?: string; year?: number; income: number }[]>([]);
   const [studentsCount, setStudentsCount] = useState<{ name: string, students: number }[]>([]);
-  const [expanded, setExpanded] = useState<boolean>(true); // Sync with TutorSidebar
+  const [expanded, setExpanded] = useState<boolean>(true);
+  const [view, setView] = useState<"monthly" | "yearly">("monthly");
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
@@ -39,14 +59,24 @@ const InstructorDashboard = () => {
     }
   };
 
-  const fetchMonthlyIncome = async () => {
+  const fetchIncomeData = async (type: "monthly" | "yearly") => {
     try {
-      const response = await getMonthlyIncome();
+      const response = type === "monthly" ? await getMonthlyIncome() : await getYearlyIncome();
+      console.log("income from backend", response.data);
       if (response.success) {
-        setMonthlyIncome(response.data);
+        if (type === "monthly") {
+          // Keep all months, no filtering
+          const transformedData = response.data.map((item: any) => ({
+            month: item.month,
+            income: item.income || 0
+          }));
+          setIncomeData(transformedData);
+        } else {
+          setIncomeData(response.data);
+        }
       }
     } catch (error) {
-      console.log("Error while fetching monthly income", error);
+      console.log(`Error while fetching ${type} income`, error);
     }
   };
 
@@ -63,9 +93,13 @@ const InstructorDashboard = () => {
 
   useEffect(() => {
     fetchDashboardDetails();
-    fetchMonthlyIncome();
+    fetchIncomeData(view);
     fetchStudentsCount();
   }, []);
+
+  useEffect(() => {
+    fetchIncomeData(view);
+  }, [view]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -100,17 +134,40 @@ const InstructorDashboard = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
-              <h2 className="text-sm font-medium mb-4 text-gray-800">Monthly Income</h2>
+              <h2 className="text-sm font-medium mb-4 text-gray-800">{view === "monthly" ? "Monthly" : "Yearly"} Income</h2>
+              <div className="mb-4">
+                <label htmlFor="view" className="mr-2 text-sm text-gray-700">Select View:</label>
+                <select
+                  id="view"
+                  value={view}
+                  onChange={(e) => setView(e.target.value as "monthly" | "yearly")}
+                  className="text-sm border rounded text-black px-2 py-1"
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
               <div className="h-80 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={monthlyIncome}
+                    data={incomeData}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 2500]} ticks={[0, 500, 1000, 1500, 2000, 2500]} />
-                    <Tooltip formatter={(value) => [`₹${value}`, 'Income']} />
+                    <XAxis
+                      dataKey={view === "monthly" ? "month" : "year"}
+                      type="category"
+                      allowDuplicatedCategory={false}
+                      tickFormatter={(value) =>
+                        view === "monthly"
+                          ? ["Feb", "Apr", "Jun", "Aug", "Oct", "Dec"].includes(value)
+                            ? value
+                            : ""
+                          : value 
+                      }
+                    />
+                    <YAxis />
+                    <Tooltip content={<CustomTooltip />} />
                     <Legend />
                     <Bar dataKey="income" fill="#0088FE" />
                   </BarChart>
