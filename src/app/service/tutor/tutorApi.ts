@@ -286,63 +286,90 @@ export const getNotifications = async () => {
     try {
         const response = await userAxiosInstance.get(`/tutor/notifications`);
         return response.data;
-    }catch(error:unknown){
+    } catch (error: unknown) {
         handleAxiosError(error);
     }
-  }
+}
 
-  export const readNotification = async (id:string) => {
+export const readNotification = async (id: string) => {
     try {
         const response = await userAxiosInstance.patch(`/tutor/notifications/${id}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error);
     }
-  }
+}
 
-  export const getMonthlyIncome = async () => {
+export const getMonthlyIncome = async () => {
     try {
         const response = await userAxiosInstance.get(`/tutor/monthly-income`)
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
-  }
+}
 
-  export const getStudentSCount = async () => {
+export const getStudentSCount = async () => {
     try {
         const response = await userAxiosInstance.get(`/tutor/students-count`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
-  }
+}
 
-  export const getTutorTransactions = async (page:number,limit:number) => {
+export const getTutorTransactions = async (page: number, limit: number) => {
     try {
         const response = await userAxiosInstance.get(`/tutor/transactions?page=${page}&limit=${limit}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
-  }
+}
 
-  export const getDashboradDetails = async () =>{
+export const getDashboradDetails = async () => {
     try {
         const response = await userAxiosInstance.get(`/tutor/dahboard-data`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
-  }
+}
 
-  export const getYearlyIncome = async () => {
+export const getYearlyIncome = async () => {
     try {
         const response = await userAxiosInstance.get(`/tutor/yearly-income`)
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export const getSessions = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/sessions`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getSessionDetails = async (sessionId: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/session-details/${sessionId}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export const updateSessionStatus = async (sessionId:string,status:string) =>{
+    try {
+        const response = await userAxiosInstance.put(`/tutor/session-status/${sessionId}`,{status});
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)
     }
-  }
-
-
+}

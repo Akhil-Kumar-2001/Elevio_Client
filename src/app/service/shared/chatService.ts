@@ -2,6 +2,7 @@ import axios from "axios";
 import tutorAxiosInstance from '@/app/service/user/userAxiosInstance';
 import studentAxiosInstance from '@/app/service/tutor/tutorAxiosInstance';
 import { toast } from "react-toastify";
+import { SessionData } from "@/types/types";
 
 export const handleAxiosError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
@@ -80,7 +81,19 @@ export const markMessagesAsRead = async(receiverId:string,role:string) => {
       const axiosInstance = role === 'tutor' ? tutorAxiosInstance : studentAxiosInstance;
       const response = await axiosInstance.post(`/chat/mark-read/${receiverId}`);
       return response.data;
-    } catch (error) {
-      
+    } catch (error:unknown) {
+      handleAxiosError(error)
     }
   } 
+  
+  
+  export const createSession = async(sessionData:SessionData) => {
+    try {
+      console.log("session data from api service",sessionData);
+      const response = await tutorAxiosInstance.post('/tutor/sessions',{sessionData});
+      return response.data;
+    } catch (error:unknown) {
+      handleAxiosError(error)
+    }
+  }
+

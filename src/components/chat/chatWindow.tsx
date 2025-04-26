@@ -1,7 +1,9 @@
+
 import React, { useEffect, useRef, useState } from 'react';
-import { Send, Image as ImageIcon, Trash2, CheckSquare } from 'lucide-react';
-import { UserMinimal } from '@/types/types';
+import { Send, Image as ImageIcon, Trash2, CheckSquare, Calendar } from 'lucide-react';
+import { SessionData, UserMinimal } from '@/types/types';
 import { getMessages as fetchMessagesFromAPI, sendMessage, deleteMessages, markMessagesAsRead } from '@/app/service/shared/chatService';
+import { createSession } from '@/app/service/shared/chatService';
 import useConversation from '@/store/useConversation';
 import useListenMessages from '@/app/hooks/useLinstenMessageHook';
 import { useSocketContext } from '@/context/SocketContext';
@@ -28,6 +30,12 @@ interface ChatWindowProps {
   currentUserId: string;
 }
 
+interface ScheduleForm {
+  date: string;
+  startTime: string;
+  duration: number;
+}
+
 const CloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? 'your-cloud-name';
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUserId }) => {
@@ -46,6 +54,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState<ScheduleForm>({
+    date: '',
+    startTime: '',
+    duration: 30,
+  });
   const { onlineUser = [] } = useSocketContext() || {};
 
   const conversationId = selectedUser?._id;
@@ -76,6 +90,56 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
       } else {
         setSelectedMessageIds([...selectedMessageIds, messageId]);
       }
+    }
+  };
+
+  const handleScheduleSession = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser || role !== 'Tutor') return;
+
+    try {
+      setIsLoading(true);
+      
+      // Combine date and time
+      const startTime = new Date(`${scheduleForm.date}T${scheduleForm.startTime}`);
+      
+      const sessionData: SessionData = {
+        tutorId: currentUserId,
+        studentId: selectedUser._id,
+        startTime,
+        duration: scheduleForm.duration,
+        roomId: `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'scheduled',
+      };
+
+      const result = await createSession(sessionData);
+
+      if (result.success) {
+        // Send a message notification about the scheduled session
+        await sendMessage(
+          selectedUser._id,
+          `Session scheduled for ${startTime.toLocaleString()} (${scheduleForm.duration} minutes)`,
+          role,
+          ''
+        );
+
+        setIsScheduleModalOpen(false);
+        setScheduleForm({
+          date: '',
+          startTime: '',
+          duration: 30,
+        });
+        
+        // Refresh messages to show the notification
+        await handleGetMessages();
+      } else {
+        throw new Error(result.message || 'Failed to schedule session');
+      }
+    } catch (error) {
+      console.error('Error scheduling session:', error);
+      // alert('Failed to schedule session. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -349,13 +413,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
                     >
                       {formatTime(message.createdAt)}
                     </p>
-                    {/* {!isReceivedMessage && !isDeleted && (
-                      <span
-                        className={`text-xs ${message.isRead ? 'text-indigo-200' : 'text-indigo-400'}`}
-                      >
-                        {message.isRead ? 'Read' : 'Sent'}
-                      </span>
-                    )} */}
                   </div>
                 </div>
               </div>
@@ -400,6 +457,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
             className="flex-1 px-4 py-2 border text-gray-700 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             disabled={isLoading}
           />
+          {role === 'Tutor' && (
+            <button
+              className="p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
+              onClick={() => setIsScheduleModalOpen(true)}
+              disabled={isLoading}
+              title="Schedule a session"
+            >
+              <Calendar className="w-5 h-5" />
+            </button>
+          )}
           <button
             className={`p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center relative ${
               isLoading ? 'opacity-75 cursor-not-allowed' : ''
@@ -414,6 +481,74 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
           </button>
         </div>
       </div>
+
+      {/* Schedule Session Modal (Only for tutors) */}
+      {role === 'Tutor' && isScheduleModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold text-black mb-4">Schedule a Session</h2>
+            <form onSubmit={handleScheduleSession}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={scheduleForm.date}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, date: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  value={scheduleForm.startTime}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration (minutes)
+                </label>
+                <select
+                  value={scheduleForm.duration}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, duration: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                >
+                  <option value={30}>30 minutes</option>
+                  <option value={60}>60 minutes</option>
+                  <option value={90}>90 minutes</option>
+                  <option value={120}>120 minutes</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsScheduleModalOpen(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Scheduling...' : 'Schedule'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

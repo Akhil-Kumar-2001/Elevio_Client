@@ -315,3 +315,23 @@ export interface IProgress  {
   lastAccessDate?: Date;
   completionDate?: Date;
 }
+
+export interface SessionData {
+  tutorId: string;
+  studentId: string;
+  startTime: Date;
+  duration: number;
+  roomId: string;
+  status: 'scheduled' | 'active' | 'completed' | 'cancelled';
+}
+
+
+export interface SessionInfo {
+  _id:string
+  studentName?: string;
+  tutorName?:string;
+  startTime: Date;
+  duration: number;
+  status: string;
+  roomId?:string;
+}
