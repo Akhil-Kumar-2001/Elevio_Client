@@ -5,6 +5,7 @@ import ToastComponent from "@/components/ToastComponent";
 import Providers from "./provider";
 import AuthProvider from "./auth-provider";
 import { SocketContextProvider } from "@/context/SocketContext";
+import { WebRTCProvider } from "@/context/WebRTCContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,12 +36,13 @@ export default function RootLayout({
         <AuthProvider>
           <Providers>
             <SocketContextProvider>
-                  {children}
+                {children}
             </SocketContextProvider>
-            <ToastComponent/>
+            <ToastComponent />
           </Providers>
         </AuthProvider>
       </body>
     </html>
   );
 }
+

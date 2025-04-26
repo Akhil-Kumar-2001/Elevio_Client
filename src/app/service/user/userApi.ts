@@ -311,21 +311,50 @@ export const createReview = async (formData: review) => {
 }
 
 
-export const getProgress = async (courseId:string) =>{
+export const getProgress = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/progress/${courseId}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const addToProgress = async (courseId: string, lectureId: string) => {
+    try {
+        console.log("add lecture to the progress api call", courseId, lectureId)
+        const response = await userAxiosInstance.post(`/student/update-progress`, { courseId, lectureId })
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export const getSessions = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/student/sessions`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+} 
+
+export const getSessionDetails = async (sessionId:string) =>{
+    try {
+        const response = await userAxiosInstance.get(`/student/session-details/${sessionId}`);
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)
     }
 }
 
-export const addToProgress = async (courseId:string,lectureId:string) =>{
+export const updateSessionStatus = async (sessionId:string,status:string) =>{
     try {
-        console.log("add lecture to the progress api call",courseId,lectureId)
-        const response = await userAxiosInstance.post(`/student/update-progress`,{courseId,lectureId})
+        const response = await userAxiosInstance.put(`/student/session-status/${sessionId}`,{status});
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)
     }
 }
+

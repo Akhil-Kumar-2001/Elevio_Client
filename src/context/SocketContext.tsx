@@ -1,15 +1,13 @@
 'use client'
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import userAuthStore from "@/store/userAuthStore";
-import tutorAuthStore from "@/store/tutorAuthStore";
-import adminAuthStore from "@/store/adminAuthStore";
-import { io, Socket } from "socket.io-client";
-import { DefaultEventsMap } from "@socket.io/component-emitter";
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import userAuthStore from '@/store/userAuthStore';
+import tutorAuthStore from '@/store/tutorAuthStore';
+import { io, Socket } from 'socket.io-client';
 
 interface SocketContextType {
-  socket: Socket<DefaultEventsMap, DefaultEventsMap> | null;
-  onlineUser: any[]; // Consider typing this as UserMinimal[] or a specific user type
+  socket: Socket | null;
+  onlineUser: any[];
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -21,10 +19,12 @@ export const useSocketContext = () => {
 export const SocketContextProvider = ({ children }: { children: ReactNode }) => {
   const tutor = tutorAuthStore();
   const student = userAuthStore();
-  const admin = adminAuthStore();
-  const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineUser, setOnlineUser] = useState<any[]>([]);
-  const userId = tutor.user?.id || student.user?.id || admin.user?.id;
+  const userId = tutor.user?.id || student.user?.id;
+  console.log(userId, 'userId in socket context');
+  console.log(socket, 'socket in socket context'); 
+
   useEffect(() => {
     if (!userId) {
       if (socket) {
@@ -35,26 +35,34 @@ export const SocketContextProvider = ({ children }: { children: ReactNode }) => 
       return;
     }
 
-    const socketInstance = io("http://localhost:5000", {
-      transports: ["websocket", "polling"],
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000', {
+      transports: ['websocket', 'polling'],
+      autoConnect: true,
       query: { userId },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     setSocket(socketInstance);
 
-    socketInstance.on("connect", () => {
-      console.log("Socket connected:", socketInstance.id);
+    socketInstance.on('connect', () => {
+      console.log('Socket connected:', socketInstance.id);
     });
 
-    socketInstance.on("getOnlineUser", (users) => {
-      console.log("Online users:", users);
+    socketInstance.on('getOnlineUser', (users) => {
+      console.log('Online users:', users);
       setOnlineUser(users);
     });
 
-    socketInstance.on("disconnect", () => {
-      console.log("Socket disconnected");
+    socketInstance.on('disconnect', () => {
+      console.log('Socket disconnected');
     });
 
+    socketInstance.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+    
     return () => {
       socketInstance.disconnect();
     };

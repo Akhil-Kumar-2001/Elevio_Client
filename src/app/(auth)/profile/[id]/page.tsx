@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -13,18 +14,17 @@ import {
   Save,
   X,
   Star,
-  Clock
+  Clock,
 } from 'lucide-react';
 import useAuthStore from '@/store/userAuthStore';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/student/navbar';
 import { toast } from 'react-toastify';
-import { getProgress, getPurchasedCourses, getStudent, getSubscription, updateStudent } from '@/app/service/user/userApi';
+import { getProgress, getPurchasedCourses, getSessions, getStudent, getSubscription, updateStudent } from '@/app/service/user/userApi';
 import Spinner from '@/components/spinner';
 import Link from 'next/link';
-import { ICourse, IProgress } from '@/types/types';
+import { ICourse, IProgress, SessionInfo } from '@/types/types';
 
-// Define the Student interface
 interface Student {
   username: string;
   email: string;
@@ -34,7 +34,6 @@ interface Student {
   profilePicture: string | null;
 }
 
-// Define the Subscription interface
 interface Subscription {
   _id: string;
   planId: {
@@ -42,7 +41,7 @@ interface Subscription {
     duration: {
       value: number;
       unit: string;
-    }
+    };
     price: number;
     features: string[];
   };
@@ -69,18 +68,19 @@ const Profile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [progressMap, setProgressMap] = useState<Record<string, IProgress>>({});
+  const [sessions, setSessions] = useState<SessionInfo[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchProfileData = async () => {
     if (!id || Array.isArray(id)) {
-      console.log("Invalid or missing student ID");
+      console.log('Invalid or missing student ID');
       setLoading(false);
       return;
     }
 
     try {
-      // Fetch student data
       const studentResponse = await getStudent();
       if (studentResponse.success) {
         setStudent(studentResponse.data);
@@ -88,27 +88,26 @@ const Profile = () => {
         setInitial(studentResponse.data.username?.charAt(0).toUpperCase() || null);
         setEditedName(studentResponse.data.username);
       } else {
-        console.log("Student fetch failed:", studentResponse);
+        console.log('Student fetch failed:', studentResponse);
         throw new Error('Failed to fetch student data');
       }
 
-      // Fetch subscription data
       try {
         const subscriptionResponse = await getSubscription();
         if (subscriptionResponse.success && subscriptionResponse.data) {
           setSubscription(subscriptionResponse.data);
         } else {
-          console.log("No subscription data found");
+          console.log('No subscription data found');
           setSubscription(null);
         }
-        setCompletedCourses(0); // Placeholder
-        setMessages(2); // Placeholder
+        setCompletedCourses(0);
+        setMessages(2);
       } catch (subError) {
-        console.log("Subscription fetch failed (non-critical):", subError);
-        setSubscription(null); // Subscription is optional
+        console.log('Subscription fetch failed (non-critical):', subError);
+        setSubscription(null);
       }
     } catch (error) {
-      console.error("Critical error in fetchProfileData:", error);
+      console.error('Critical error in fetchProfileData:', error);
       router.push('/not-found');
     } finally {
       setLoading(false);
@@ -125,7 +124,7 @@ const Profile = () => {
 
   const purchasedCourses = async () => {
     if (!id || Array.isArray(id)) {
-      console.log("User id is not available");
+      console.log('User id is not available');
       return;
     }
     try {
@@ -133,12 +132,12 @@ const Profile = () => {
       if (response.success && Array.isArray(response.data)) {
         setCourses(response.data);
       } else {
-        console.log("No purchased courses found or invalid response:", response);
-        setCourses([]); // Fallback to empty array
+        console.log('No purchased courses found or invalid response:', response);
+        setCourses([]);
       }
     } catch (error) {
-      console.error("Error while getting Purchased Courses:", error);
-      setCourses([]); // Fallback to empty array on error
+      console.error('Error while getting Purchased Courses:', error);
+      setCourses([]);
       toast.error('Failed to fetch purchased courses.');
     }
   };
@@ -149,22 +148,25 @@ const Profile = () => {
       return;
     }
     try {
-      const progressPromises = courses.map(course =>
-        getProgress(course._id).then(response => ({
+      const progressPromises = courses.map((course) =>
+        getProgress(course._id).then((response) => ({
           courseId: course._id,
-          progress: response?.success ? response.data : null
+          progress: response?.success ? response.data : null,
         }))
       );
       const progressResults = await Promise.all(progressPromises);
-      const progressData = progressResults.reduce((acc, { courseId, progress }) => {
-        if (progress) {
-          acc[courseId] = progress;
-        }
-        return acc;
-      }, {} as Record<string, IProgress>);
+      const progressData = progressResults.reduce(
+        (acc, { courseId, progress }) => {
+          if (progress) {
+            acc[courseId] = progress;
+          }
+          return acc;
+        },
+        {} as Record<string, IProgress>
+      );
       setProgressMap(progressData);
     } catch (error) {
-      console.error("Error fetching progress for courses:", error);
+      console.error('Error fetching progress for courses:', error);
       setProgressMap({});
       toast.error('Failed to fetch course progress.');
     }
@@ -180,9 +182,8 @@ const Profile = () => {
 
   useEffect(() => {
     const completedCount = Object.values(progressMap).filter(
-      progress => progress.progressPercentage === 100 || progress.isCompleted
+      (progress) => progress.progressPercentage === 100 || progress.isCompleted
     ).length;
-    
     setCompletedCourses(completedCount);
   }, [progressMap]);
 
@@ -198,7 +199,7 @@ const Profile = () => {
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase();
   };
 
   const handleLogout = () => {
@@ -243,7 +244,7 @@ const Profile = () => {
         throw new Error('Failed to update profile');
       }
     } catch (error) {
-      console.log("Failed to update profile:", error);
+      console.log('Failed to update profile:', error);
       toast.error('Failed to update profile.');
     }
   };
@@ -268,13 +269,10 @@ const Profile = () => {
     formData.append('cloud_name', cloudName || '');
 
     try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
       const data = await response.json();
       if (data.secure_url) {
         setImage(data.secure_url);
@@ -283,9 +281,61 @@ const Profile = () => {
         throw new Error('Failed to upload image');
       }
     } catch (error) {
-      console.log("Failed to upload image to Cloudinary:", error);
+      console.log('Failed to upload image to Cloudinary:', error);
       toast.error('Failed to upload profile photo.');
     }
+  };
+
+  const fetchSessions = async () => {
+    try {
+      const response = await getSessions();
+      console.log('session data in component student', response.data);
+      if (response.success) {
+        // Convert startTime strings to Date objects
+        const convertedSessions = response.data.map((session: SessionInfo) => ({
+          ...session,
+          startTime: new Date(session.startTime),
+        }));
+        setSessions(convertedSessions);
+      } else {
+        toast.error('Failed to fetch sessions.');
+      }
+    } catch (error) {
+      console.log('Error while fetching scheduled sessions', error);
+      toast.error('Error fetching sessions.');
+    }
+  };
+
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  // Update current time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Modified canJoinSession for student (5 minutes)
+  const canJoinSession = (sessionStartTime: Date, durationMinutes: number, userRole: 'tutor' | 'student') => {
+    if (!(sessionStartTime instanceof Date) || isNaN(sessionStartTime.getTime())) {
+      console.error('Invalid session start time:', sessionStartTime);
+      return false;
+    }
+
+    const sessionEndTime = new Date(sessionStartTime.getTime() + durationMinutes * 60000);
+    const timeDiffStart = (sessionStartTime.getTime() - currentTime.getTime()) / (1000 * 60);
+    const timeDiffEnd = (sessionEndTime.getTime() - currentTime.getTime()) / (1000 * 60);
+
+    // Tutor can join 10 minutes before, student 5 minutes before
+    const joinWindowMinutes = userRole === 'tutor' ? 10 : 5;
+    return timeDiffStart <= joinWindowMinutes && timeDiffEnd >= 0;
+  };
+
+  const handleJoinSession = (sessionId: string) => {
+    router.push(`/video-chat/${sessionId}`);
   };
 
   if (loading) {
@@ -348,17 +398,14 @@ const Profile = () => {
                 {subscription ? (
                   <div className="mt-2 flex items-center">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subscription.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                        }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        subscription.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}
                     >
                       {subscription.status === 'active' ? 'Active Subscription' : 'Inactive Subscription'}
                     </span>
                     {subscription.status === 'active' && (
-                      <span className="ml-2 text-sm text-gray-600">
-                        {getDaysRemaining()} days remaining
-                      </span>
+                      <span className="ml-2 text-sm text-gray-600">{getDaysRemaining()} days remaining</span>
                     )}
                   </div>
                 ) : (
@@ -503,19 +550,17 @@ const Profile = () => {
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex space-x-4 border-b mb-6">
             <button
-              className={`pb-4 px-4 font-medium ${activeTab === 'progress'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-                }`}
+              className={`pb-4 px-4 font-medium ${
+                activeTab === 'progress' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'
+              }`}
               onClick={() => setActiveTab('progress')}
             >
               Progress
             </button>
             <button
-              className={`pb-4 px-4 font-medium ${activeTab === 'schedule'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-                }`}
+              className={`pb-4 px-4 font-medium ${
+                activeTab === 'schedule' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'
+              }`}
               onClick={() => setActiveTab('schedule')}
             >
               Schedule
@@ -561,24 +606,55 @@ const Profile = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                {[1, 2, 3].map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-50 p-5 rounded-xl hover:shadow-md transition-shadow border border-gray-100"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">Advanced Web Development</p>
-                        <p className="text-sm text-gray-500 mt-1">Chapter {index + 4}: React Hooks</p>
-                        <p className="text-xs text-blue-600 mt-2">Today, 2:00 PM - 3:30 PM</p>
+                {sessions && sessions.length > 0 ? (
+                  sessions.map((session, index) => {
+                    const startTime = new Date(session.startTime);
+                    const endTime = new Date(startTime.getTime() + session.duration * 60 * 1000);
+
+                    // Use canJoinSession with 'student' role
+                    const canJoin = canJoinSession(startTime, session.duration, 'student');
+
+                    const formattedTime = startTime.toLocaleString('en-US', {
+                      weekday: 'long',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+                    const formattedEndTime = endTime.toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+
+                    return (
+                      <div
+                        key={index}
+                        className="bg-gray-50 p-5 rounded-xl hover:shadow-md transition-shadow border border-gray-100"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900">Session with {session.tutorName}</p>
+                            <p className="text-sm text-gray-500 mt-1">Status: {session.status}</p>
+                            <p className="text-xs text-blue-600 mt-2">
+                              {formattedTime} - {formattedEndTime}
+                            </p>
+                          </div>
+                          {canJoin && (
+                            <button
+                              onClick={() => handleJoinSession(session._id)}
+                              className="flex items-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+                            >
+                              <span className="mr-2">Join</span>
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <button className="flex items-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
-                        <span className="mr-2">Join</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-500">No upcoming sessions scheduled.</p>
+                )}
               </div>
             </div>
           )}
