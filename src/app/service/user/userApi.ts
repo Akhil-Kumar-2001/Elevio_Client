@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, EditStudentType, review, userType } from "@/types/types";
+import { basicType, EditStudentType, review, ReviewEdit, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import userAxiosInstance from "./userAxiosInstance";
 
@@ -250,9 +250,9 @@ export const getSectionsByCourse = async (courseId: string) => {
     }
 }
 
-export const getLecturesBySection = async (courseId: string) => {
+export const getLecturesBySection = async (sectionId: string) => {
     try {
-        const response = await userAxiosInstance.get(`/student/lectures/${courseId}`)
+        const response = await userAxiosInstance.get(`/student/lectures/${sectionId}`)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -358,3 +358,20 @@ export const updateSessionStatus = async (sessionId:string,status:string) =>{
     }
 }
 
+export const updateReview = async (reviewId:string,ratings:ReviewEdit) => {
+    try {
+        const response = await userAxiosInstance.put(`/student/edit-review/${reviewId}`,{ratings});
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const deleteReview = async (reviewId:string) => {
+    try {
+        const response = await userAxiosInstance.delete(`/student/delete-review/${reviewId}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
