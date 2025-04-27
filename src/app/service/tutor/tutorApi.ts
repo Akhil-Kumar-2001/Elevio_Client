@@ -217,7 +217,6 @@ export const getSections = async (courseId: string) => {
 
 export const getLecturesBySection = async (sectionId: string) => {
     try {
-
         console.log("lectues from the api called")
         const response = await userAxiosInstance.get(`/tutor/get-lectures?id=${sectionId}`)
         console.log("lectues from the api call", response)
@@ -371,5 +370,63 @@ export const updateSessionStatus = async (sessionId:string,status:string) =>{
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error)
+    }
+}
+
+
+export const getCourseDetailsForPreview = async (courseId: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/getcourse/${courseId}`)
+        console.log("preview course details with populate details",response)
+        return response.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getSectionsByCourseForPreview = async (courseId: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/getsections/${courseId}`)
+        return response.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getLecturesBySectionForPreview = async (sectionId: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/getlectures/${sectionId}`)
+        return response.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getReviewsByCourse = async (courseId: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/reviews/${courseId}`);
+        console.log("course reviws", response.data)
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+
+export  const replyReview =  async(reviewId: string, reply: string) => {
+    try {
+        const response = await userAxiosInstance.post(`/tutor/reply-review/${reviewId}`, { reply });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const deleteReply = async(reviewId:string) => {
+    try {
+        const response = await userAxiosInstance.delete(`/tutor/delete-reply/${reviewId}`);
+        return response.data;
+    } catch (error:unknown) {
+        handleAxiosError(error);
     }
 }

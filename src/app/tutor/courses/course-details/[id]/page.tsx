@@ -8,7 +8,7 @@ import { getCourseDetails, updateCourse, getCategories } from '@/app/service/tut
 import { toast } from 'react-toastify';
 import { Course, Category } from '@/types/types';
 import Image from 'next/image';
-import { Camera, Edit, FileText, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Camera, Edit, FileText, CheckCircle, ArrowLeft, Eye } from 'lucide-react';
 import axios from 'axios';
 
 const CourseDetailPage = () => {
@@ -508,6 +508,20 @@ const CourseDetailPage = () => {
                           <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 -top-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs rounded py-1 px-3 whitespace-nowrap z-50 min-w-max">
                             Manage Content
                             <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600" />
+                          </div>
+                        </div>
+
+                        <div className="group relative">
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/tutor/courses/preview/${course._id}`)}
+                            className="p-2.5 bg-purple-600 text-white rounded-full shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                          <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 -top-10 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white text-xs rounded py-1 px-3 whitespace-nowrap z-50 min-w-max">
+                            Preview Course
+                            <div className="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-purple-600" />
                           </div>
                         </div>
 

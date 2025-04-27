@@ -130,6 +130,31 @@ export interface ICourse {
   updatedAt: string;
 }
 
+export interface ICoursePreview {
+  _id: string;
+  tutorId:{
+    _id: string;
+    username: string;
+  };
+  title: string;
+  price: number;
+  subtitle: string;
+  description: string;
+  category: string;
+  purchasedStudents: string[];
+  totalDuration: number;
+  totalLectures: number;
+  totalSections: number;
+  isBlocked: boolean;
+  status: string;
+  rejectedReason: string;
+  imageThumbnail: string;
+  avgRating?: number;
+  totalReviews?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Category {
   _id: string;
   name: string;
@@ -286,6 +311,11 @@ export interface review {
   review: string;
 }
 
+export interface ReviewEdit {
+  rating: number;
+  review: string;
+}
+
 export interface DashboardData {
   totalStudents: number;
   totalTutors: number;
@@ -334,4 +364,18 @@ export interface SessionInfo {
   duration: number;
   status: string;
   roomId?:string;
+}
+
+export interface IReview {
+  _id: string;
+  courseId: string;
+  userId: {
+    _id: string;
+    username: string;
+  };
+  rating: number;
+  review: string;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
