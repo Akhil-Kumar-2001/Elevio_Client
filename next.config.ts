@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     domains: [
       "drive.google.com",
       "lh3.googleusercontent.com",
-      "res.cloudinary.com" // ✅ Added Cloudinary as an allowed domain
+      "res.cloudinary.com"
     ],
     remotePatterns: [
       {
@@ -22,8 +22,8 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com", // ✅ Allow Cloudinary images
-        pathname: "/**", // Matches all paths
+        hostname: "res.cloudinary.com",
+        pathname: "/**", 
       },
     ],
   },
