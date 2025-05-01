@@ -24,6 +24,7 @@ import { getProgress, getPurchasedCourses, getSessions, getStudent, getSubscript
 import Spinner from '@/components/spinner';
 import Link from 'next/link';
 import { ICourse, IProgress, SessionInfo } from '@/types/types';
+import Image from 'next/image';
 
 interface Student {
   username: string;
@@ -113,6 +114,7 @@ const Profile = () => {
       setLoading(false);
     }
   };
+  console.log(initial);
 
   useEffect(() => {
     if (id) {
@@ -358,11 +360,14 @@ const Profile = () => {
                 onClick={handleImageClick}
               >
                 {image ? (
-                  <img
-                    src={image}
-                    alt={student.username}
-                    className="h-24 w-24 rounded-full object-cover border-4 border-blue-100"
-                  />
+                  <Image
+                  src={image}
+                  alt={student.username}
+                  width={96}
+                  height={96}
+                  className="h-24 w-24 rounded-full object-cover border-4 border-blue-100"
+                  priority
+                />
                 ) : (
                   <div className="h-24 w-24 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center border-4 border-blue-100">
                     <span className="text-3xl font-semibold text-white">

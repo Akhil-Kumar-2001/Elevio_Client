@@ -379,3 +379,10 @@ export interface IReview {
   createdAt: string;
   updatedAt: string;
 }
+
+
+export interface IncomeData {
+  month?: string; 
+  date?: string; 
+  income: number;
+}

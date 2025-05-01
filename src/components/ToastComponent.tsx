@@ -1,23 +1,24 @@
 'use client';
 
 import React from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ToastComponent = () => {
   // Example function to trigger a toast
-  const showToast = () => {
-    toast.success('🚀 Operation successful!', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: 'dark', // Set base theme to dark
-      className: 'custom-toast',
-    });
-  };
+  
+  // const showToast = () => {
+  //   toast.success('🚀 Operation successful!', {
+  //     position: 'top-right',
+  //     autoClose: 3000,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: true,
+  //     draggable: true,
+  //     theme: 'dark', // Set base theme to dark
+  //     className: 'custom-toast',
+  //   });
+  // };
 
   return (
     <div>

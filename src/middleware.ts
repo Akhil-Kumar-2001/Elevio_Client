@@ -4,10 +4,10 @@ import jwt from 'jsonwebtoken';
 import { TokenPayload } from './types/types';
 
 export async function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
+    const url = req.nextUrl.clone();
   const { pathname } = url;
 
-  if (pathname.startsWith('/login') || pathname.startsWith('/admin/login') || pathname.startsWith('/tutor/login') || pathname.startsWith('/api/auth/login')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/admin/login') || pathname.startsWith('/tutor/login')) {
     console.log("Skipping middleware for login request...");
     return NextResponse.next();
   }
@@ -62,6 +62,7 @@ export const config = {
     '/tutor/pending-page',
     '/tutor/profile',
     '/tutor/courses',
+    '/tutor/courses/preview',
     "/tutor/courses/createcourse",
     "/tutor/courses/create-details/:path*",
     '/tutor/home',

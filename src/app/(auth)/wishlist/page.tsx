@@ -10,8 +10,8 @@ const WishlistPage = () => {
           Wishlist Coming Soon!
         </h1>
         <p className="text-gray-600 mb-6">
-          We're working hard to bring you an amazing wishlist experience. 
-          Stay tuned for something special!
+          {`We're working hard to bring you an amazing wishlist experience. 
+          Stay tuned for something special!`}
         </p>
         <div className="flex justify-center mb-6">
           <div className="flex space-x-2">

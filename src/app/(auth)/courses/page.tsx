@@ -11,6 +11,7 @@ import Navbar from '@/components/student/navbar';
 import CoursesLoading from '@/components/student/coursesLoading';
 import Pagination from '@/components/student/pagination';
 import Image from 'next/image';
+import { ICoursePreview } from '@/types/types';
 
 interface ExtendedFrontendCourse {
   _id: string;
@@ -84,7 +85,7 @@ const Courses = () => {
     try {
       const response = await getPurchasedCourses(userId);
       if (response.success) {
-        const purchasedCourseIds = response.data.map((course: any) => course._id);
+        const purchasedCourseIds = response.data.map((course: ICoursePreview) => course._id);
         setPurchasedCourses(purchasedCourseIds); // Store only the _id of purchased courses
       }
     } catch (error) {
@@ -100,7 +101,7 @@ const Courses = () => {
         setTotalPages(Math.floor(response.data.totalRecord / 5));
       }
 
-      const mappedCourses: ExtendedFrontendCourse[] = response.data.courses.map((course: any) => {
+      const mappedCourses: ExtendedFrontendCourse[] = response.data.courses.map((course: ICoursePreview) => {
         // Find category name by matching category ID
         const categoryName = categories.find(cat => cat._id === course.category)?.name || 'Unknown';
 
@@ -108,7 +109,7 @@ const Courses = () => {
           _id: course._id,
           title: course.title,
           rating: 4.8, // Default rating or you could add this to your API response
-          students: course.totalStudents || Math.floor(Math.random() * 1000),
+          students: course.purchasedStudents.length || Math.floor(Math.random() * 1000),
           price: course.price,
           image: course.imageThumbnail,
           category: categoryName // Assign category name instead of ID

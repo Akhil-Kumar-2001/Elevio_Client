@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import Navbar from "@/components/student/navbar";
 import useAuthStore from '@/store/userAuthStore';
-import { createOrder, createSubscritionOrder, getSubscriptions, verifyPayment, verifySubscritionPayment } from "@/app/service/user/userApi";
+import { createSubscritionOrder, getSubscriptions, verifySubscritionPayment } from "@/app/service/user/userApi";
 import { SubscriptionType } from "@/types/types";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -45,7 +45,6 @@ declare global {
 const PricingPlans = () => {
   const router = useRouter()
   const [subscription, setSubscription] = useState<SubscriptionType[]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const { user } = useAuthStore();
   const userId = user?.id;

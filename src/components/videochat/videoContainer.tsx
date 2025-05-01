@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MicOff, Video, VideoOff } from 'lucide-react';
+import {  MicOff, VideoOff } from 'lucide-react';
 
 interface VideoContainerProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -12,7 +12,6 @@ interface VideoContainerProps {
 
 const VideoContainer: React.FC<VideoContainerProps> = ({
   videoRef, 
-  isMain, 
   isMuted,
   isVideoOff,
   userName,

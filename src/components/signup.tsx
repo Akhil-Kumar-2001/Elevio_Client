@@ -38,7 +38,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -63,9 +63,14 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
       const signUpApi = role === 'student' ? userSignup : tutorSignup;
       const response = await signUpApi(formData);
       toast.success(response.message);
-      role === 'student' 
-        ? router.push(`/otp?email=${response.email}`) 
-        : router.push(`/tutor/otp?email=${response.email}`);
+      // role === 'student'
+      //   ? router.push(`/otp?email=${response.email}`)
+      //   : router.push(`/tutor/otp?email=${response.email}`);
+      if (role === 'student') {
+        router.push(`/otp?email=${response.email}`)
+      } else {
+        router.push(`/tutor/otp?email=${response.email}`)
+      }
     } catch (error) {
       console.log(error)
       setErrors({ general: 'Signup failed. Please try again.' });
@@ -76,8 +81,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signIn("google", role == 'student' 
-        ? { callbackUrl: '/home', redirect: false } 
+      const result = await signIn("google", role == 'student'
+        ? { callbackUrl: '/home', redirect: false }
         : { callbackUrl: '/tutor/dashboard', redirect: false }
       );
 
@@ -97,7 +102,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
       if (!session || !session.user) return;
 
       console.log("Session found, calling backend...");
-      
+
       const userData = {
         username: session.user.name ?? "",
         email: session.user.email ?? "",
@@ -131,9 +136,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
         {/* Left section - Image */}
         <div className="hidden md:flex md:w-1/2 items-center justify-center p-12">
           <div className="w-96">
-            <img 
-              src={imageSrc} 
-              alt={`${role === 'student' ? "Student studying" : "Tutor teaching"} signing up`} 
+            <img
+              src={imageSrc}
+              alt={`${role === 'student' ? "Student studying" : "Tutor teaching"} signing up`}
               className="w-full h-auto"
             />
           </div>
@@ -156,11 +161,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     placeholder="Full Name"
                     value={formData.username}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.username 
-                        ? 'border-red-500' 
+                    className={`w-full px-4 py-3 border ${errors.username
+                        ? 'border-red-500'
                         : 'border-gray-200'
-                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                      } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
                   />
                   {errors.username && (
                     <p className="text-red-500 text-sm mt-1">{errors.username}</p>
@@ -175,11 +179,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     placeholder="Email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.email 
-                        ? 'border-red-500' 
+                    className={`w-full px-4 py-3 border ${errors.email
+                        ? 'border-red-500'
                         : 'border-gray-200'
-                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
+                      } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black`}
                   />
                   {errors.email && (
                     <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -194,11 +197,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     placeholder="Password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.password 
-                        ? 'border-red-500' 
+                    className={`w-full px-4 py-3 border ${errors.password
+                        ? 'border-red-500'
                         : 'border-gray-200'
-                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12`}
+                      } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12`}
                   />
                   <button
                     type="button"
@@ -225,11 +227,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     placeholder="Confirm Password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.confirmPassword 
-                        ? 'border-red-500' 
+                    className={`w-full px-4 py-3 border ${errors.confirmPassword
+                        ? 'border-red-500'
                         : 'border-gray-200'
-                    } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12`}
+                      } rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all text-black pr-12`}
                   />
                   <button
                     type="button"
@@ -257,20 +258,19 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                    loading 
-                      ? 'bg-gray-400 cursor-not-allowed' 
+                  className={`w-full py-3 rounded-lg font-medium transition-colors ${loading
+                      ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-purple-600 hover:bg-purple-700 text-white'
-                  }`}
+                    }`}
                 >
                   {loading ? 'Loading...' : 'Sign Up'}
                 </button>
               </div>
 
               {/* Google Sign-In Button */}
-              <button 
-                type="button" 
-                onClick={handleGoogleSignIn} 
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
                 className="w-full flex items-center justify-center gap-2 py-2 mt-3 rounded-lg text-gray-500 hover:bg-gray-100 transition-all"
               >
                 <FcGoogle size={32} />
@@ -279,8 +279,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
 
               {/* Login Link */}
               <div className="text-center text-sm text-gray-500 mt-6">
-                <a 
-                  href={role === 'tutor' ? '/tutor/login' : '/login'} 
+                <a
+                  href={role === 'tutor' ? '/tutor/login' : '/login'}
                   className="hover:text-purple-600 hover:underline"
                 >
                   Already have an account? Sign in

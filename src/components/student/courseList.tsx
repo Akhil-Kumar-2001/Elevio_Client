@@ -74,7 +74,7 @@ const WhatToLearnNext = () => {
     }
     try {
       const response = await addToCart(userId, courseId);
-      if (response) {
+      if (response.success) {
         toast.success(response.message);
         incrementCartCount();
       }

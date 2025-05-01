@@ -89,14 +89,14 @@ const StudentVideoChat = () => {
           setSessionData((prev) => (prev ? { ...prev, status: data.status } : null));
           if (data.status === 'completed' || data.status === 'cancelled') {
             toast.info('Session has ended');
-            router.push('/home');
+            router.push(`/profile/${user?.id}`);
           }
         }
       });
 
       socket.on('call-ended', () => {
         toast.info('Call has been ended by the tutor');
-        router.push('/home');
+        router.push(`/profile/${user?.id}`);
       });
 
       return () => {

@@ -106,7 +106,10 @@ const StudentsManagement = () => {
 
             <Table
               columnArray={tableColumn}
-              dataArray={students}
+              dataArray={students.map(student => ({
+                ...student,
+                id: student._id // Ensure a unique identifier is provided
+              }))}
               actions={true}
               onBlockUser={(userId, currentStatus) => openConfirmModal(userId, currentStatus)}
             />

@@ -99,7 +99,12 @@ const CourseVerification = () => {
 
             <Table
               columnArray={tableColumn}
-              dataArray={courses}
+              dataArray={courses.map(course => ({
+                ...course,
+                status: course.status === 'Active' ? 1 : 0, // Convert status to number
+                category: typeof course.category === 'string' ? course.category : course.category.name, // Ensure category is a string
+                isBlocked: course.isBlocked ? 'true' : 'false', // Convert isBlocked to string
+              }))}
               pageRole={'Course-preview'}
               pageCourseFunction={viewProfile}
             />

@@ -2,7 +2,6 @@ import axios from "axios";
 import { basicType, Course, CourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
-import exp from "node:constants";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -428,5 +427,14 @@ export const deleteReply = async(reviewId:string) => {
         return response.data;
     } catch (error:unknown) {
         handleAxiosError(error);
+    }
+}
+
+export const getIncomeByDateRange = async (startDate: string, endDate: string) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/income-by-date-range?startDate=${startDate}&endDate=${endDate}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
     }
 }

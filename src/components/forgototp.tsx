@@ -56,6 +56,8 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
     setIsVerifyDisabled(false);
   };
 
+  console.log(canResend)
+
   useEffect(() => {
     if (timer === null || timer <= 0) return;
 
@@ -105,9 +107,15 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
         const response = await (role == 'student' ? studentForgotOtpPost(otpString, email) : tutorForgotOtpPost(otpString, email));
         if (response) {
           toast.success(response.message);
-          role == 'student' ? router.push(`/resetpassword?email=${response.email}`) : router.push(`/tutor/resetpassword?email=${response.email}`)
+          // role == 'student' ? router.push(`/resetpassword?email=${response.email}`) : router.push(`/tutor/resetpassword?email=${response.email}`)
+          if(role === 'student'){
+            router.push(`/resetpassword?email=${response.email}`) 
+          }else{
+            router.push(`/tutor/resetpassword?email=${response.email}`)
+          }
         }
       } catch (error) {
+        console.log("error", error);
           toast.error('Otp Verification failed')
       }
     }
@@ -134,7 +142,7 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
               Verification Code
             </h2>
             <p className="text-center text-gray-500 text-sm mb-8">
-              We've sent a verification code to {email || 'your email'}
+              {`We've sent a verification code to`} {email || 'your email'}
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col space-y-8 max-w-sm mx-auto w-full">

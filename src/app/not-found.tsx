@@ -18,7 +18,7 @@ function App() {
         {/* Main Content */}
         <h1 className="text-6xl font-bold text-black mb-4">Page Not Found</h1>
         <p className="text-gray-600 text-xl mb-8">
-          Oops! The learning resource you're looking for seems to have wandered off.
+          {"Oops! The learning resource you're looking for seems to have wandered off."}
         </p>
 
         {/* Divider */}

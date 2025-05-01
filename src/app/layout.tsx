@@ -5,7 +5,6 @@ import ToastComponent from "@/components/ToastComponent";
 import Providers from "./provider";
 import AuthProvider from "./auth-provider";
 import { SocketContextProvider } from "@/context/SocketContext";
-import { WebRTCProvider } from "@/context/WebRTCContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -174,9 +174,9 @@ import { jwtDecode } from 'jwt-decode';
 // Add this at the top of your file
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
-const failedQueue: {resolve: (token: string) => void; reject: (error: any) => void}[] = [];
+const failedQueue: {resolve: (token: string) => void; reject: (error: unknown) => void}[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);

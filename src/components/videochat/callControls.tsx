@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Share } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, PhoneOff } from 'lucide-react';
 import ControlButton from './controlButtons';
 
 interface CallControlsProps {
@@ -47,14 +47,14 @@ const CallControls: React.FC<CallControlsProps> = ({
         )}
       </ControlButton>
 
-      <ControlButton
+      {/* <ControlButton
         onClick={() => {}}
         active={true}
         activeColor="bg-gray-700 hover:bg-gray-600"
         tooltip="Share screen"
       >
         <Share size={24} className="text-white" />
-      </ControlButton>
+      </ControlButton> */}
 
       <ControlButton
         onClick={onEndCall}

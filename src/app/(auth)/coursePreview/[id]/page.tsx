@@ -7,9 +7,9 @@ import { useParams, useRouter } from 'next/navigation';
 import Footer from '@/components/student/footer';
 import useAuthStore from '@/store/userAuthStore';
 import { toast } from 'react-toastify';
-import { ISection, ILecture, TutorType, IProgress, ICoursePreview } from '@/types/types';
+import { ISection, ILecture, IProgress, ICoursePreview } from '@/types/types';
 import Link from 'next/link';
-import { createOrder, createReview, getCourseDetails, getLecturesBySection, getProgress, getReviewsByCourse, getStudent, getSubscription, getTutor, verifyPayment, addToProgress, updateReview, deleteReview, getSectionsByCourse } from '@/app/service/user/userApi';
+import { createOrder, createReview, getCourseDetails, getLecturesBySection, getProgress, getReviewsByCourse, getStudent, getSubscription, verifyPayment, addToProgress, updateReview, deleteReview, getSectionsByCourse } from '@/app/service/user/userApi';
 import { createChat } from '@/app/service/shared/chatService';
 import ReactPlayer from 'react-player';
 import Image from 'next/image';
@@ -316,6 +316,7 @@ const CoursePreview = () => {
         setReviews([]);
       }
     } catch (error) {
+      console.error("Error fetching reviews:", error);
       setReviews([]);
     }
   };
@@ -570,9 +571,7 @@ const CoursePreview = () => {
   }, [id, userId]);
 
   useEffect(() => {
-    if (course) {
       handleGetProgress();
-    }
   }, [course]);
 
   if (loading) {
@@ -891,7 +890,7 @@ const CoursePreview = () => {
 
                         {review.reply && (
                           <div className="mt-3 ml-6 p-3 bg-gray-50 border-l-4 border-blue-400 rounded">
-                            <p className="text-sm font-medium text-gray-700">{course.tutorId.username}'s Reply:</p>
+                            <p className="text-sm font-medium text-gray-700">{`${course.tutorId?.username || "Unknown"}'s Reply:`}</p>
                             <p className="text-gray-600 mt-1">{review.reply}</p>
                           </div>
                         )}

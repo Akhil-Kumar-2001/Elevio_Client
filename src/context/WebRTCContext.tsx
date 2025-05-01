@@ -1,8 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useRef } from 'react';
 import { useSocketContext } from '@/context/SocketContext';
-import debounce from 'lodash/debounce';
 
 interface WebRTCContextType {
   startCall: (roomId: string, initiator: boolean) => Promise<void>;

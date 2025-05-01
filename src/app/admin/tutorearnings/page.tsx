@@ -40,10 +40,9 @@ const TutorEarnings = () => {
     balance: number;
     totalEarnings: number;
     totalWithdrawn: number;
+    [key: string]: string | number; // Add index signature
   }
 
-  const [tutors, setTutors] = useState<TutorType[]>([]);
-  const [wallets, setWallets] = useState<WalletType[]>([]);
   const [combinedData, setCombinedData] = useState<CombinedDataType[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
@@ -63,13 +62,11 @@ const TutorEarnings = () => {
       // Get wallets data
       const walletData = await getTutorsWallets(currentPage, 5);
       if (walletData && walletData.success) {
-        setWallets(walletData.data.wallets);
         setTotalPages(Math.ceil(walletData.data.totalRecord / 5));
         
         // Get all tutors for matching
         const tutorData = await getTutorsList();
         if (tutorData && tutorData.success) {
-          setTutors(tutorData.data);
           
           // Combine wallet and tutor data
           const combined = walletData.data.wallets.map((wallet: WalletType) => {

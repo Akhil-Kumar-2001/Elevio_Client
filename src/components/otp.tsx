@@ -77,6 +77,8 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
     return () => clearInterval(interval);
   }, [timer]);
 
+  console.log(canResend)
+
   const handleResend = async () => {
     startTimer();
     try {
@@ -106,10 +108,15 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
         if (response) {
           // toast.success('OTP Verified Successfully');
           toast.success(response.message);
-          role == 'student' ? router.push('/login') : router.push('/tutor/login')
+          if (role === 'student') {
+            router.push('/login');
+          } else {
+            router.push('/tutor/login');
+          }
         }
       } catch (error) {
-          toast.error('Otp Verification failed')
+        console.log(error)
+        toast.error('Otp Verification failed')
       }
     }
   };
@@ -135,7 +142,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
               Verification Code
             </h2>
             <p className="text-center text-gray-500 text-sm mb-8">
-              We've sent a verification code to {email || 'your email'}
+              {`We've sent a verification code to`} {email || 'your email'}
             </p>
 
             <form onSubmit={handleSubmit} className="flex flex-col space-y-8 max-w-sm mx-auto w-full">
@@ -200,8 +207,8 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
                 type="submit"
                 disabled={isVerifyDisabled}
                 className={`w-full py-3 rounded-lg font-medium transition-colors ${isVerifyDisabled
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
                   }`}
               >
                 Verify

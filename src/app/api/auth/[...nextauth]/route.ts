@@ -1,4 +1,4 @@
-import NextAuth, {User,Account} from "next-auth";
+import NextAuth, {Account} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 
@@ -10,7 +10,7 @@ const authOptions = {
         })
     ],
     callbacks: {
-        async signIn({ user,account } : {user:User;account:Account | null}){
+        async signIn({ account } : {account:Account | null}){
             if(account?.provider === 'google') {
                 try {
                     return true

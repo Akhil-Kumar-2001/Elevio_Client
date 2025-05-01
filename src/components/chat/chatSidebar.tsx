@@ -6,6 +6,7 @@ import useConversation from '@/store/useConversation';
 import { UserMinimal } from '@/types/types';
 import { getChats } from '@/app/service/shared/chatService';
 import { useSocketContext } from '@/context/SocketContext';
+import Image from 'next/image';
 
 interface ChatSidebarProps {
   role: 'Tutor' | 'Student';
@@ -114,10 +115,12 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
               } ${index !== users.length - 1 ? 'border-b border-gray-200' : ''}`}
           >
             <div className="relative">
-              <img
+              <Image
                 src={user.profilePicture || '/default-profile.png'}
                 alt={user.username}
-                className="w-12 h-12 rounded-full object-cover"
+                width={48} // Corresponds to w-12 (12 * 4 = 48px in Tailwind)
+                height={48} // Corresponds to h-12 (12 * 4 = 48px in Tailwind)
+                className="rounded-full object-cover"
               />
               <div className="absolute bottom-0 right-0">
                 <Circle

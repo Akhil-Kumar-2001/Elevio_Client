@@ -45,7 +45,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     addMessage,
     setLastMessageMeta, 
     resetUnreadCount, 
-    selectedConversation 
   } = useConversation();
   
   const [newMessage, setNewMessage] = useState('');

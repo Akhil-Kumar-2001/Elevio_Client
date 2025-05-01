@@ -29,6 +29,15 @@ interface SkillOption {
   label: string;
 }
 
+interface TutorFormData {
+  bio: string;
+  qualification: string;
+  experience: string;
+  skills: string[] | string; // Adjust based on whether skills is an array or string
+  document1Url: string;
+  document2Url: string;
+}
+
 const skillsOptions: SkillOption[] = [
   { value: "JavaScript", label: "JavaScript" },
   { value: "React", label: "React" },
@@ -137,7 +146,7 @@ const VerificationForm: React.FC = () => {
   };
 
   // Handle form submission
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: TutorFormData) => {
     if (!user) {
       toast.error("User ID is missing. Please log in again.");
       return;
@@ -150,7 +159,7 @@ const VerificationForm: React.FC = () => {
           bio: data.bio,
           qualification: data.qualification,
           experience: data.experience,
-          skills: data.skills,
+          skills: Array.isArray(data.skills) ? data.skills : [data.skills],
           documents: [
             {
               type: "id_verification",

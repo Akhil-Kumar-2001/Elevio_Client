@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { Eye, EyeOff } from 'lucide-react'; // Add this import
 import { resetPassword as StudentResetPassword } from '@/app/service/user/userApi';
 import { resetPassword as TutorResetPassword } from '@/app/service/tutor/tutorApi';
+import Image from 'next/image';
 
 interface ResetPasswordPageProps {
     role: 'student' | 'tutor';
@@ -66,8 +67,14 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
             if (response) {
                 toast.success(response.message);
             }
-            role === 'student' ? router.push('/login') : router.push('/tutor/login');
+            // role === 'student' ? router.push('/login') : router.push('/tutor/login');
+            if (role === 'student') {
+                router.push('/login');
+            } else {
+                router.push('/tutor/login');
+            }
         } catch (error) {
+            console.log(error)
             setErrors('Failed to reset password. Please try again.');
         } finally {
             setLoading(false);
@@ -83,9 +90,11 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ role }) => {
             <div className="flex w-full max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
                 {/* Left section - Image */}
                 <div className="hidden md:flex md:w-1/2 items-center justify-center p-12">
-                    <img
+                    <Image
                         src={authImage}
-                        alt={role === 'student' ? "Student studying" : "Tutor teaching"}
+                        alt={role === 'student' ? 'Student studying' : 'Tutor teaching'}
+                        width={500} // Adjust based on your design
+                        height={500} // Adjust based on your design
                         className="w-full h-auto"
                     />
                 </div>

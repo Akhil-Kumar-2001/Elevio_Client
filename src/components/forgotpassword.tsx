@@ -40,10 +40,15 @@ const ForgotPassword: React.FC<ForgotPasswordPageProps> = ({ role }) => {
     setLoading(true);
 
     try {
-      const forgotApi = role == 'student' ? studentForgotPassword : tutorForgotPassword
+      const forgotApi = role === 'student' ? studentForgotPassword : tutorForgotPassword
       const response = await forgotApi(email)
       toast.success(response.message)
-      role === 'student'? router.push(`/forgototp?email=${response.email}`) : router.push(`/tutor/forgototp?email=${response.email}`) 
+      // role === 'student'? router.push(`/forgototp?email=${response.email}`) : router.push(`/tutor/forgototp?email=${response.email}`) 
+      if(role ==='student'){
+        router.push(`/forgototp?email=${response.email}`)
+      }else{
+        router.push(`/tutor/forgototp?email=${response.email}`)
+      }
     } catch (error) {
       console.log(error)
       setErrors('Failed to send reset link. Please try again.');

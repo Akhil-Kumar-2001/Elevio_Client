@@ -1,14 +1,15 @@
-"use client";
+'use client'
 
 import {
   getDashboradDetails,
   getMonthlyIncome,
   getStudentSCount,
-  getYearlyIncome
+  getYearlyIncome,
+  getIncomeByDateRange,
 } from '@/app/service/tutor/tutorApi';
 import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
-import { IDashboardDetails } from '@/types/types';
+import { IDashboardDetails, IncomeData } from '@/types/types';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import {
@@ -22,12 +23,16 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  TooltipProps,
 } from 'recharts';
+import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-    const income = payload[0].value;
+    const income = payload[0].value as number;
     const incomeColor = income > 0 ? 'text-green-600' : 'text-red-600';
     return (
       <div className="bg-white p-2 border border-gray-300 shadow-lg rounded">
@@ -44,7 +49,10 @@ const InstructorDashboard = () => {
   const [incomeData, setIncomeData] = useState<{ month?: string; year?: number; income: number }[]>([]);
   const [studentsCount, setStudentsCount] = useState<{ name: string, students: number }[]>([]);
   const [expanded, setExpanded] = useState<boolean>(true);
-  const [view, setView] = useState<"monthly" | "yearly">("monthly");
+  const [view, setView] = useState<"monthly" | "yearly" | "custom">("monthly");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [tutorId, setTutorId] = useState<string>("");
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
@@ -53,22 +61,27 @@ const InstructorDashboard = () => {
       const response = await getDashboradDetails();
       if (response.success) {
         setDashboardData(response.data);
+        setTutorId(response.data.tutorId || "someTutorId");
       }
     } catch (error) {
       console.log("Error while fetching dashboard details", error);
     }
   };
 
-  const fetchIncomeData = async (type: "monthly" | "yearly") => {
+  const fetchIncomeData = async (type: "monthly" | "yearly" | "custom", start?: Date, end?: Date) => {
     try {
-      const response = type === "monthly" ? await getMonthlyIncome() : await getYearlyIncome();
-      console.log("income from backend", response.data);
+      let response;
+      if (type === "custom" && start && end && tutorId) {
+        response = await getIncomeByDateRange(start.toISOString(), end.toISOString());
+      } else {
+        response = type === "monthly" ? await getMonthlyIncome() : await getYearlyIncome();
+      }
+      console.log(`${type} income from backend`, response.data);
       if (response.success) {
-        if (type === "monthly") {
-          // Keep all months, no filtering
-          const transformedData = response.data.map((item: any) => ({
-            month: item.month,
-            income: item.income || 0
+        if (type === "monthly" || type === "custom") {
+          const transformedData = response.data.map((item: IncomeData) => ({
+            month: item.month || item.date,
+            income: item.income || 0,
           }));
           setIncomeData(transformedData);
         } else {
@@ -93,13 +106,25 @@ const InstructorDashboard = () => {
 
   useEffect(() => {
     fetchDashboardDetails();
-    fetchIncomeData(view);
     fetchStudentsCount();
-  }, []);
+    if (view === "custom" && startDate && endDate && tutorId) {
+      fetchIncomeData(view, startDate, endDate);
+    } else {
+      fetchIncomeData(view);
+    }
+  }, [view, startDate, endDate, tutorId]);
 
-  useEffect(() => {
-    fetchIncomeData(view);
-  }, [view]);
+  const formatXAxisTick = (value: string) => {
+    if (view === "yearly") {
+      return value.toString();
+    }
+    if (view === "monthly") {
+      return value.slice(0, 3);
+    }
+    const [month, year] = value.split(' ');
+    const shortMonth = month.slice(0, 3);
+    return `${shortMonth} ${year}`;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -133,38 +158,73 @@ const InstructorDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
-              <h2 className="text-sm font-medium mb-4 text-gray-800">{view === "monthly" ? "Monthly" : "Yearly"} Income</h2>
-              <div className="mb-4">
-                <label htmlFor="view" className="mr-2 text-sm text-gray-700">Select View:</label>
-                <select
-                  id="view"
-                  value={view}
-                  onChange={(e) => setView(e.target.value as "monthly" | "yearly")}
-                  className="text-sm border rounded text-black px-2 py-1"
-                >
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
-                </select>
+            <div className="chart-section border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-sm font-medium text-gray-800">
+                  {view === "monthly" ? "Monthly Income" : view === "yearly" ? "Yearly Income" : "Income (Custom Range)"}
+                </h2>
+                <div className="flex items-center space-x-4">
+                  <div className="select-wrapper">
+                    <label htmlFor="view" className="mr-2 text-sm text-gray-700">Select View:</label>
+                    <select
+                      id="view"
+                      value={view}
+                      onChange={(e) => setView(e.target.value as "monthly" | "yearly" | "custom")}
+                      className="text-sm border rounded text-black px-2 py-1"
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                      <option value="custom">Custom Range</option>
+                    </select>
+                  </div>
+                  {view === "custom" && (
+                    <div className="custom-date-picker">
+                      <div className="flex flex-col">
+                        <label className="text-sm text-gray-700">Start Date:</label>
+                        <DatePicker
+                          selected={startDate}
+                          onChange={(date: Date | null) => setStartDate(date)}
+                          selectsStart
+                          startDate={startDate}
+                          endDate={endDate}
+                          className="text-sm border rounded px-2 py-1 text-black w-40"
+                          placeholderText="Select start date"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-sm text-gray-700">End Date:</label>
+                        <DatePicker
+                          selected={endDate}
+                          onChange={(date: Date | null) => setEndDate(date)}
+                          selectsEnd
+                          startDate={startDate}
+                          endDate={endDate}
+                          minDate={startDate ?? undefined}
+                          className="text-sm border rounded px-2 py-1 text-black w-40"
+                          placeholderText="Select end date"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="h-80 flex items-center justify-center">
+              <div className="chart-container h-96 flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={incomeData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    margin={{ top: 10, right: 30, left: 20, bottom: 80 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
-                      dataKey={view === "monthly" ? "month" : "year"}
+                      dataKey={view === "monthly" ? "month" : view === "yearly" ? "year" : "month"}
                       type="category"
                       allowDuplicatedCategory={false}
-                      tickFormatter={(value) =>
-                        view === "monthly"
-                          ? ["Feb", "Apr", "Jun", "Aug", "Oct", "Dec"].includes(value)
-                            ? value
-                            : ""
-                          : value 
-                      }
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
+                      interval="preserveStartEnd"
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={formatXAxisTick}
                     />
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} />

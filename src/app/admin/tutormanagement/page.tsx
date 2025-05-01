@@ -107,7 +107,13 @@ const TutorManagement = () => {
 
             <Table
               columnArray={tableColumn}
-              dataArray={tutors}
+              dataArray={tutors.map(tutor => ({
+                ...tutor,
+                [tableColumn[0].field]: tutor.username,
+                [tableColumn[1].field]: tutor.email,
+                [tableColumn[2].field]: tutor.role,
+                [tableColumn[3].field]: tutor.createdAt,
+              }))}
               actions={true}
               onBlockUser={(userId, currentStatus) => openConfirmModal(userId, currentStatus)}
             />

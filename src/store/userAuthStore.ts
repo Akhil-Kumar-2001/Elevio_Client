@@ -110,8 +110,6 @@ const useAuthStore = create<AuthState>()(
             toast.error("Failed to retrieve session data");
             return;
           }
-          // console.log(session)
-          // console.log(session?.user)
     
           if (!session || !session.user) {
             console.error('Session or user data is missing');
@@ -135,13 +133,9 @@ const useAuthStore = create<AuthState>()(
           console.log(response)
           localStorage.setItem('authUserCheck', response.data.accessToken) 
           useAuthStore.getState().saveUserDetails(response.data);
-
-          // toast.success(response.message);
-          // router.push('/home') 
-    
-        } catch (error: any) {
+        } catch (error) {
           console.log(error)
-          toast.error(error)
+          toast.error((error as Error)?.message || 'An unexpected error occurred')
         }
       },
     }),

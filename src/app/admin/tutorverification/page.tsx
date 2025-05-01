@@ -79,7 +79,10 @@ const TutorManagement = () => {
 
             <Table
               columnArray={tableColumn}
-              dataArray={tutors}
+              dataArray={tutors.map(tutor => ({
+                ...tutor,
+                isVerified: tutor.status === 1 ? 'Verified' : 'Pending'
+              }))}
               pageRole={'tutor-profile'}
               pageFunction={viewProfile}
             />

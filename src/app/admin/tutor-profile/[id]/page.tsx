@@ -7,11 +7,11 @@ import { useEffect, useState } from "react";
 import { Tutor } from "@/types/types";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 const TutorVerificationDetails = () => {
     const { id } = useParams()
     const [tutor, setTutor] = useState<Tutor | null>(null);
-    const [tutorId, setTutorId] = useState<string | null>(null);
     const router = useRouter()
 
     const tutorData = async () => {
@@ -26,7 +26,6 @@ const TutorVerificationDetails = () => {
 
     useEffect(() => {
         if (id) {
-            setTutorId(id as string);
             tutorData();
         }
     }, [id])
@@ -36,7 +35,7 @@ const TutorVerificationDetails = () => {
             {/* Navbar (Top) */}
             <div className="fixed top-0 left-0 w-full border-b border-gray-800 bg-black z-50 h-16">
                 <div className="flex items-center h-full px-4">
-                <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>                </div>
+                    <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>                </div>
             </div>
 
             {/* Sidebar */}
@@ -49,7 +48,7 @@ const TutorVerificationDetails = () => {
                 <div className="p-6 overflow-y-auto">
                     <div className="max-w-3xl mx-auto">
                         <h1 className="text-xl font-semibold mb-7 mt-7">Tutor Verification Details</h1>
-                        
+
                         {/* Personal Information */}
                         <div className="bg-[#1E2125] p-6 rounded-lg mb-4">
                             <h3 className="text-lg font-semibold mb-4">👤 Personal Information</h3>
@@ -121,10 +120,13 @@ const TutorVerificationDetails = () => {
                                 {tutor?.profile?.documents && tutor.profile.documents.length > 0 ? (
                                     tutor.profile.documents.map((doc, index) => (
                                         <div key={index} className="bg-[#212529] rounded-lg overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={doc.fileUrl}
                                                 alt={doc.type}
+                                                width={300} // Reasonable default for a card, adjust based on layout
+                                                height={160} // Matches h-40 (40 * 4 = 160px)
                                                 className="w-full h-40 object-cover"
+                                                priority
                                             />
                                             <div className="p-4">
                                                 <p className="font-semibold text-white">{doc.type.replace("_", " ").toUpperCase()}</p>

@@ -2,12 +2,13 @@
 
 import AdminSidebar from "@/components/admin/adminsidebar";
 import { useParams } from 'next/navigation'
-import {  getTutor } from "@/app/service/admin/adminApi";
+import { getTutor } from "@/app/service/admin/adminApi";
 import { useEffect, useState } from "react";
 import { Tutor } from "@/types/types";
 import { useRouter } from "next/navigation";
 import VerificationModal from "@/components/admin/verificationConfirmModal";
 import Link from "next/link";
+import Image from "next/image";
 
 const TutorVerificationDetails = () => {
     const { id } = useParams()
@@ -38,7 +39,7 @@ const TutorVerificationDetails = () => {
             {/* Navbar (Top) */}
             <div className="fixed top-0 left-0 w-full border-b border-gray-800 bg-black z-50 h-16">
                 <div className="flex items-center h-full px-4">
-                <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>                </div>
+                    <Link href={`/admin/dashboard`} className="text-xl font-bold">Elevio</Link>                </div>
             </div>
 
             {/* Sidebar */}
@@ -124,9 +125,11 @@ const TutorVerificationDetails = () => {
                                 {tutor?.profile?.documents && tutor.profile.documents.length > 0 ? (
                                     tutor.profile.documents.map((doc, index) => (
                                         <div key={index} className="bg-[#212529] rounded-lg overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={doc.fileUrl}
                                                 alt={doc.type}
+                                                width={400}
+                                                height={160}
                                                 className="w-full h-40 object-cover"
                                             />
                                             <div className="p-4">

@@ -45,9 +45,7 @@ const Cart = () => {
   };
 
   useEffect(() => {
-    if (studentId) {
-      handleCart();
-    }
+    handleCart();
   }, [studentId]);
 
   const handleRemove = async (id: string) => {
@@ -103,8 +101,8 @@ const Cart = () => {
                         <Image
                           src={item.courseImage}
                           alt={item.courseTitle}
-                          width={192} 
-                          height={128} 
+                          width={192}
+                          height={128}
                           className="object-cover rounded-lg"
                         />
                         <div className="flex-1">

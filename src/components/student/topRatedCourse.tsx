@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getListedCourses, addToCart, getPurchasedCourses, getTopRatedCourses } from '../../app/service/user/userApi'; // Adjust path to your API file
+import {addToCart, getPurchasedCourses, getTopRatedCourses } from '../../app/service/user/userApi'; // Adjust path to your API file
 import { FrontendCourse, ICourse } from '@/types/types'; // Adjust path to your types file
 import useAuthStore from '@/store/userAuthStore';
 import { useCartCountStore } from '@/store/cartCountStore';

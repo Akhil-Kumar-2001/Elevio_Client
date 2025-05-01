@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 // import VideoLayout from '@/components/videochat/VideoLayout';
 import { useParams, useRouter } from 'next/navigation';
-import { WebRTCProvider } from '@/context/WebRTCContext';
 import { useSocketContext } from '@/context/SocketContext';
 import tutorAuthStore from '@/store/tutorAuthStore';
 import { toast } from 'react-toastify';
@@ -49,7 +48,7 @@ const TutorVideoChat = () => {
         }));
         if (data.status === 'completed' || data.status === 'cancelled') {
           toast.info('Session has ended');
-          router.push('/tutor/dashboard');
+          router.push("/tutor/sessions");
         }
       }
     }, 100),
@@ -124,7 +123,7 @@ const TutorVideoChat = () => {
       socket.on('session-updated', handleSessionUpdate);
       socket.on('call-ended', () => {
         toast.info('Call has been ended by the student');
-        router.push('/tutor/dashboard');
+        router.push("/tutor/sessions");
       });
 
       return () => {
@@ -160,10 +159,10 @@ const TutorVideoChat = () => {
       <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-900">
         <div className="text-white text-xl mb-4">{error}</div>
         <button
-          onClick={() => router.push('/tutor/dashboard')}
+          onClick={() => router.push("/tutor/sessions")}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          Return to Dashboard
+          Go back
         </button>
       </div>
     );

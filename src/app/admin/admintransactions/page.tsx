@@ -15,7 +15,7 @@ interface TransactionType {
   relatedUserId: string;
   userType: string;
   referenceId: string;
-}
+  [key: string]: string | number;}
 
 interface WalletType {
   _id: string;
@@ -196,7 +196,7 @@ const AdminTransactions = () => {
             ) : wallet ? (
               <div>
                 <h2 className="text-lg font-medium mb-3">Transaction History</h2>
-                <Table
+                <Table<TransactionType>
                   columnArray={columns}
                   dataArray={wallet.transactions}
                 />

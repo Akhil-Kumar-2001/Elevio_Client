@@ -113,21 +113,21 @@ const VideoCallInterface: React.FC<VideoCallInterfaceProps> = ({ role }) => {
           }
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error accessing media devices:", error);
-      if (error.name === "NotReadableError") {
+      if ((error as Error).name === "NotReadableError") {
         toast.error(
           "Camera or microphone is in use by another application. Please close other apps and try again.",
           { autoClose: false, onClose: () => setShowRetry(true) }
         );
-      } else if (error.name === "NotAllowedError") {
+      } else if ((error as Error).name === "NotAllowedError") {
         toast.error("Please grant permission to access your camera and microphone.", {
           autoClose: false,
           onClose: () => setShowRetry(true),
         });
         setVideoError(true);
         setIsVideoOn(false);
-      } else if (error.name === "NotFoundError") {
+      } else if ((error as Error).name === "NotFoundError") {
         toast.error("No camera or microphone found. Please connect a device and try again.", {
           autoClose: false,
           onClose: () => setShowRetry(true),
@@ -225,7 +225,7 @@ const VideoCallInterface: React.FC<VideoCallInterfaceProps> = ({ role }) => {
 
     socketRef.current.emit("join-session", { sessionId, userId, role });
 
-    socketRef.current.on("user-joined", async ({ userId: otherUserId, role: otherRole }) => {
+    socketRef.current.on("user-joined", async ({ role: otherRole }) => {
       if (role === "tutor" && otherRole === "student") {
         try {
           console.log("Student joined, creating offer...");
@@ -241,7 +241,7 @@ const VideoCallInterface: React.FC<VideoCallInterfaceProps> = ({ role }) => {
       }
     });
 
-    socketRef.current.on("offer", async ({ offer, fromUserId }) => {
+    socketRef.current.on("offer", async ({ offer }) => {
       if (role === "student" && peerConnectionRef.current) {
         try {
           console.log("Received offer from tutor:", offer);

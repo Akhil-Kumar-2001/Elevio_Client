@@ -6,7 +6,7 @@ import Navbar from '@/components/tutor/navbar';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
 import { getCourseDetails, updateCourse, getCategories } from '@/app/service/tutor/tutorApi';
 import { toast } from 'react-toastify';
-import { Course, Category } from '@/types/types';
+import { Course, Category, ICategory } from '@/types/types';
 import Image from 'next/image';
 import { Camera, Edit, FileText, CheckCircle, ArrowLeft, Eye } from 'lucide-react';
 import axios from 'axios';
@@ -54,6 +54,8 @@ const CourseDetailPage = () => {
       setLoading(false);
     }
   };
+
+  console.log(imageFile, 'imageFile');
 
   const fetchCategories = async () => {
     try {
@@ -229,9 +231,9 @@ const CourseDetailPage = () => {
   const handleConfirmListCourse = async () => {
     handleCloseConfirmModal(); // Close the modal
     await handleListCourse(); // Proceed with listing the course
-  };
+  }
 
-  const getCategoryName = (category: any) => {
+  const getCategoryName = (category: ICategory) => {
     if (!category) return "Uncategorized";
     if (typeof category === "string") return "Uncategorized";
     return category.name || "Uncategorized";
@@ -448,7 +450,7 @@ const CourseDetailPage = () => {
 
                       <div className="flex items-center gap-4 mb-5">
                         <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                          {getCategoryName(course.category)}
+                          {typeof course.category === 'object' ? getCategoryName(course.category) : "Uncategorized"}
                         </span>
                         <span className="text-2xl text-black font-bold">₹{course.price}</span>
                       </div>

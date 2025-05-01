@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client';
 
 interface SocketContextType {
   socket: Socket | null;
-  onlineUser: any[];
+  onlineUser: string[];
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -20,7 +20,7 @@ export const SocketContextProvider = ({ children }: { children: ReactNode }) => 
   const tutor = tutorAuthStore();
   const student = userAuthStore();
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [onlineUser, setOnlineUser] = useState<any[]>([]);
+  const [onlineUser, setOnlineUser] = useState<string[]>([]);
   const userId = tutor.user?.id || student.user?.id;
   console.log(userId, 'userId in socket context');
   console.log(socket, 'socket in socket context'); 
@@ -34,7 +34,6 @@ export const SocketContextProvider = ({ children }: { children: ReactNode }) => 
       }
       return;
     }
-
     const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000', {
       transports: ['websocket', 'polling'],
       autoConnect: true,

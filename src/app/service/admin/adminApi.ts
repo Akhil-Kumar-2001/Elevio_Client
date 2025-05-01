@@ -2,7 +2,6 @@ import axios from "axios";
 import { SubscriptionType, userType } from "@/types/types";
 import { toast } from 'react-toastify'
 import adminAxiosInstance from "./adminAxiosInstance";
-import exp from "constants";
 
 const API_URI = process.env.NEXT_PUBLIC_API_URI;
 
@@ -331,6 +330,16 @@ export const AdminMontlyIncome = async () => {
 export const AdminYearlyIncome = async () => {
     try {
         const incomes = await adminAxiosInstance.get(`/admin/admin-yearly-income`);
+        return incomes.data;
+    } catch (error:unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const AdminIncomeByDateRange = async (startDate: string, endDate: string) => {
+    try {
+        const incomes = await adminAxiosInstance.get(`/admin/admin-income-by-date-range?startDate=${startDate}&endDate=${endDate}`);
+        console.log("income by date range", incomes.data)   
         return incomes.data;
     } catch (error:unknown) {
         handleAxiosError(error)
