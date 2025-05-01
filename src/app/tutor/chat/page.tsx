@@ -12,9 +12,9 @@ const Chat = () => {
   const [selectedUser, setSelectedUser] = useState<UserMinimal | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100">
       <Navbar />
-      <div className="h-[calc(100vh-64px)] flex flex-grow mt-14">  {/* Adjust 64px based on your navbar height */}
+      <div className="flex flex-grow overflow-hidden mt-14"> {/* Adjust 64px based on your navbar height */}
         <ChatSidebar
           role="Tutor"
           onSelectUser={setSelectedUser}
