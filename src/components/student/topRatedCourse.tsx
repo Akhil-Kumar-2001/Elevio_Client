@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {addToCart, getPurchasedCourses, getTopRatedCourses } from '../../app/service/user/userApi'; // Adjust path to your API file
+import {addToCart, addToWishlist, getPurchasedCourses, getTopRatedCourses } from '../../app/service/user/userApi'; // Adjust path to your API file
 import { FrontendCourse, ICourse } from '@/types/types'; // Adjust path to your types file
 import useAuthStore from '@/store/userAuthStore';
 import { useCartCountStore } from '@/store/cartCountStore';
@@ -20,7 +20,7 @@ const TopRated = () => {
   const [error, setError] = useState<string | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // Track which card is being hovered
   const { user } = useAuthStore();
-  const { incrementCartCount } = useCartCountStore();
+  const { incrementCartCount,incrementWishlistCount } = useCartCountStore();
   const userId = user?.id;
 
   const fetchCourses = async () => {
@@ -84,8 +84,20 @@ const TopRated = () => {
     }
   };
 
-  const handleWishlist = () => {
-    toast.info("Wish list feature Coming Soon....");
+  const handleWishlist = async(courseId:string) => {
+    // toast.info("Wish list feature Coming Soon....");
+    try {
+      const response = await addToWishlist(courseId);
+      if (response.success) {
+        toast.success(response.message);
+        incrementWishlistCount();
+
+      }
+    } catch (error) {
+      console.log("Error adding course to wishlist:", error);
+      // setError('Failed to add course to wishlist');
+      
+    }
   };
 
   // New function to handle navigation to course details page
@@ -165,7 +177,7 @@ const TopRated = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent navigation when clicking the button
-                        handleWishlist();
+                        handleWishlist(course._id);
                       }}
                       className="p-2 border border-purple-600 rounded-full hover:bg-purple-100 transition-colors"
                       aria-label="Add to Wishlist"

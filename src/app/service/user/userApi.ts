@@ -151,9 +151,46 @@ export const addToCart = async (userId: string, courseId: string) => {
     }
 }
 
+export const addToWishlist = async (courseId: string) => {
+    try {
+        const response = await userAxiosInstance.post(`/student/add-to-wishlist/${courseId}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const getWishlistCourses = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/student/wishlist`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const removeFromWishlist = async (courseId: string) => {
+    try {
+        const response = await userAxiosInstance.delete(`/student/remove-from-wishlist/${courseId}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
 export const cartData = async (studentId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/cart/${studentId}`);
+        return response.data
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
+
+export const wishlistData = async () => {
+    try {
+        const response = await userAxiosInstance.get(`/student/wishlist`);
+        console.log("wishlist data in api", response.data)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)

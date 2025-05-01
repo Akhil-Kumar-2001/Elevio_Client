@@ -5,7 +5,7 @@ import useAuthStore from '@/store/userAuthStore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getStudent, cartData } from '../../app/service/user/userApi';
+import { getStudent, cartData, wishlistData } from '../../app/service/user/userApi';
 import { useCartCountStore } from '@/store/cartCountStore';
 import { toast } from 'react-toastify';
 
@@ -20,6 +20,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuthStore();
   const { cartCount, setCartCount } = useCartCountStore();
+  const { wishlistCount, setWishlistCount } = useCartCountStore();
   const studentId = user?.id;
   const { logout } = useAuthStore();
 
@@ -64,6 +65,18 @@ const Navbar = () => {
     }
   };
 
+  const fetchWishlistCount = async () => {
+    try {
+      const response = await wishlistData();
+      console.log('Wishlist count:', response.data.length);
+      if(response.success) {
+      setWishlistCount(response.data.length);
+      }
+    } catch (error) {
+      console.log('Failed to fetch wishlist data:', error);
+    }
+  };
+
   useEffect(() => {
     if (!studentId) return;
 
@@ -88,9 +101,10 @@ const Navbar = () => {
 
     getImageStudent();
     fetchCartCount();
+    fetchWishlistCount();
   }, [studentId]);
 
-  const wishlistCount = 0;
+  // const wishlistCount = 0;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
