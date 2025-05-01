@@ -36,6 +36,8 @@ const AddCourseForm = () => {
   const [imageThumbnail, setImageThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState('');
   const [description, setDescription] = useState('');
+  const [expanded, setExpanded] = useState<boolean>(true);
+
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
@@ -89,8 +91,8 @@ const AddCourseForm = () => {
       };
 
       console.log('Course Data:', courseData);
-      const response =await createCourse(courseData);
-      if(response.success){
+      const response = await createCourse(courseData);
+      if (response.success) {
         toast.success(response.message)
         router.push('/tutor/courses');
       }
@@ -104,7 +106,7 @@ const AddCourseForm = () => {
       <Navbar />
       <div className="flex flex-1 h-[calc(100vh-64px)]">
         <div className="w-64 bg-white">
-          <TutorSidebar />
+          <TutorSidebar expanded={expanded} setExpanded={setExpanded} />
         </div>
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="flex justify-center items-center min-h-full py-8">
@@ -113,42 +115,42 @@ const AddCourseForm = () => {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Name</label>
-                  <input 
-                    type="text" 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)} 
-                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200" 
-                    placeholder="Enter course name" 
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    placeholder="Enter course name"
                   />
                 </div>
-                
+
                 {/* New Subtitle Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Subtitle</label>
-                  <input 
-                    type="text" 
-                    value={subtitle} 
-                    onChange={(e) => setSubtitle(e.target.value)} 
-                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200" 
-                    placeholder="Enter course subtitle" 
+                  <input
+                    type="text"
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    placeholder="Enter course subtitle"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Price ($)</label>
-                  <input 
-                    type="number" 
-                    value={price} 
-                    onChange={(e) => setPrice(e.target.value)} 
-                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200" 
-                    placeholder="Enter course price" 
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    placeholder="Enter course price"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select 
-                    value={category} 
-                    onChange={(e) => setCategory(e.target.value)} 
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 appearance-none"
                   >
                     <option value="" disabled>Select a category</option>
@@ -165,20 +167,20 @@ const AddCourseForm = () => {
                     ) : (
                       <span className="text-gray-500">Click to upload thumbnail</span>
                     )}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleThumbnailChange} 
-                      className="absolute w-full h-full opacity-0 cursor-pointer" 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailChange}
+                      className="absolute w-full h-full opacity-0 cursor-pointer"
                     />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Course Description</label>
-                  <textarea 
-                    value={description} 
-                    onChange={(e) => setDescription(e.target.value)} 
-                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 resize-none h-24" 
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-4 py-2 border text-gray-600 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 resize-none h-24"
                     placeholder="Enter course description"
                   />
                 </div>
