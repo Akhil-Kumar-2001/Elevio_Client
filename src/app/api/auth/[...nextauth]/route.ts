@@ -27,7 +27,7 @@ const authOptions = {
         signIn: '/login',
         // error: '/auth/error',
       },
-      secret: process.env.AUTH_SECRET,
+      secret: process.env.NEXTAUTH_SECRET,
 }
 
 // Define the NextAuth handler and export as GET and POST
