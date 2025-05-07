@@ -14,16 +14,7 @@ export async function middleware(req: NextRequest) {
     console.log("Skipping middleware for login request...");
     return NextResponse.next();
   }
-  // const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
-  let token
-  if(pathname.startsWith('/')){
-    token = useAuthStore.getState().token
-  }else if(pathname.startsWith('/tutor')){
-    token = tutorAuthStore.getState().token
-  }else if(pathname.startsWith('/admin')){
-    token = adminAuthStore.getState().token
-  }
-  // const token = localStorage.getItem('userAccessToken') || localStorage.getItem('admin-accessToken');
+  const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
   const refreshToken = req.cookies.get('refreshToken')?.value; 
   const adminRefreshToken = req.cookies.get('admin-refreshToken')?.value;
 
@@ -64,37 +55,37 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/home',
-    // "/mylearning",
-    // '/courses/:path*',
-    // '/profile',
-    // '/cart',
-    // '/chat',
-    // '/checkout',
-    // '/coursePreview',
-    // '/wishlist',
-    // '/tutor/dashboard',
-    // '/tutor/verification',
-    // '/tutor/pending-page',
-    // '/tutor/profile',
-    // '/tutor/courses',
-    // '/tutor/courses/preview',
-    // "/tutor/courses/createcourse",
-    // "/tutor/courses/create-details/:path*",
-    // '/tutor/home',
-    // '/tutor/chat',
-    // '/tutor/earnings',
-    // '/admin/dashboard',
-    // '/admin/studentsmanagement',
-    // '/admin/tutormanagement',
-    // '/admin/tutorverification',
-    // '/admin/tutor-details/:path',
-    // '/admin/category',
-    // '/admin/courseverification',
-    // '/admin/course-preview/:path',
-    // '/admin/admintransactions',
-    // '/admin/subscription',
-    // '/admin/tutor-profile',
-    // '/admin/tutorearnings',
+    "/mylearning",
+    '/courses/:path*',
+    '/profile',
+    '/cart',
+    '/chat',
+    '/checkout',
+    '/coursePreview',
+    '/wishlist',
+    '/tutor/dashboard',
+    '/tutor/verification',
+    '/tutor/pending-page',
+    '/tutor/profile',
+    '/tutor/courses',
+    '/tutor/courses/preview',
+    "/tutor/courses/createcourse",
+    "/tutor/courses/create-details/:path*",
+    '/tutor/home',
+    '/tutor/chat',
+    '/tutor/earnings',
+    '/admin/dashboard',
+    '/admin/studentsmanagement',
+    '/admin/tutormanagement',
+    '/admin/tutorverification',
+    '/admin/tutor-details/:path',
+    '/admin/category',
+    '/admin/courseverification',
+    '/admin/course-preview/:path',
+    '/admin/admintransactions',
+    '/admin/subscription',
+    '/admin/tutor-profile',
+    '/admin/tutorearnings',
 
   ],
 };
