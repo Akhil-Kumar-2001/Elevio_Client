@@ -11,7 +11,7 @@ export async function middleware(req: NextRequest) {
     console.log("Skipping middleware for login request...");
     return NextResponse.next();
   }
-
+  console.log("Cookie from  mdidlleware",req.cookies.get('accessToken'));
   const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
   const refreshToken = req.cookies.get('refreshToken')?.value; 
   const adminRefreshToken = req.cookies.get('admin-refreshToken')?.value;
@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
   }
 
   console.log("middleware role =>", role);
-console.log("tokern",token)
+console.log("tokern from middleware",token)
   if (!token) {
     if (pathname.startsWith('/tutor')) {
       return NextResponse.redirect(new URL('/tutor/login', req.url));
