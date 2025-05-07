@@ -2,6 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { TokenPayload } from './types/types';
+import useAuthStore from './store/userAuthStore';
+import tutorAuthStore from './store/tutorAuthStore';
+import adminAuthStore from './store/adminAuthStore';
 
 export async function middleware(req: NextRequest) { 
     const url = req.nextUrl.clone();
@@ -11,7 +14,15 @@ export async function middleware(req: NextRequest) {
     console.log("Skipping middleware for login request...");
     return NextResponse.next();
   }
-  const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
+  // const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
+  let token
+  if(pathname.startsWith('/')){
+    token = useAuthStore.getState().token
+  }else if(pathname.startsWith('/tutor')){
+    token = tutorAuthStore.getState().token
+  }else if(pathname.startsWith('/admin')){
+    token = adminAuthStore.getState().token
+  }
   // const token = localStorage.getItem('userAccessToken') || localStorage.getItem('admin-accessToken');
   const refreshToken = req.cookies.get('refreshToken')?.value; 
   const adminRefreshToken = req.cookies.get('admin-refreshToken')?.value;
