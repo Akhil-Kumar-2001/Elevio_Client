@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
-    // return NextResponse.redirect(new URL('/login', req.url));
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
   if ((!token && refreshToken) || (!token && adminRefreshToken)) {
