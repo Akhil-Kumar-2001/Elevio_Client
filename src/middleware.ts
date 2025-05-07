@@ -11,8 +11,8 @@ export async function middleware(req: NextRequest) {
     console.log("Skipping middleware for login request...");
     return NextResponse.next();
   }
-  // const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
-  const token = localStorage.getItem('userAccessToken') || localStorage.getItem('admin-accessToken');
+  const token = req.cookies.get('accessToken')?.value || req.cookies.get('admin-accessToken')?.value;
+  // const token = localStorage.getItem('userAccessToken') || localStorage.getItem('admin-accessToken');
   const refreshToken = req.cookies.get('refreshToken')?.value; 
   const adminRefreshToken = req.cookies.get('admin-refreshToken')?.value;
 
@@ -27,8 +27,10 @@ export async function middleware(req: NextRequest) {
   }
 
   console.log("middleware role =>", role);
-console.log("tokern from middleware",token)
-console.log("Cookie from  mdidlleware",localStorage.getItem('userAccessToken'));
+  console.log("All cookies:", Object.fromEntries(req.cookies));
+  console.log("tokern from middleware",token)
+
+// console.log("Cookie from  mdidlleware",localStorage.getItem('userAccessToken'));
 
   if (!token) {
     if (pathname.startsWith('/tutor')) {
