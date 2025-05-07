@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { TokenPayload } from './types/types';
 
-export async function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) { 
     const url = req.nextUrl.clone();
   const { pathname } = url;
 
