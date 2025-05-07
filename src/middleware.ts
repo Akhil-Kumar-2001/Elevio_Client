@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
   const adminRefreshToken = req.cookies.get('admin-refreshToken')?.value;
 
   let role = null;
-  if (token) {
+  if (token) {  
     try {
       const decoded = jwt.decode(token) as TokenPayload | null; // ✅ Type-safe decoding
       role = decoded?.role || null;
@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
   }
 
   console.log("middleware role =>", role);
-
+console.log("tokern",token)
   if (!token) {
     if (pathname.startsWith('/tutor')) {
       return NextResponse.redirect(new URL('/tutor/login', req.url));
@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
-    return NextResponse.redirect(new URL('/login', req.url));
+    // return NextResponse.redirect(new URL('/login', req.url));
   }
 
   if ((!token && refreshToken) || (!token && adminRefreshToken)) {
@@ -48,7 +48,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // '/home',
+    '/home',
     // "/mylearning",
     // '/courses/:path*',
     // '/profile',
