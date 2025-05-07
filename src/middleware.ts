@@ -2,9 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { TokenPayload } from './types/types';
-import useAuthStore from './store/userAuthStore';
-import tutorAuthStore from './store/tutorAuthStore';
-import adminAuthStore from './store/adminAuthStore';
 
 export async function middleware(req: NextRequest) { 
     const url = req.nextUrl.clone();
