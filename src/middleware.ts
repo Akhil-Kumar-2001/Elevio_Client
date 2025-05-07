@@ -86,6 +86,5 @@ export const config = {
     '/admin/subscription',
     '/admin/tutor-profile',
     '/admin/tutorearnings',
-
   ],
 };
