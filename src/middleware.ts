@@ -28,8 +28,7 @@ export async function middleware(req: NextRequest) {
   console.log("middleware role =>", role);
   console.log("All cookies:", Object.fromEntries(req.cookies));
   console.log("tokern from middleware",token)
-
-// console.log("Cookie from  mdidlleware",localStorage.getItem('userAccessToken'));
+  console.log("cookie data",req.cookies) 
 
   if (!token) {
     if (pathname.startsWith('/tutor')) {
