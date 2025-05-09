@@ -28,7 +28,6 @@ export async function middleware(req: NextRequest) {
   console.log("middleware role =>", role);
   console.log("All cookies:", Object.fromEntries(req.cookies));
   console.log("tokern from middleware",token)
-  console.log("cookie data",req.cookies) 
 
   if (!token) {
     if (pathname.startsWith('/tutor')) {
@@ -37,7 +36,7 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
-    // return NextResponse.redirect(new URL('/login', req.url));
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
   if ((!token && refreshToken) || (!token && adminRefreshToken)) {
