@@ -620,7 +620,7 @@ const Navbar = () => {
                 {cartCount}
               </span>
             )}
-          </div>
+          </div> 
 
           {/* Profile Photo with Dropdown */}
           <div className="relative profile-dropdown" ref={dropdownRef}>
