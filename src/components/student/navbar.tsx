@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -25,6 +24,8 @@ const Navbar = () => {
   const studentId = user?.id;
   const { logout } = useAuthStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  console.log(student)
 
   const handleLogout = () => {
     logout();
