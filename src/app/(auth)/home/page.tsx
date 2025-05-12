@@ -7,6 +7,7 @@ import SubscriptionBanner from '@/components/student/subscriptionBanner';
 import WhatToLearnNext from '@/components/student/courseList';
 import Footer from '@/components/student/footer';
 import TopRated from '@/components/student/topRatedCourse';
+import AboutFooter from '@/components/student/about/AboutFooter';
 
 const Homepage = () => {
 
@@ -17,7 +18,9 @@ const Homepage = () => {
       <SubscriptionBanner />
       <WhatToLearnNext />
       <TopRated />
-      <Footer />
+      {/* <Footer /> */}
+      <AboutFooter />
+
     </div>
   );
 };

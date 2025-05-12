@@ -9,6 +9,7 @@ import useAuthStore from '@/store/userAuthStore';
 import { ICourse, IProgress } from '@/types/types';
 import { getProgress, getPurchasedCourses } from '@/app/service/user/userApi';
 import Image from 'next/image';
+import AboutFooter from '@/components/student/about/AboutFooter';
 
 const MyLearning = () => {
   const router = useRouter();
@@ -164,7 +165,9 @@ const MyLearning = () => {
         )}
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
+      <AboutFooter />
+
     </div>
   );
 };
