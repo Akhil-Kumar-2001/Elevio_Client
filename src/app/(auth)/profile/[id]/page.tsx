@@ -753,6 +753,7 @@ const Profile = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  console.log(initial)
 
   const fetchProfileData = async () => {
     if (!id || Array.isArray(id)) {

@@ -5,7 +5,6 @@ import Navbar from '@/components/student/navbar';
 import HeroSection from '@/components/student/heroSection'; // Import the HeroSection component
 import SubscriptionBanner from '@/components/student/subscriptionBanner';
 import WhatToLearnNext from '@/components/student/courseList';
-import Footer from '@/components/student/footer';
 import TopRated from '@/components/student/topRatedCourse';
 import AboutFooter from '@/components/student/about/AboutFooter';
 

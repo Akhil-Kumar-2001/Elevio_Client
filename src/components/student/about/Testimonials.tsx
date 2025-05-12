@@ -21,7 +21,7 @@ const Testimonial = ({ content, name, role, image, rating }: TestimonialProps) =
           />
         ))}
       </div>
-      <p className="text-gray-700 mb-4 italic">"{content}"</p>
+      <p className="text-gray-700 mb-4 italic">{content}</p>
       <div className="flex items-center">
         <img
           src={image}

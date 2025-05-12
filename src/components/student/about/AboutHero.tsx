@@ -20,9 +20,9 @@ const AboutHero = () => {
               Transforming education through personalized learning experiences
             </h2>
             <p className="text-lg md:text-xl leading-relaxed text-blue-50 mb-8 max-w-2xl">
-              Elevio is a cutting-edge learning platform designed to connect students with expert tutors
+              {`Elevio is a cutting-edge learning platform designed to connect students with expert tutors
               through technology. We believe that personalized education leads to better outcomes,
-              which is why we've built a platform that prioritizes one-to-one connections.
+              which is why we've built a platform that prioritizes one-to-one connections.`}
             </p>
             <div className="flex flex-wrap gap-4">
               {/* <button className="px-8 py-3 rounded-full bg-white text-blue-900 font-medium hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">

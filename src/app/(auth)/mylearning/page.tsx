@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { BookOpen, Clock, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/student/navbar';
-import Footer from '@/components/student/footer';
 import useAuthStore from '@/store/userAuthStore';
 import { ICourse, IProgress } from '@/types/types';
 import { getProgress, getPurchasedCourses } from '@/app/service/user/userApi';

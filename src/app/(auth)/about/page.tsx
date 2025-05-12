@@ -5,7 +5,6 @@ import Testimonials from '@/components/student/about/Testimonials';
 import Stats from '@/components/student/about/Stats';
 import CtaSection from '@/components/student/about/CtaSections';
 import AboutFooter from '@/components/student/about/AboutFooter';
-import Navbar from '@/components/student/navbar';
 
 const About = () => {
   return (
