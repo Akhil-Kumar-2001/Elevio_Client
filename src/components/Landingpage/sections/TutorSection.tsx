@@ -13,7 +13,7 @@ export default function TutorSection() {
               {/* Background elements */}
               <div className="absolute -top-6 -left-6 w-64 h-64 bg-pink-100 rounded-full mix-blend-multiply opacity-70 animate-pulse-slow"></div>
               <div className="absolute -bottom-10 -right-10 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply opacity-70"></div>
-              
+
               {/* Tutor image container */}
               <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl animate-fade-in-right">
                 <div className="aspect-[4/3] relative">
@@ -24,7 +24,7 @@ export default function TutorSection() {
                     className="object-cover"
                   />
                 </div>
-                
+
                 {/* Stats card */}
                 <div className="absolute -bottom-1 -right-0 mr-2 mb-2 bg-white rounded-xl shadow-lg p-4 animate-float">
                   <div className="flex flex-col items-center">
@@ -35,33 +35,33 @@ export default function TutorSection() {
               </div>
             </div>
           </div>
-          
+
           {/* Content Column */}
           <div className="w-full lg:w-1/2 order-1 lg:order-2">
             <div className="max-w-lg mx-auto lg:mx-0">
               <h2 className="text-sm font-semibold text-pink-600 uppercase tracking-wide">For Educators</h2>
               <h3 className="mt-2 text-4xl font-bold text-gray-900 md:text-5xl">Become an Instructor</h3>
-              
+
               <p className="mt-4 text-lg text-gray-600">
-                Share your expertise with the world. Create engaging courses, 
-                build your audience, and earn income while making a difference in students' lives.
+                {`Share your expertise with the world. Create engaging courses, 
+                build your audience, and earn income while making a difference in students' lives.`}
               </p>
-              
+
               <div className="mt-8 space-y-4">
                 {[
-                  { 
-                    icon: <Award className="h-6 w-6 text-pink-600" />, 
-                    title: 'Showcase your expertise', 
+                  {
+                    icon: <Award className="h-6 w-6 text-pink-600" />,
+                    title: 'Showcase your expertise',
                     description: 'Establish yourself as an authority in your field'
                   },
-                  { 
-                    icon: <DollarSign className="h-6 w-6 text-pink-600" />, 
-                    title: 'Earn passive income', 
+                  {
+                    icon: <DollarSign className="h-6 w-6 text-pink-600" />,
+                    title: 'Earn passive income',
                     description: 'Get paid every time a student enrolls in your course'
                   },
-                  { 
-                    icon: <Users className="h-6 w-6 text-pink-600" />, 
-                    title: 'Build your community', 
+                  {
+                    icon: <Users className="h-6 w-6 text-pink-600" />,
+                    title: 'Build your community',
                     description: 'Connect directly with students through chat and video calls'
                   },
                 ].map((item, index) => (
@@ -74,10 +74,10 @@ export default function TutorSection() {
                   </div>
                 ))}
               </div>
-              
+
               <div className="mt-10">
-                <Link 
-                  href="/tutor/signup" 
+                <Link
+                  href="/tutor/signup"
                   className="inline-flex items-center rounded-full bg-pink-600 px-8 py-3 text-base font-medium text-white shadow-md transition-all hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                 >
                   Start Teaching Today
