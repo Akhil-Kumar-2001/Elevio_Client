@@ -438,3 +438,12 @@ export const getIncomeByDateRange = async (startDate: string, endDate: string) =
         handleAxiosError(error)
     }
 }
+
+export const getStudents = async (page: number, limit: number) => {
+    try {
+        const response = await userAxiosInstance.get(`/tutor/students?page=${page}&limit=${limit}`);
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error)
+    }
+}
