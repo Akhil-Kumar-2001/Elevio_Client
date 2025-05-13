@@ -131,8 +131,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
         } else {
           setErrors({ general: 'Invalid email or password' });
         }
-      } else {
-        setErrors({ general: 'An unexpected error occurred' });
       }
     } finally {
       setLoading(false);
