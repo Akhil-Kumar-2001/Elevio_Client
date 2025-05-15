@@ -26,6 +26,8 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
   const [email, setEmail] = useState<string>('');
   const searchParams = useSearchParams();
 
+  console.log(canResend)
+
   useEffect(() => {
     const emailFromQuery = searchParams.get('email');
     setEmail(emailFromQuery ?? '');
@@ -92,6 +94,7 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
     e.preventDefault();
+    console.log(index)
     const pastedData = e.clipboardData.getData('text').trim();
 
     // Validate that the pasted data is a 6-digit numeric string

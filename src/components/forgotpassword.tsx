@@ -50,11 +50,8 @@ const ForgotPassword: React.FC<ForgotPasswordPageProps> = ({ role }) => {
       
       window.history.replaceState(null, '', redirectUrl);
       router.push(redirectUrl);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Forgot password error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to send reset link. Please try again.';
-      setErrors(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
