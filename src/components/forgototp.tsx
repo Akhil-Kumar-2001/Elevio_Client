@@ -26,8 +26,6 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
   const [email, setEmail] = useState<string>('');
   const searchParams = useSearchParams();
 
-  console.log(canResend)
-
   useEffect(() => {
     const emailFromQuery = searchParams.get('email');
     setEmail(emailFromQuery ?? '');
@@ -93,7 +91,6 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
-    console.log(index)
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text').trim();
 
@@ -106,7 +103,7 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
       const lastInput = document.getElementById(`otp-${otp.length - 1}`) as HTMLInputElement;
       if (lastInput) lastInput.focus();
     } else {
-      toast.error('Please paste a valid 6-digit OTP');
+      toast.error('Please paste a 6-digit OTP');
     }
   };
 
@@ -134,13 +131,11 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
       const response = await (role === 'student' ? studentForgotOtpPost(otpString, email) : tutorForgotOtpPost(otpString, email));
       if (response) {
         toast.success(response.message);
-        if (role === 'student') {
-          window.history.replaceState(null, '', `/resetpassword?email=${response.email}`);
-          router.push(`/resetpassword?email=${response.email}`);
-        } else {
-          window.history.replaceState(null, '', `/tutor/resetpassword?email=${response.email}`);
-          router.push(`/tutor/resetpassword?email=${response.email}`);
-        }
+        const redirectUrl = role === 'student'
+          ? `/resetpassword?email=${encodeURIComponent(response.email)}`
+          : `/tutor/resetpassword?email=${encodeURIComponent(response.email)}`;
+        window.history.replaceState(null, '', redirectUrl);
+        router.push(redirectUrl);
       }
     } catch (error) {
       console.error("OTP Verification failed:", error);
@@ -148,8 +143,81 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
     }
   };
 
+  // Shared animation props for 3D book/clipboard
+  const bookAnimationProps = {
+    className: 'relative w-48 h-32 rounded-lg shadow-xl',
+    style: { willChange: 'transform, box-shadow' } as React.CSSProperties,
+    glow: (
+      <motion.div
+        className="absolute inset-0 bg-teal-600 rounded-lg bg-gradient-to-r from-teal-500 to-teal-700"
+        animate={{
+          boxShadow: [
+            '0 10px 20px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.2)',
+            '0 15px 30px rgba(13, 148, 136, 0.4), 0 0 30px rgba(13, 148, 136, 0.3)',
+            '0 10px 20px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.2)',
+          ],
+        }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="absolute inset-2 bg-white rounded-lg flex items-center justify-center z-10">
+          <span className="text-teal-600 font-poppins font-bold text-xl">Verify</span>
+        </div>
+      </motion.div>
+    ),
+    float: (
+      <motion.div
+        animate={{ y: [0, -15] }}
+        transition={{
+          y: {
+            type: 'spring',
+            stiffness: 50,
+            damping: 20,
+            repeat: Infinity,
+            repeatType: 'reverse',
+            duration: 3,
+          },
+        }}
+      >
+        <motion.div
+          animate={{ rotateY: [0, 15, 0, -15, 0] }}
+          transition={{
+            rotateY: {
+              duration: 5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            },
+          }}
+        />
+      </motion.div>
+    ),
+  };
+
+  // Shared animation props for orbiting icons
+  const iconAnimationProps = {
+    orbit: {
+      className: 'absolute',
+      animate: { rotate: 360 },
+      transition: { duration: 25, repeat: Infinity, ease: 'linear' },
+      style: { willChange: 'transform' } as React.CSSProperties,
+    },
+    icon: (x: number, y: number, delay: number, Icon: React.ComponentType<{ className: string }>) => (
+      <motion.div
+        className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+        style={{ x, y }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: [1, 1.3, 1] }}
+        transition={{
+          opacity: { duration: 0.5, delay },
+          scale: { duration: 3, repeat: Infinity, delay, ease: 'easeInOut' },
+        }}
+      >
+        <Icon className="w-6 h-6 text-teal-600" />
+      </motion.div>
+    ),
+  };
+
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4 overflow-hidden">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-12 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -157,7 +225,7 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
         className="w-full max-w-5xl bg-white rounded-3xl shadow-xl flex flex-col lg:flex-row h-[90vh] overflow-hidden"
       >
         {/* Left Section: Engaging Visual */}
-        <div className="lg:w-1/2 bg-gradient-to-b from-teal-50 to-gray-100 p-8 flex flex-col items-center justify-center relative">
+        <div className="lg:w-1/2 bg-gradient-to-b from-teal-50 to-gray-100 p-12 flex flex-col items-center justify-center relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -165,7 +233,7 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
             className="text-center z-10"
           >
             <motion.h1
-              className="text-4xl font-extrabold text-teal-600 font-poppins mb-3 bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-400"
+              className="text-5xl font-extrabold text-teal-600 font-poppins mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-400"
               animate={{ scale: [1, 1.03, 1] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               style={{ willChange: 'transform' }}
@@ -176,7 +244,7 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: 'easeInOut' }}
-              className="text-base text-gray-700 font-poppins mb-6"
+              className="text-lg text-gray-700 font-poppins mb-8"
             >
               Empowering Learning
             </motion.p>
@@ -185,187 +253,31 @@ const ForgotOtpVerification: React.FC<OTPVerificationProps> = ({
           {role === 'student' ? (
             <>
               {/* 3D Book with Glow */}
-              <motion.div
-                className="relative w-40 h-24 rounded-lg shadow-xl"
-                style={{ willChange: 'transform, box-shadow' }}
-              >
-                <motion.div
-                  className="absolute inset-0 bg-teal-600 rounded-lg bg-gradient-to-r from-teal-500 to-teal-700"
-                  animate={{
-                    boxShadow: [
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
-                      '0 12px 24px rgba(13, 148, 136, 0.4), 0 0 24px rgba(13, 148, 136, 0.3)',
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
-                    ],
-                  }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <div className="absolute inset-2 bg-white rounded-lg flex items-center justify-center z-10">
-                    <span className="text-teal-600 font-poppins font-bold text-lg">Verify</span>
-                  </div>
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -12] }}
-                  transition={{
-                    y: {
-                      type: 'spring',
-                      stiffness: 50,
-                      damping: 20,
-                      repeat: Infinity,
-                      repeatType: 'reverse',
-                      duration: 3,
-                    },
-                  }}
-                >
-                  <motion.div
-                    animate={{ rotateY: [0, 15, 0, -15, 0] }}
-                    transition={{
-                      rotateY: {
-                        duration: 5,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      },
-                    }}
-                  />
-                </motion.div>
+              <motion.div {...bookAnimationProps}>
+                {bookAnimationProps.glow}
+                {bookAnimationProps.float}
               </motion.div>
 
               {/* Orbiting Knowledge Icons for Student */}
-              <motion.div
-                className="absolute"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                style={{ willChange: 'transform' }}
-              >
-                <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 100, y: 0 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: [1, 1.3, 1] }}
-                  transition={{
-                    opacity: { duration: 0.5, delay: 0.5 },
-                    scale: { duration: 3, repeat: Infinity, delay: 0.5, ease: 'easeInOut' },
-                  }}
-                >
-                  <Pencil className="w-5 h-5 text-teal-600" />
-                </motion.div>
-                <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: -100, y: 0 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: [1, 1.3, 1] }}
-                  transition={{
-                    opacity: { duration: 0.5, delay: 0.7 },
-                    scale: { duration: 3, repeat: Infinity, delay: 0.7, ease: 'easeInOut' },
-                  }}
-                >
-                  <GraduationCap className="w-5 h-5 text-teal-600" />
-                </motion.div>
-                <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 0, y: 100 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: [1, 1.3, 1] }}
-                  transition={{
-                    opacity: { duration: 0.5, delay: 0.9 },
-                    scale: { duration: 3, repeat: Infinity, delay: 0.9, ease: 'easeInOut' },
-                  }}
-                >
-                  <Globe className="w-5 h-5 text-teal-600" />
-                </motion.div>
+              <motion.div {...iconAnimationProps.orbit}>
+                {iconAnimationProps.icon(120, 0, 0.5, Pencil)}
+                {iconAnimationProps.icon(-120, 0, 0.7, GraduationCap)}
+                {iconAnimationProps.icon(0, 120, 0.9, Globe)}
               </motion.div>
             </>
           ) : (
             <>
               {/* 3D Clipboard with Glow */}
-              <motion.div
-                className="relative w-40 h-24 rounded-lg shadow-xl"
-                style={{ willChange: 'transform, box-shadow' }}
-              >
-                <motion.div
-                  className="absolute inset-0 bg-teal-600 rounded-lg bg-gradient-to-r from-teal-500 to-teal-700"
-                  animate={{
-                    boxShadow: [
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
-                      '0 12px 24px rgba(13, 148, 136, 0.4), 0 0 24px rgba(13, 148, 136, 0.3)',
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
-                    ],
-                  }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <div className="absolute inset-2 bg-white rounded-lg flex items-center justify-center z-10">
-                    <span className="text-teal-600 font-poppins font-bold text-lg">Verify</span>
-                  </div>
-                </motion.div>
-                <motion.div
-                  animate={{ y: [0, -12] }}
-                  transition={{
-                    y: {
-                      type: 'spring',
-                      stiffness: 50,
-                      damping: 20,
-                      repeat: Infinity,
-                      repeatType: 'reverse',
-                      duration: 3,
-                    },
-                  }}
-                >
-                  <motion.div
-                    animate={{ rotateY: [0, 15, 0, -15, 0] }}
-                    transition={{
-                      rotateY: {
-                        duration: 5,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      },
-                    }}
-                  />
-                </motion.div>
+              <motion.div {...bookAnimationProps}>
+                {bookAnimationProps.glow}
+                {bookAnimationProps.float}
               </motion.div>
 
               {/* Orbiting Knowledge Icons for Tutor */}
-              <motion.div
-                className="absolute"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                style={{ willChange: 'transform' }}
-              >
-                <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 100, y: 0 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: [1, 1.3, 1] }}
-                  transition={{
-                    opacity: { duration: 0.5, delay: 0.5 },
-                    scale: { duration: 3, repeat: Infinity, delay: 0.5, ease: 'easeInOut' },
-                  }}
-                >
-                  <Pen className="w-5 h-5 text-teal-600" />
-                </motion.div>
-                <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: -100, y: 0 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: [1, 1.3, 1] }}
-                  transition={{
-                    opacity: { duration: 0.5, delay: 0.7 },
-                    scale: { duration: 3, repeat: Infinity, delay: 0.7, ease: 'easeInOut' },
-                  }}
-                >
-                  <Book className="w-5 h-5 text-teal-600" />
-                </motion.div>
-                <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 0, y: 100 }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: [1, 1.3, 1] }}
-                  transition={{
-                    opacity: { duration: 0.5, delay: 0.9 },
-                    scale: { duration: 3, repeat: Infinity, delay: 0.9, ease: 'easeInOut' },
-                  }}
-                >
-                  <Users className="w-5 h-5 text-teal-600" />
-                </motion.div>
+              <motion.div {...iconAnimationProps.orbit}>
+                {iconAnimationProps.icon(120, 0, 0.5, Pen)}
+                {iconAnimationProps.icon(-120, 0, 0.7, Book)}
+                {iconAnimationProps.icon(0, 120, 0.9, Users)}
               </motion.div>
             </>
           )}
