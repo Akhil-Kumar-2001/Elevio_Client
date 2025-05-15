@@ -141,7 +141,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
         className="w-full max-w-5xl bg-white rounded-3xl shadow-xl flex flex-col lg:flex-row h-[90vh] overflow-hidden"
       >
         {/* Left Section: Engaging Visual */}
-        <div className="lg:w-1/2 bg-gradient-to-b from-teal-50 to-gray-100 p-8 flex flex-col items-center justify-center relative">
+        <div className="lg:w-1/2 bg-gradient-to-b from-teal-50 to-gray-100 p-12 flex flex-col items-center justify-center relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -149,7 +149,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
             className="text-center z-10"
           >
             <motion.h1
-              className="text-4xl font-extrabold text-teal-600 font-poppins mb-3 bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-400"
+              className="text-5xl font-extrabold text-teal-600 font-poppins mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-400"
               animate={{ scale: [1, 1.03, 1] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               style={{ willChange: 'transform' }}
@@ -160,7 +160,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: 'easeInOut' }}
-              className="text-base text-gray-700 font-poppins mb-6"
+              className="text-lg text-gray-700 font-poppins mb-8"
             >
               Empowering Learning
             </motion.p>
@@ -170,26 +170,26 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
             <>
               {/* 3D Book with Glow */}
               <motion.div
-                className="relative w-40 h-24 rounded-lg shadow-xl"
+                className="relative w-48 h-32 rounded-lg shadow-xl"
                 style={{ willChange: 'transform, box-shadow' }}
               >
                 <motion.div
                   className="absolute inset-0 bg-teal-600 rounded-lg bg-gradient-to-r from-teal-500 to-teal-700"
                   animate={{
                     boxShadow: [
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
-                      '0 12px 24px rgba(13, 148, 136, 0.4), 0 0 24px rgba(13, 148, 136, 0.3)',
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
+                      '0 10px 20px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.2)',
+                      '0 15px 30px rgba(13, 148, 136, 0.4), 0 0 30px rgba(13, 148, 136, 0.3)',
+                      '0 10px 20px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.2)',
                     ],
                   }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 >
                   <div className="absolute inset-2 bg-white rounded-lg flex items-center justify-center z-10">
-                    <span className="text-teal-600 font-poppins font-bold text-lg">Join</span>
+                    <span className="text-teal-600 font-poppins font-bold text-xl">Join</span>
                   </div>
                 </motion.div>
                 <motion.div
-                  animate={{ y: [0, -12] }}
+                  animate={{ y: [0, -15] }}
                   transition={{
                     y: {
                       type: 'spring',
@@ -222,8 +222,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                 style={{ willChange: 'transform' }}
               >
                 <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 100, y: 0 }}
+                  className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+                  style={{ x: 120, y: 0 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: [1, 1.3, 1] }}
                   transition={{
@@ -231,11 +231,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     scale: { duration: 3, repeat: Infinity, delay: 0.5, ease: 'easeInOut' },
                   }}
                 >
-                  <Pencil className="w-5 h-5 text-teal-600" />
+                  <Pencil className="w-6 h-6 text-teal-600" />
                 </motion.div>
                 <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: -100, y: 0 }}
+                  className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+                  style={{ x: -120, y: 0 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: [1, 1.3, 1] }}
                   transition={{
@@ -243,11 +243,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     scale: { duration: 3, repeat: Infinity, delay: 0.7, ease: 'easeInOut' },
                   }}
                 >
-                  <GraduationCap className="w-5 h-5 text-teal-600" />
+                  <GraduationCap className="w-6 h-6 text-teal-600" />
                 </motion.div>
                 <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 0, y: 100 }}
+                  className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+                  style={{ x: 0, y: 120 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: [1, 1.3, 1] }}
                   transition={{
@@ -255,7 +255,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     scale: { duration: 3, repeat: Infinity, delay: 0.9, ease: 'easeInOut' },
                   }}
                 >
-                  <Globe className="w-5 h-5 text-teal-600" />
+                  <Globe className="w-6 h-6 text-teal-600" />
                 </motion.div>
               </motion.div>
             </>
@@ -263,26 +263,26 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
             <>
               {/* 3D Clipboard with Glow */}
               <motion.div
-                className="relative w-40 h-24 rounded-lg shadow-xl"
+                className="relative w-48 h-32 rounded-lg shadow-xl"
                 style={{ willChange: 'transform, box-shadow' }}
               >
                 <motion.div
                   className="absolute inset-0 bg-teal-600 rounded-lg bg-gradient-to-r from-teal-500 to-teal-700"
                   animate={{
                     boxShadow: [
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
-                      '0 12px 24px rgba(13, 148, 136, 0.4), 0 0 24px rgba(13, 148, 136, 0.3)',
-                      '0 8px 16px rgba(13, 148, 136, 0.3), 0 0 16px rgba(13, 148, 136, 0.2)',
+                      '0 10px 20px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.2)',
+                      '0 15px 30px rgba(13, 148, 136, 0.4), 0 0 30px rgba(13, 148, 136, 0.3)',
+                      '0 10px 20px rgba(13, 148, 136, 0.3), 0 0 20px rgba(13, 148, 136, 0.2)',
                     ],
                   }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                 >
                   <div className="absolute inset-2 bg-white rounded-lg flex items-center justify-center z-10">
-                    <span className="text-teal-600 font-poppins font-bold text-lg">Join</span>
+                    <span className="text-teal-600 font-poppins font-bold text-xl">Join</span>
                   </div>
                 </motion.div>
                 <motion.div
-                  animate={{ y: [0, -12] }}
+                  animate={{ y: [0, -15] }}
                   transition={{
                     y: {
                       type: 'spring',
@@ -315,8 +315,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                 style={{ willChange: 'transform' }}
               >
                 <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 100, y: 0 }}
+                  className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+                  style={{ x: 120, y: 0 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: [1, 1.3, 1] }}
                   transition={{
@@ -324,11 +324,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     scale: { duration: 3, repeat: Infinity, delay: 0.5, ease: 'easeInOut' },
                   }}
                 >
-                  <Pen className="w-5 h-5 text-teal-600" />
+                  <Pen className="w-6 h-6 text-teal-600" />
                 </motion.div>
                 <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: -100, y: 0 }}
+                  className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+                  style={{ x: -120, y: 0 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: [1, 1.3, 1] }}
                   transition={{
@@ -336,11 +336,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     scale: { duration: 3, repeat: Infinity, delay: 0.7, ease: 'easeInOut' },
                   }}
                 >
-                  <Book className="w-5 h-5 text-teal-600" />
+                  <Book className="w-6 h-6 text-teal-600" />
                 </motion.div>
                 <motion.div
-                  className="absolute w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
-                  style={{ x: 0, y: 100 }}
+                  className="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md"
+                  style={{ x: 0, y: 120 }}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: [1, 1.3, 1] }}
                   transition={{
@@ -348,7 +348,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
                     scale: { duration: 3, repeat: Infinity, delay: 0.9, ease: 'easeInOut' },
                   }}
                 >
-                  <Users className="w-5 h-5 text-teal-600" />
+                  <Users className="w-6 h-6 text-teal-600" />
                 </motion.div>
               </motion.div>
             </>
@@ -428,6 +428,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
             </div>
 
             <div className="relative">
+
               <motion.input
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
