@@ -7,6 +7,7 @@ import { Pencil, GraduationCap, Globe, Pen, Book, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { studentForgotPassword } from '@/app/service/user/userApi';
 import { tutorForgotPassword } from '@/app/service/tutor/tutorApi';
+import Link from 'next/link';
 
 interface ForgotPasswordPageProps {
   role: 'student' | 'tutor';
@@ -244,12 +245,12 @@ const ForgotPassword: React.FC<ForgotPasswordPageProps> = ({ role }) => {
             </motion.button>
 
             <div className="flex justify-center text-base text-gray-600 mt-4 font-poppins">
-              <a
+              <Link
                 href={role === 'student' ? '/login' : '/tutor/login'}
                 className="hover:text-teal-600 hover:underline transition duration-200"
               >
                 Back to login?
-              </a>
+              </Link>
             </div>
           </form>
         </div>
