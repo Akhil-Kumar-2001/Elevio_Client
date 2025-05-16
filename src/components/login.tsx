@@ -13,6 +13,7 @@ import { googleSignInApi as studentGoogle, studentSignin } from '@/app/service/u
 
 import useTutorAuthStore from '@/store/tutorAuthStore';
 import useStudentAuthStore from '@/store/userAuthStore';
+import Link from 'next/link';
 
 // Login validation schema
 const loginSchema = z.object({
@@ -527,13 +528,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
             <div className="flex justify-between text-sm text-gray-600 mt-8 font-poppins">
               {role === "student" ? (
                 <>
-                  <a href="/forgotpassword" className="hover:text-teal-600 hover:underline transition duration-200">Forgot Password?</a>
-                  <a href="/signup" className="hover:text-teal-600 hover:underline transition duration-200">Register Now</a>
+                  <Link href="/forgotpassword" className="hover:text-teal-600 hover:underline transition duration-200">Forgot Password?</Link>
+                  <Link href="/signup" className="hover:text-teal-600 hover:underline transition duration-200">Register Now</Link>
                 </>
               ) : (
                 <>
-                  <a href="/tutor/forgotpassword" className="hover:text-teal-600 hover:underline transition duration-200">Forgot Password?</a>
-                  <a href="/tutor/signup" className="hover:text-teal-600 hover:underline transition duration-200">Register Now</a>
+                  <Link href="/tutor/forgotpassword" className="hover:text-teal-600 hover:underline transition duration-200">Forgot Password?</Link>
+                  <Link href="/tutor/signup" className="hover:text-teal-600 hover:underline transition duration-200">Register Now</Link>
                 </>
               )}
             </div>

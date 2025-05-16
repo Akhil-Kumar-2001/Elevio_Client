@@ -12,6 +12,7 @@ import { googleSignInApi as studentGoogle, userSignup } from '@/app/service/user
 import { googleSignInApi as tutorGoogle, tutorSignup } from '@/app/service/tutor/tutorApi';
 import useTutorAuthStore from '@/store/tutorAuthStore';
 import useStudentAuthStore from '@/store/userAuthStore';
+import Link from 'next/link';
 
 interface SignupFormProps {
   role: 'student' | 'tutor';
@@ -499,12 +500,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ role }) => {
             </div>
 
             <div className="flex justify-center text-sm text-gray-600 mt-4 font-poppins">
-              <a
+              <Link
                 href={role === 'tutor' ? '/tutor/login' : '/login'}
                 className="hover:text-teal-600 hover:underline transition duration-200"
               >
                 Already have an account? Sign in
-              </a>
+              </Link>
             </div>
           </form>
         </div>
