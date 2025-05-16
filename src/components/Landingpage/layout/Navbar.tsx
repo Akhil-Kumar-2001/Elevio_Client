@@ -13,32 +13,44 @@ export default function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <nav 
+    <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-        isScrolled 
-          ? "bg-white/95 backdrop-blur-sm shadow-md py-3" 
+        isScrolled
+          ? "bg-white/95 backdrop-blur-sm shadow-md py-3"
           : "bg-transparent py-5"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link 
-            href="/" 
-            className="flex items-center"
-          >
-            <div className={cn(
-              "text-2xl font-bold tracking-tight transition-colors",
-              isScrolled ? "text-pink-600" : "text-gray-900"
-            )}>
-              Elevio
+          <Link href="/" className="flex items-center">
+            <div className="flex items-center">
+              {/* Tilted square logo */}
+              <div className={cn(
+                "relative flex items-center justify-center w-8 h-8 rounded-md shadow-md mr-2 transform rotate-12 transition-transform duration-200 hover:scale-105",
+                isScrolled ? "bg-pink-600" : "bg-pink-500"
+              )}>
+                <span className="text-white font-bold text-lg transform -rotate-12">E</span>
+              </div>
+
+              {/* Text with color split */}
+              <div className="flex items-center">
+                <span className={cn(
+                  "text-xl font-bold tracking-tight",
+                  isScrolled ? "text-gray-700" : "text-gray-800"
+                )}>ELE</span>
+                <span className={cn(
+                  "text-xl font-bold tracking-tight",
+                  isScrolled ? "text-pink-600" : "text-pink-500"
+                )}>VIO</span>
+              </div>
             </div>
           </Link>
 
@@ -46,23 +58,23 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <NavLinks isScrolled={isScrolled} />
             <div className="flex space-x-4">
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className={cn(
                   "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                  isScrolled 
-                    ? "text-gray-700 hover:text-pink-600" 
+                  isScrolled
+                    ? "text-gray-700 hover:text-pink-600"
                     : "text-gray-800 hover:text-pink-700"
                 )}
               >
                 Log in
               </Link>
-              <Link 
-                href="/signup" 
+              <Link
+                href="/signup"
                 className={cn(
                   "px-4 py-2 rounded-md text-sm font-medium transition-all",
-                  isScrolled 
-                    ? "bg-pink-600 text-white hover:bg-pink-700" 
+                  isScrolled
+                    ? "bg-pink-600 text-white hover:bg-pink-700"
                     : "bg-pink-500 text-white hover:bg-pink-600"
                 )}
               >
@@ -100,15 +112,15 @@ export default function Navbar() {
           <div className="flex flex-col items-center justify-center h-full space-y-8">
             <NavLinks mobile setMobileMenuOpen={setMobileMenuOpen} />
             <div className="flex flex-col space-y-4 w-64">
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="px-4 py-3 rounded-md text-center text-gray-800 bg-gray-100 hover:bg-gray-200 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Log in
               </Link>
-              <Link 
-                href="/signup" 
+              <Link
+                href="/signup"
                 className="px-4 py-3 rounded-md text-center bg-pink-600 text-white hover:bg-pink-700 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -122,11 +134,11 @@ export default function Navbar() {
   );
 }
 
-function NavLinks({ 
-  isScrolled, 
+function NavLinks({
+  isScrolled,
   mobile,
   setMobileMenuOpen
-}: { 
+}: {
   isScrolled?: boolean;
   mobile?: boolean;
   setMobileMenuOpen?: (open: boolean) => void;
@@ -150,8 +162,8 @@ function NavLinks({
           href={link.href}
           className={cn(
             "transition-colors font-medium",
-            mobile 
-              ? "text-2xl text-gray-900 hover:text-pink-600" 
+            mobile
+              ? "text-2xl text-gray-900 hover:text-pink-600"
               : "text-sm",
             !mobile && isScrolled
               ? "text-gray-700 hover:text-pink-600"
