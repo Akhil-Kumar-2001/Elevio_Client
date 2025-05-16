@@ -193,7 +193,7 @@ const VerificationForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-white ">
       <Navbar />
-      <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      <div className="max-w-2xl mx-auto mt-14 p-6  bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-black mb-2">Complete Verification</h2>
         <p className="text-gray-600 text-sm mb-4">Submit required documents for basic verification.</p>
 
