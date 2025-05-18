@@ -86,7 +86,11 @@ const WishlistPage = () => {
     //     </div>
     //   </div>
     // );
-    <WishlistLoading />
+        return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <WishlistLoading />
+      </div>
+        )
   }
 
   if (error) {
