@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
       "drive.google.com",
       "lh3.googleusercontent.com",
       "res.cloudinary.com",
-      'placehold.co'
+      'placehold.co',
+      "ui-avatars.com"
     ],
     remotePatterns: [
       {
