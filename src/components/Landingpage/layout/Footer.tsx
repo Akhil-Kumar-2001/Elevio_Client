@@ -91,8 +91,8 @@ export default function Footer() {
               {[
                 { 
                   icon: <Mail size={18} />, 
-                  text: 'support@elevio.com', 
-                  href: 'mailto:support@elevio.com'
+                  text: 'elevioofficial@gmail.com', 
+                  href: 'mailto:elevioofficial@gmail.com'
                 },
                 { 
                   icon: <Phone size={18} />, 
