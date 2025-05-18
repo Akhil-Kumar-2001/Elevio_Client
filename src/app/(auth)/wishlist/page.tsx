@@ -8,6 +8,7 @@ import { useCartCountStore } from '@/store/cartCountStore';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import WishlistLoading from '@/components/student/wishlistLoading';
 
 interface ExtendedFrontendCourse extends FrontendCourse {
   _id: string;
@@ -72,19 +73,20 @@ const WishlistPage = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6">
-        <Navbar />
-        <div className="max-w-7xl mx-auto mt-16">
-          <h2 className="text-3xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-8 drop-shadow-sm">
-            Your Learning Wishlist
-          </h2>
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-          </div>
-        </div>
-      </div>
-    );
+    // return (
+    //   <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6">
+    //     <Navbar />
+    //     <div className="max-w-7xl mx-auto mt-16">
+    //       <h2 className="text-3xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-8 drop-shadow-sm">
+    //         Your Learning Wishlist
+    //       </h2>
+    //       <div className="flex justify-center items-center h-64">
+    //         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+    //       </div>
+    //     </div>
+    //   </div>
+    // );
+    <WishlistLoading />
   }
 
   if (error) {
