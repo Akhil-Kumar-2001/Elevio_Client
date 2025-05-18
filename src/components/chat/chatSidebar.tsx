@@ -116,7 +116,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ role, onSelectUser, selectedU
           >
             <div className="relative">
               <Image
-                src={user.profilePicture || '/default-profile.png'}
+                src={user.profilePicture || 'https://placehold.co/48x48?text=U'}
                 alt={user.username}
                 width={48} // Corresponds to w-12 (12 * 4 = 48px in Tailwind)
                 height={48} // Corresponds to h-12 (12 * 4 = 48px in Tailwind)

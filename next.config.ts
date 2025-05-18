@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
     domains: [
       "drive.google.com",
       "lh3.googleusercontent.com",
-      "res.cloudinary.com"
+      "res.cloudinary.com",
+      'placehold.co'
     ],
     remotePatterns: [
       {
