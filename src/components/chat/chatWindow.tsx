@@ -302,7 +302,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
       <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <img
-            src={selectedUser.profilePicture || '/default-avatar.png'}
+            src={selectedUser.profilePicture || `https://ui-avatars.com/api/?name=${selectedUser.username || 'U'}&size=48`}
             alt={selectedUser.username}
             className="w-10 h-10 rounded-full"
           />
