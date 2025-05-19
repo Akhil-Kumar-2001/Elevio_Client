@@ -45,7 +45,7 @@ export default function Navbar() {
                 <span className={cn(
                   "text-xl font-bold tracking-tight",
                   isScrolled ? "text-gray-700" : "text-gray-800"
-                )}>ELE</span>
+                )}>LE</span>
                 <span className={cn(
                   "text-xl font-bold tracking-tight",
                   isScrolled ? "text-pink-600" : "text-pink-500"

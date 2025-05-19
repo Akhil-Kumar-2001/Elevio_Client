@@ -138,7 +138,7 @@ const Navbar = () => {
 
           {/* Text with the color split */}
           <div className="flex items-center">
-            <span className="text-2xl font-bold text-gray-800 tracking-tight">ELE</span>
+            <span className="text-2xl font-bold text-gray-800 tracking-tight">LE</span>
             <span className="text-2xl font-bold text-blue-500 tracking-tight">VIO</span>
           </div>
         </div>
