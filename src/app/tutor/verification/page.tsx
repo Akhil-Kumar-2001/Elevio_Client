@@ -74,6 +74,7 @@ const VerificationForm: React.FC = () => {
   }, []);
 
   if (!isClient) return null;
+  
 
   const handleSkillsChange = (selectedOptions: MultiValue<SkillOption>) => {
     setSelectedSkills(selectedOptions);
@@ -268,7 +269,6 @@ const VerificationForm: React.FC = () => {
             />
             {errors.skills && <p className="text-red-500 text-sm mt-1">{errors.skills.message?.toString()}</p>}
           </div>
-
           {/* Document Uploads */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Documents *</label>

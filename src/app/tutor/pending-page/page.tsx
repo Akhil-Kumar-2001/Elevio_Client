@@ -45,10 +45,6 @@ const VerificationProgress = () => {
           <span className="text-blue-600 font-bold">24-48 hours</span>
         </div>
 
-        {/* Go Back Button
-        <Link href="/tutor/dashboard" className="flex items-center justify-center text-blue-600 hover:underline">
-          <ArrowLeft className="mr-1 w-4 h-4" /> Go Back
-        </Link> */}
       </div>
     </div>
   );
