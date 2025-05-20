@@ -1,6 +1,4 @@
 import React from 'react';
-import { ArrowLeft } from 'lucide-react';
-import Link from "next/link";
 import Navbar from '@/components/tutor/header';
 
 const VerificationProgress = () => {

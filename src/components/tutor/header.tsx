@@ -29,6 +29,7 @@ const Navbar = () => {
   // Use Zustand store for auth
   const { user, logout } = useAuthStore();
   const tutorId = user?.id;
+  console.log(tutor)
 
   const getImageTutor = async () => {
     if (!tutorId) {
