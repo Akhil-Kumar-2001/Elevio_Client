@@ -1,10 +1,12 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from "next/link";
+import Navbar from '@/components/tutor/header';
 
 const VerificationProgress = () => {
   return (
     <div className="flex justify-center items-center w-full p-4 bg-white min-h-screen">
+      <Navbar />
       <div className="bg-white rounded-md p-8 max-w-md w-full flex flex-col items-center border border-gray-200 shadow-lg">
         {/* Clock Icon */}
         <div className="mb-4 p-6 rounded-full bg-blue-100">
@@ -45,10 +47,10 @@ const VerificationProgress = () => {
           <span className="text-blue-600 font-bold">24-48 hours</span>
         </div>
 
-        {/* Go Back Button */}
+        {/* Go Back Button
         <Link href="/tutor/dashboard" className="flex items-center justify-center text-blue-600 hover:underline">
           <ArrowLeft className="mr-1 w-4 h-4" /> Go Back
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

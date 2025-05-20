@@ -120,9 +120,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
       if (role === 'student') {
         window.history.replaceState(null, '', '/home');
         router.replace('/home');
-      } else {
-        window.history.replaceState(null, '', '/tutor/dashboard');
-        router.replace('/tutor/dashboard');
+      } else if( role === 'tutor') {
+        if(response.data.verificationStatus === "not_verified") {
+        window.history.replaceState(null, '', '/tutor/verification');
+        router.replace('/tutor/verification');
+        }
+        else if(response.data.verificationStatus === "pending") {
+        window.history.replaceState(null, '', '/tutor/pending-page');
+        router.replace('/tutor/pending-page');
+        }else{
+          window.history.replaceState(null, '', '/tutor/dashboard');
+          router.replace('/tutor/dashboard');
+        }
       }
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error && error.response) {
