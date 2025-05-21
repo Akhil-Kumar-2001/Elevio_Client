@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { CreditCard, Trash2 } from "lucide-react";
-import Navbar from "@/components/student/navbar";
-import { useRouter } from "next/navigation";
-import { useCartStore } from "@/store/cartStore";
-import useAuthStore from "@/store/userAuthStore"
-import { removeItem, createOrder, verifyPayment } from "@/app/service/user/userApi";
-import { toast } from "react-toastify";
-import Image from "next/image";
-
+import React, { useState } from 'react';
+import { CreditCard, Trash2 } from 'lucide-react';
+import Navbar from '@/components/student/navbar';
+import { useRouter } from 'next/navigation';
+import { useCartStore } from '@/store/cartStore';
+import { useCartCountStore } from '@/store/cartCountStore';
+import useAuthStore from '@/store/userAuthStore';
+import { removeItem, createOrder, verifyPayment } from '@/app/service/user/userApi';
+import { toast } from 'react-toastify';
+import Image from 'next/image';
+import PaymentFailureModal from '@/components/student/PaymentFailureModal';
 
 interface RazorpayResponse {
   razorpay_order_id: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
 }
-
 
 interface RazorpayOptions {
   key: string;
@@ -33,9 +33,11 @@ interface RazorpayOptions {
   theme: {
     color: string;
   };
+  modal?: {
+    ondismiss: () => void;
+  };
 }
 
-// Extend the Window interface for Razorpay
 declare global {
   interface Window {
     Razorpay: new (options: RazorpayOptions) => {
@@ -45,23 +47,26 @@ declare global {
 }
 
 const Checkout: React.FC = () => {
-  const router = useRouter()
+  const router = useRouter();
   const { cartItems, totalPrice, setCartItems } = useCartStore();
+  const { decrementCartCount } = useCartCountStore();
   const { user } = useAuthStore();
   const subtotal = totalPrice;
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isPaymentFailureModalOpen, setIsPaymentFailureModalOpen] = useState<boolean>(false);
+  const [paymentFailureMessage, setPaymentFailureMessage] = useState<string>('');
 
   const studentId = user?.id;
-  // Function to dynamically load Razorpay script
+
   const loadRazorpayScript = () => {
     return new Promise<boolean>((resolve) => {
       if (window.Razorpay) {
-        resolve(true); // Script already loaded
+        resolve(true);
         return;
       }
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.async = true;
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
@@ -69,100 +74,136 @@ const Checkout: React.FC = () => {
     });
   };
 
-  // Handle removing an item from the cart
   const handleRemoveItem = async (id: string) => {
     try {
       if (!studentId) {
-        toast.error("Student id is required");
-        return
+        toast.error('Please log in to remove items from the cart');
+        return;
       }
       const result = await removeItem(id, studentId);
       if (result) {
         const updatedCart = cartItems.filter((item) => item.courseId !== id);
         setCartItems(updatedCart);
-        toast.success("Item removed from cart");
+        decrementCartCount();
+        toast.success('Item removed from cart');
       }
     } catch (error) {
-      console.error("Failed to remove item:", error);
-      toast.error("Failed to remove item");
+      console.error('Failed to remove item:', error);
+      toast.error('Failed to remove item');
     }
   };
 
-  // Handle payment initiation
   const handlePayment = async () => {
     if (!selectedPaymentMethod) {
-      toast.warning("Please select a payment method");
+      toast.warning('Please select a payment method');
+      setPaymentFailureMessage('Please select a payment method');
+      setIsPaymentFailureModalOpen(true);
       return;
     }
 
     setLoading(true);
 
-    const scriptLoaded = await loadRazorpayScript();
-    if (!scriptLoaded) {
-      toast.error("Failed to load Razorpay SDK. Please check your network.");
-      setLoading(false);
-      return;
-    }
-
     try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        toast.error('Failed to load payment gateway. Please check your network connection.');
+        setPaymentFailureMessage('Failed to load payment gateway. Please check your network connection.');
+        setIsPaymentFailureModalOpen(true);
+        setLoading(false);
+        return;
+      }
+
       const courseIds = cartItems.map((item) => item.courseId);
       if (courseIds.length === 0) {
-        throw new Error("No courses in cart");
+        toast.error('No courses in cart');
+        setPaymentFailureMessage('No courses in cart');
+        setIsPaymentFailureModalOpen(true);
+        setLoading(false);
+        return;
       }
       if (!studentId) {
-        throw new Error("Student id is required");
-        return
+        toast.error('Please log in to proceed with payment');
+        setPaymentFailureMessage('Please log in to proceed with payment');
+        setIsPaymentFailureModalOpen(true);
+        setLoading(false);
+        return;
       }
 
       const order = await createOrder(studentId, totalPrice, courseIds);
-      console.log("order after creation", order)
-      if (!order) {
-        throw new Error("Order creation failed");
+      console.log('order after creation', order);
+      if (!order || !order.data || !order.data.razorpayOrderId) {
+        toast.error('Failed to create order. Please try again.');
+        setPaymentFailureMessage('Failed to create order. Please try again.');
+        setIsPaymentFailureModalOpen(true);
+        setLoading(false);
+        return;
       }
-      console.log("env key id ", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID)
+
+      const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!razorpayKeyId) {
+        toast.error('Payment system configuration error. Please contact support.');
+        console.error('Missing Razorpay Key ID in environment variables');
+        setPaymentFailureMessage('Payment system configuration error. Please contact support.');
+        setIsPaymentFailureModalOpen(true);
+        setLoading(false);
+        return;
+      }
+
       const options: RazorpayOptions = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "", // Ensure this is set in .env
+        key: razorpayKeyId,
         amount: order.data.amount,
-        currency: "INR",
-        name: "Elevio Learning",
-        description: "Course Purchase",
+        currency: 'INR',
+        name: 'Elevio Learning',
+        description: 'Course Purchase',
         order_id: order.data.razorpayOrderId,
         handler: async (response: RazorpayResponse) => {
           try {
-            console.log("order id razorpay", response)
+            console.log('order id razorpay', response);
             const verification = await verifyPayment(
               response.razorpay_order_id,
               response.razorpay_payment_id,
               response.razorpay_signature
             );
-            console.log("verification", verification)
+            console.log('verification', verification);
 
-            if (verification.status === "success") {
-              setCartItems([]); // Clear cart on success
-              toast.success("Payment completed successfully!");
-              router.push("/cart");
+            if (verification.status === 'success') {
+              setCartItems([]);
+              toast.success('Payment completed successfully!');
+              router.push('/cart');
             } else {
-              toast.error("Payment verification failed");
+              toast.error('Payment verification failed');
+              setPaymentFailureMessage('Payment verification failed. Please contact support if your payment was processed.');
+              setIsPaymentFailureModalOpen(true);
             }
           } catch (error) {
-            console.error("Verification error:", error);
-            toast.error("Payment verification failed");
+            console.error('Verification error:', error);
+            toast.error('We couldn’t verify your payment. Please contact support if your payment was processed.');
+            setPaymentFailureMessage('We couldn’t verify your payment. Please contact support if your payment was processed.');
+            setIsPaymentFailureModalOpen(true);
           }
         },
         prefill: {
-          name: "Student Name", // Replace with actual student data
-          email: "student@example.com",
+          name:  'Student Name',
+          email: 'student@example.com',
         },
         theme: {
-          color: "#6B46C1",
+          color: '#6B46C1',
+        },
+        modal: {
+          ondismiss: () => {
+            setPaymentFailureMessage('Payment was not completed. Please try again.');
+            setIsPaymentFailureModalOpen(true);
+          },
         },
       };
 
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
-      console.error("Payment error:", error);
-      toast.error("Something went wrong during payment");
+      console.error('Payment error:', error);
+      toast.error('Something went wrong during payment');
+      setPaymentFailureMessage('Something went wrong during payment. Please try again later.');
+      setIsPaymentFailureModalOpen(true);
     } finally {
       setLoading(false);
     }
@@ -179,7 +220,7 @@ const Checkout: React.FC = () => {
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Order details ({cartItems.length} {cartItems.length === 1 ? "course" : "courses"})
+                Order details ({cartItems.length} {cartItems.length === 1 ? 'course' : 'courses'})
               </h2>
               <div className="space-y-4">
                 {cartItems.length === 0 ? (
@@ -218,11 +259,12 @@ const Checkout: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Payment method</h2>
               <button
-                onClick={() => setSelectedPaymentMethod("razorpay")}
-                className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium ${selectedPaymentMethod === "razorpay"
-                  ? "border-purple-500 text-purple-700 bg-purple-50"
-                  : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
+                onClick={() => setSelectedPaymentMethod('razorpay')}
+                className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium ${
+                  selectedPaymentMethod === 'razorpay'
+                    ? 'border-purple-500 text-purple-700 bg-purple-50'
+                    : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                }`}
               >
                 <CreditCard className="w-5 h-5 mr-2 text-gray-400" />
                 Razorpay
@@ -246,18 +288,25 @@ const Checkout: React.FC = () => {
                 <button
                   onClick={handlePayment}
                   disabled={loading || cartItems.length === 0}
-                  className={`w-full py-3 px-4 rounded-lg text-white font-medium ${loading || cartItems.length === 0
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-purple-600 hover:bg-purple-700"
-                    }`}
+                  className={`w-full py-3 px-4 rounded-lg text-white font-medium ${
+                    loading || cartItems.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
                 >
-                  {loading ? "Processing..." : "Complete Checkout"}
+                  {loading ? 'Processing...' : 'Complete Checkout'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <PaymentFailureModal
+        isOpen={isPaymentFailureModalOpen}
+        onClose={() => {
+          setIsPaymentFailureModalOpen(false);
+          setPaymentFailureMessage('');
+        }}
+        message={paymentFailureMessage || 'Payment failed. Please try again or contact support.'}
+      />
     </div>
   );
 };

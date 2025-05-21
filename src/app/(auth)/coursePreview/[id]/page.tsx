@@ -14,6 +14,7 @@ import { createChat } from '@/app/service/shared/chatService';
 import ReactPlayer from 'react-player';
 import Image from 'next/image';
 import CertificateGenerator from '@/components/student/certificateGenerate';
+import PaymentFailureModal from '@/components/student/PaymentFailureModal';
 
 // Define Review interface
 interface IReview {
@@ -52,14 +53,9 @@ interface RazorpayOptions {
   theme: {
     color: string;
   };
-}
-
-declare global {
-  interface Window {
-    Razorpay: new (options: RazorpayOptions) => {
-      open: () => void;
-    };
-  }
+  modal?: {
+    ondismiss: () => void;
+  };
 }
 
 interface Subscription {
@@ -134,9 +130,10 @@ const CoursePreview = () => {
   const [editingReview, setEditingReview] = useState<{ rating: number; review: string; reviewId: string }>({
     rating: 0, review: '', reviewId: ''
   });
-  // State for confirmation modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [reviewIdToDelete, setReviewIdToDelete] = useState<string>('');
+  const [isPaymentFailureModalOpen, setIsPaymentFailureModalOpen] = useState<boolean>(false);
+  const [paymentFailureMessage, setPaymentFailureMessage] = useState<string>('');
 
   const loadRazorpayScript = () => {
     return new Promise<boolean>((resolve) => {
@@ -159,26 +156,36 @@ const CoursePreview = () => {
     try {
       if (!userId) {
         toast.error("Please log in to purchase this course");
+        setPaymentFailureMessage("Please log in to purchase this course");
+        setIsPaymentFailureModalOpen(true);
         return;
       }
       if (!course || !course.price || course.price <= 0) {
         toast.error("Invalid course price");
+        setPaymentFailureMessage("Invalid course price");
+        setIsPaymentFailureModalOpen(true);
         return;
       }
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         toast.error("Failed to load payment gateway. Please check your network connection.");
+        setPaymentFailureMessage("Failed to load payment gateway. Please check your network connection.");
+        setIsPaymentFailureModalOpen(true);
         return;
       }
       const order = await createOrder(userId, course.price, courseIds);
       if (!order || !order.data || !order.data.razorpayOrderId) {
         toast.error("Failed to create order. Please try again.");
+        setPaymentFailureMessage("Failed to create order. Please try again.");
+        setIsPaymentFailureModalOpen(true);
         return;
       }
       const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
       if (!razorpayKeyId) {
         toast.error("Payment system configuration error. Please contact support.");
         console.error("Missing Razorpay Key ID in environment variables");
+        setPaymentFailureMessage("Payment system configuration error. Please contact support.");
+        setIsPaymentFailureModalOpen(true);
         return;
       }
       const options: RazorpayOptions = {
@@ -200,10 +207,14 @@ const CoursePreview = () => {
               router.push("/mylearning");
             } else {
               toast.error("Payment verification failed. Please contact support if your payment was processed.");
+              setPaymentFailureMessage("Payment verification failed. Please contact support if your payment was processed.");
+              setIsPaymentFailureModalOpen(true);
             }
           } catch (error) {
             console.error("Payment verification error:", error);
             toast.error("We couldn't verify your payment. Please contact support if your payment was processed.");
+            setPaymentFailureMessage("We couldn't verify your payment. Please contact support if your payment was processed.");
+            setIsPaymentFailureModalOpen(true);
           }
         },
         prefill: {
@@ -213,12 +224,20 @@ const CoursePreview = () => {
         theme: {
           color: "#6B46C1",
         },
+        modal: {
+          ondismiss: () => {
+            setPaymentFailureMessage("Payment was not completed. Please try again.");
+            setIsPaymentFailureModalOpen(true);
+          },
+        },
       };
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
       console.error("Payment process error:", error);
       toast.error("Something went wrong. Please try again later.");
+      setPaymentFailureMessage("Something went wrong. Please try again later.");
+      setIsPaymentFailureModalOpen(true);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -571,7 +590,7 @@ const CoursePreview = () => {
   }, [id, userId]);
 
   useEffect(() => {
-      handleGetProgress();
+    handleGetProgress();
   }, [course]);
 
   if (loading) {
@@ -597,7 +616,6 @@ const CoursePreview = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-
       <div className="flex flex-col lg:flex-row w-full pt-16 flex-grow">
         <div className="lg:w-3/4 h-full flex flex-col">
           <div className="relative bg-black w-full" style={{ paddingTop: '56.25%' }}>
@@ -617,13 +635,11 @@ const CoursePreview = () => {
               </div>
             )}
           </div>
-
           <div className="p-6 bg-white border-b">
             <Link href="/mylearning" className="flex items-center text-blue-600 mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to My Learning
             </Link>
-
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-4">
@@ -639,7 +655,6 @@ const CoursePreview = () => {
                   )}
                 </div>
                 <p className="text-gray-600 mb-4">{course.subtitle}</p>
-
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center">
                     <User className="w-4 h-4 text-gray-500 mr-1" />
@@ -655,7 +670,6 @@ const CoursePreview = () => {
                   </div>
                 </div>
               </div>
-
               {progress?.isCompleted && hasPurchased() && (
                 <div className="mb-4">
                   <CertificateGenerator
@@ -665,7 +679,6 @@ const CoursePreview = () => {
                   />
                 </div>
               )}
-
               {!hasPurchased() && (
                 <div className="flex flex-col items-end">
                   <div className="text-2xl font-bold text-gray-900 mb-2">
@@ -687,7 +700,6 @@ const CoursePreview = () => {
                 </div>
               )}
             </div>
-
             {currentLecture && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <h2 className="font-semibold text-gray-800">
@@ -698,7 +710,6 @@ const CoursePreview = () => {
                 </p>
               </div>
             )}
-
             <div className="mt-4">
               {hasPurchased() ? (
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center">
@@ -712,7 +723,6 @@ const CoursePreview = () => {
                 </div>
               )}
             </div>
-
             {hasPurchased() && hasValidSubscription() && (
               <div className="mt-4">
                 <button
@@ -725,10 +735,8 @@ const CoursePreview = () => {
               </div>
             )}
           </div>
-
           <div className="mt-6 p-6 bg-white border-t">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Student Reviews</h2>
-
             {hasPurchased() && !hasReviewed && !isEditingReview ? (
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Submit Your Review</h3>
@@ -813,7 +821,6 @@ const CoursePreview = () => {
                 </form>
               </div>
             ) : null}
-
             {reviews.length > 0 ? (
               <>
                 <div className="flex items-center mb-4">
@@ -856,7 +863,6 @@ const CoursePreview = () => {
                               </span>
                             </div>
                           </div>
-
                           {isUserReview && (
                             <div className="ml-auto flex space-x-2">
                               <button
@@ -885,9 +891,7 @@ const CoursePreview = () => {
                             </div>
                           )}
                         </div>
-
                         <p className="text-gray-700">{review.review}</p>
-
                         {review.reply && (
                           <div className="mt-3 ml-6 p-3 bg-gray-50 border-l-4 border-blue-400 rounded">
                             <p className="text-sm font-medium text-gray-700">{`${course.tutorId?.username || "Unknown"}'s Reply:`}</p>
@@ -904,7 +908,6 @@ const CoursePreview = () => {
             )}
           </div>
         </div>
-
         <div className="lg:w-1/4 bg-white border-l h-full overflow-y-auto">
           <div className="p-4 border-b bg-gray-50">
             <h2 className="text-lg font-semibold text-gray-800">Course Content</h2>
@@ -914,7 +917,6 @@ const CoursePreview = () => {
               <span>{course.totalDuration} hours</span>
             </div>
           </div>
-
           <div className="divide-y">
             {sections.map((section, sectionIndex) => {
               const sectionId = section._id.toString();
@@ -951,7 +953,6 @@ const CoursePreview = () => {
                       </div>
                     )}
                   </button>
-
                   {expandedSections[sectionId] && userCanAccessSection && (
                     <div className="bg-gray-50 py-2">
                       {section.lectures && section.lectures.length > 0 ? (
@@ -1004,7 +1005,6 @@ const CoursePreview = () => {
               );
             })}
           </div>
-
           {!hasPurchased() && (
             <div className="p-4 bg-blue-50 border-t">
               <div className="flex justify-between items-center mb-3">
@@ -1035,8 +1035,6 @@ const CoursePreview = () => {
           )}
         </div>
       </div>
-
-      {/* Confirmation Modal for Deleting Review */}
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -1044,7 +1042,14 @@ const CoursePreview = () => {
         title="Confirm Delete"
         message="Are you sure you want to delete this review? This action cannot be undone."
       />
-
+      <PaymentFailureModal
+        isOpen={isPaymentFailureModalOpen}
+        onClose={() => {
+          setIsPaymentFailureModalOpen(false);
+          setPaymentFailureMessage('');
+        }}
+        message={paymentFailureMessage || "Payment failed. Please try again or contact support."}
+      />
       <Footer />
     </div>
   );
