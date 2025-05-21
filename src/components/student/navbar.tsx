@@ -203,6 +203,14 @@ const Navbar = () => {
               <InformationCircleIcon className="w-5 h-5 mr-1" />
               About
             </Link>
+            <Link
+              href="/sessions"
+              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 hover:underline"
+              onClick={toggleMobileMenu}
+            >
+              <CalendarIcon className="w-5 h-5 mr-2" />
+              Sessions
+            </Link>
           </div>
 
           {/* Icons */}

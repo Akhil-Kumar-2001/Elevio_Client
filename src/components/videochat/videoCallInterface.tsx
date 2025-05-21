@@ -197,12 +197,7 @@ const VideoCallInterface: React.FC<VideoCallInterfaceProps> = ({ role }) => {
   const handleEndCallButton = () => {
     endCall();
     setTimeout(() => {
-      if (role === "tutor") {
-        router.push("/tutor/sessions");
-      } else {
-        const userId = authStore.getState().user?.id;
-        router.push(`/profile/${userId}`);
-      }
+      router.back();
     }, 1000);
   };
 
