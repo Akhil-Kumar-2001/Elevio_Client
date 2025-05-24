@@ -14,7 +14,7 @@ const Chat = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <Navbar />
-      <div className="flex flex-grow overflow-hidden mt-14"> {/* Adjust 64px based on your navbar height */}
+      <div className="flex flex-grow overflow-hidden mt-15"> {/* Adjust 64px based on your navbar height */}
         <ChatSidebar
           role="Tutor"
           onSelectUser={setSelectedUser}

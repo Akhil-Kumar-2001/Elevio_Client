@@ -16,7 +16,7 @@ const Chat = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="h-screen flex pt-20">
+      <div className="h-screen flex pt-18">
         <ChatSidebar
           role={"Student"}
           onSelectUser={setSelectedUser}
