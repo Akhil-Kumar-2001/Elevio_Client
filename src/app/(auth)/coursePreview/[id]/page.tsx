@@ -619,6 +619,21 @@ const CoursePreview = () => {
       <div className="flex flex-col lg:flex-row w-full pt-16 flex-grow">
         <div className="lg:w-3/4 h-full flex flex-col">
           <div className="relative bg-black w-full" style={{ paddingTop: '56.25%' }}>
+            {/* {currentLecture ? (
+              <ReactPlayer
+                url={currentLecture.videoUrl || '/placeholder-video.mp4'}
+                className="absolute top-0 left-0 w-full h-full"
+                style={{ objectFit: 'contain' }}
+                width="100%"
+                height="100%"
+                controls
+                onProgress={handleVideoProgress}
+              />
+            ) : (
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white">
+                Select a lecture to start learning
+              </div>
+            )} */}
             {currentLecture ? (
               <ReactPlayer
                 url={currentLecture.videoUrl || '/placeholder-video.mp4'}
@@ -627,6 +642,15 @@ const CoursePreview = () => {
                 width="100%"
                 height="100%"
                 controls
+                config={{
+                  file: {
+                    attributes: {
+                      controlsList: 'nodownload',
+                      // disablePictureInPicture: true,
+                      onContextMenu: (e: React.MouseEvent<HTMLVideoElement>) => e.preventDefault(),
+                    },
+                  },
+                }}
                 onProgress={handleVideoProgress}
               />
             ) : (
