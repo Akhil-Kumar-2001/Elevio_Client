@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Send, Image as ImageIcon, Trash2, CheckSquare, Calendar } from 'lucide-react';
 import { SessionData, UserMinimal } from '@/types/types';
@@ -6,8 +5,8 @@ import { getMessages as fetchMessagesFromAPI, sendMessage, deleteMessages, markM
 import { createSession } from '@/app/service/shared/chatService';
 import useConversation from '@/store/useConversation';
 import useListenMessages from '@/app/hooks/useLinstenMessageHook';
-import { useSocketContext } from '@/context/SocketContext';
 import useListenDeleteMessages from '@/app/hooks/useListenDeletedHook';
+import { useSocketContext } from '@/context/SocketContext';
 
 interface ExtendedUserMinimal extends UserMinimal {
   isOnline?: boolean;
@@ -59,15 +58,87 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     startTime: '',
     duration: 30,
   });
+  const [visibleChars, setVisibleChars] = useState<{ [key: string]: number }>({});
   const { onlineUser = [] } = useSocketContext() || {};
+  const MAX_MESSAGE_LENGTH = 3000;
+  const INITIAL_CHARS = 1000;
+  const CHARS_INCREMENT = 1000;
 
   const conversationId = selectedUser?._id;
   const messages = conversationId ? getMessages(conversationId) : [];
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const lastMessageCountRef = useRef(messages.length);
 
   useListenMessages();
   useListenDeleteMessages();
+
+  const truncateMessage = (message: string, messageId: string) => {
+    const totalLength = message.length;
+    if (totalLength <= INITIAL_CHARS) {
+      return { truncated: message, needsReadMore: false, isFullyVisible: false };
+    }
+
+    const visibleLength = visibleChars[messageId] || INITIAL_CHARS;
+
+    const truncated = message.substring(0, visibleLength) + (visibleLength < totalLength ? '...' : '');
+    const needsReadMore = visibleLength < totalLength;
+    const isFullyVisible = visibleLength >= totalLength;
+
+    return { truncated, needsReadMore, isFullyVisible };
+  };
+
+  const handleReadMore = (messageId: string, messageLength: number) => {
+    const messageContainer = messageContainerRef.current;
+    const messageElement = document.getElementById(`message-${messageId}`);
+    let scrollPositionBefore = 0;
+
+    if (messageContainer && messageElement) {
+      // Calculate the scroll position relative to the message element
+      const messageRect = messageElement.getBoundingClientRect();
+      const containerRect = messageContainer.getBoundingClientRect();
+      scrollPositionBefore = messageContainer.scrollTop + (messageRect.top - containerRect.top);
+    }
+
+    setVisibleChars((prev) => {
+      const currentVisible = prev[messageId] || INITIAL_CHARS;
+      const newVisible = Math.min(currentVisible + CHARS_INCREMENT, messageLength);
+      return { ...prev, [messageId]: newVisible };
+    });
+
+    // Restore scroll position after DOM update
+    setTimeout(() => {
+      if (messageContainer) {
+        messageContainer.scrollTop = scrollPositionBefore;
+      }
+    }, 0);
+  };
+
+  const handleReadLess = (messageId: string) => {
+    const messageContainer = messageContainerRef.current;
+    const messageElement = document.getElementById(`message-${messageId}`);
+    let scrollPositionBefore = 0;
+
+    if (messageContainer && messageElement) {
+      // Calculate the scroll position relative to the message element
+      const messageRect = messageElement.getBoundingClientRect();
+      const containerRect = messageContainer.getBoundingClientRect();
+      scrollPositionBefore = messageContainer.scrollTop + (messageRect.top - containerRect.top);
+    }
+
+    setVisibleChars((prev) => ({
+      ...prev,
+      [messageId]: INITIAL_CHARS,
+    }));
+
+    // Restore scroll position after DOM update
+    setTimeout(() => {
+      if (messageContainer) {
+        messageContainer.scrollTop = scrollPositionBefore;
+      }
+    }, 0);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,7 +170,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
     try {
       setIsLoading(true);
       
-      // Combine date and time
       const startTime = new Date(`${scheduleForm.date}T${scheduleForm.startTime}`);
       
       const sessionData: SessionData = {
@@ -114,7 +184,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
       const result = await createSession(sessionData);
 
       if (result.success) {
-        // Send a message notification about the scheduled session
         await sendMessage(
           selectedUser._id,
           `Session scheduled for ${startTime.toLocaleString()} (${scheduleForm.duration} minutes)`,
@@ -129,14 +198,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
           duration: 30,
         });
         
-        // Refresh messages to show the notification
         await handleGetMessages();
       } else {
         throw new Error(result.message || 'Failed to schedule session');
       }
     } catch (error) {
       console.error('Error scheduling session:', error);
-      // alert('Failed to schedule session. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +211,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
 
   const handlesendMessage = async () => {
     if ((!newMessage.trim() && !selectedImage) || !selectedUser) return;
+    if (newMessage.length > MAX_MESSAGE_LENGTH) {
+      alert(`Message exceeds the maximum length of ${MAX_MESSAGE_LENGTH} characters.`);
+      return;
+    }
+
     try {
       setIsLoading(true);
       let imageUrl = '';
@@ -277,10 +349,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
   }, [selectedUser]);
 
   useEffect(() => {
-    const messageContainer = document.getElementById('message-container');
-    if (messageContainer) {
-      messageContainer.scrollTop = messageContainer.scrollHeight;
+    // Only scroll to bottom if a new message is added
+    if (messages.length > lastMessageCountRef.current) {
+      const messageContainer = messageContainerRef.current;
+      if (messageContainer) {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }
     }
+    lastMessageCountRef.current = messages.length;
   }, [messages]);
 
   useEffect(() => {
@@ -353,6 +429,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
 
       <div
         id="message-container"
+        ref={messageContainerRef}
         className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gray-50"
       >
         {isLoading && messages.length === 0 ? (
@@ -367,10 +444,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
           messages.map((message) => {
             const isReceivedMessage = message.receiverId === currentUserId;
             const isDeleted = message.isDeleted || false;
+            const { truncated, needsReadMore, isFullyVisible } = truncateMessage(message.message, message._id);
 
             return (
               <div
                 key={message._id}
+                id={`message-${message._id}`}
                 className={`flex ${isReceivedMessage ? 'justify-start' : 'justify-end'} items-center`}
               >
                 {isSelecting && !isDeleted && message.senderId === currentUserId && (
@@ -385,6 +464,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     isReceivedMessage ? 'bg-white border border-gray-200' : 'bg-indigo-600 text-white'
                   } ${isDeleted ? 'opacity-50' : ''}`}
+                  style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
                 >
                   {isDeleted ? (
                     <p className={isReceivedMessage ? 'text-gray-500 italic' : 'text-white italic'}>
@@ -400,19 +480,35 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
                         />
                       )}
                       {message.message && (
-                        <p className={isReceivedMessage ? 'text-gray-900' : 'text-white'}>
-                          {message.message}
-                        </p>
+                        <>
+                          <p className={isReceivedMessage ? 'text-gray-900' : 'text-white'}>
+                            {truncated}
+                          </p>
+                          {(needsReadMore || isFullyVisible) && (
+                            <button
+                              onClick={() =>
+                                isFullyVisible
+                                  ? handleReadLess(message._id)
+                                  : handleReadMore(message._id, message.message.length)
+                              }
+                              className={`text-sm mt-1 ${
+                                isReceivedMessage ? 'text-indigo-600' : 'text-indigo-200'
+                              } focus:outline-none`}
+                            >
+                              {isFullyVisible ? 'Show less' : 'Show more'}
+                            </button>
+                          )}
+                        </>
                       )}
+                      <div className="flex justify-between items-center">
+                        <p
+                          className={`text-xs mt-1 ${isReceivedMessage ? 'text-gray-500' : 'text-indigo-200'}`}
+                        >
+                          {formatTime(message.createdAt)}
+                        </p>
+                      </div>
                     </>
                   )}
-                  <div className="flex justify-between items-center">
-                    <p
-                      className={`text-xs mt-1 ${isReceivedMessage ? 'text-gray-500' : 'text-indigo-200'}`}
-                    >
-                      {formatTime(message.createdAt)}
-                    </p>
-                  </div>
                 </div>
               </div>
             );
@@ -446,16 +542,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
               disabled={isLoading}
             />
           </label>
-          <input
-            ref={inputRef}
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handlesendMessage()}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border text-gray-700 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            disabled={isLoading}
-          />
+          <div className="flex-1 relative">
+            <input
+              ref={inputRef}
+              type="text"
+              value={newMessage}
+              onChange={(e) => {
+                if (e.target.value.length <= MAX_MESSAGE_LENGTH) {
+                  setNewMessage(e.target.value);
+                }
+              }}
+              onKeyPress={(e) => e.key === 'Enter' && handlesendMessage()}
+              placeholder="Type your message..."
+              className="w-full px-4 py-2 border text-gray-700 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {newMessage.length}/{MAX_MESSAGE_LENGTH} characters
+            </p>
+          </div>
           {role === 'Tutor' && (
             <button
               className="p-2 bg-indigo-600 text-white rounded-full shadow-md hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
@@ -481,7 +586,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ role, selectedUser, currentUser
         </div>
       </div>
 
-      {/* Schedule Session Modal (Only for tutors) */}
       {role === 'Tutor' && isScheduleModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
