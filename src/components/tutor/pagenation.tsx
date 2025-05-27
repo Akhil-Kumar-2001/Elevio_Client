@@ -7,46 +7,32 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ totalPages, currentPage, onPageChange }) => {
-    const getPageNumbers = () => {
-        const pages = [];
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(i);
-        }
-        return pages;
-    };
-
     return (
-        <div className="flex justify-center mt-6 mb-4">
-            <div className="flex gap-2 bg-black p-1 rounded-lg">
-                {/* Previous Button */}
+        <div className="flex justify-center items-center gap-2 mt-6 mb-4 w-full max-w-xs mx-auto">
+            {/* Left Section: Previous Button */}
+            <div>
                 <button
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className="px-3 py-1 text-white rounded-md disabled:opacity-50"
+                    className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-full border border-gray-400 hover:bg-gray-800 disabled:opacity-50 transition"
                 >
                     {"<"}
                 </button>
+            </div>
 
-                {/* Page Numbers */}
-                {getPageNumbers().map((page) => (
-                    <button
-                        key={page}
-                        onClick={() => onPageChange(page)}
-                        className={`px-3 py-1 rounded-md transition ${
-                            currentPage === page
-                                ? "bg-white text-black font-semibold"
-                                : "text-white hover:bg-gray-700"
-                        }`}
-                    >
-                        {page}
-                    </button>
-                ))}
+            {/* Center Section: Current Page */}
+            <div>
+                <span className="w-8 h-8 flex items-center justify-center bg-white text-black font-semibold rounded-full border border-gray-400 shadow-md">
+                    {currentPage}
+                </span>
+            </div>
 
-                {/* Next Button */}
+            {/* Right Section: Next Button */}
+            <div>
                 <button
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages}
-                    className="px-3 py-1 text-white rounded-md disabled:opacity-50"
+                    className="w-8 h-8 flex items-center justify-center bg-black text-white rounded-full border border-gray-400 hover:bg-gray-800 disabled:opacity-50 transition"
                 >
                     {">"}
                 </button>

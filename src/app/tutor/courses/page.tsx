@@ -47,36 +47,51 @@ const Courses = () => {
   };
 
   // Fetch courses from API
-  const fetchCourses = async () => {
+  const fetchCourses = async (page: number) => {
     setLoading(true);
     try {
       if (!tutorId) {
         console.log("Tutor ID is not available");
         return;
       }
-      const response = await getCourses(tutorId, currentPage, 5);
+      const response = await getCourses(tutorId, page, 5);
       if (response && response.success) {
-        setCourses(response.data.courses);
-        setTotalPages(Math.floor(response.data.totalRecord / 5));
+        setCourses(response.data.courses || []); // Ensure courses is an array
+        const totalRecords = response.data.totalRecord || 0;
+        const calculatedTotalPages = Math.ceil(totalRecords / 5); // Use Math.ceil to round up
+        setTotalPages(calculatedTotalPages > 0 ? calculatedTotalPages : 1); // Ensure at least 1 page
+      } else {
+        setCourses([]);
+        setTotalPages(1);
       }
     } catch (error) {
       console.log(error);
       toast.error('Failed to fetch courses');
+      setCourses([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch categories and courses on mount and when tutorId changes
   useEffect(() => {
-    fetchCategories();
-    fetchCourses();
-  }, [currentPage]);
+    if (tutorId) {
+      fetchCategories();
+      fetchCourses(currentPage);
+    }
+  }, [tutorId]); // Add tutorId as a dependency
+
+  // Fetch courses when currentPage changes
+  useEffect(() => {
+    if (tutorId) {
+      fetchCourses(currentPage);
+    }
+  }, [currentPage, tutorId]); // Add currentPage and tutorId as dependencies
 
   const viewProfile = (courseId: string) => {
     router.push(`/tutor/courses/course-details/${courseId}`);
   };
-
-  console.log(loading)
 
   // Define Column interface specific to Course
   interface Column {
@@ -126,7 +141,18 @@ const Courses = () => {
               <span>Add Course</span>
             </Link>
           </div>
-          <Table<Course> columnArray={columns} dataArray={courses} pageRole={'course-details'} pageFunction={viewProfile} />
+          {loading ? (
+            <p>Loading...</p>
+          ) : courses.length === 0 ? (
+            <p>No courses available.</p>
+          ) : (
+            <Table<Course>
+              columnArray={columns}
+              dataArray={courses}
+              pageRole={'course-details'}
+              pageFunction={viewProfile}
+            />
+          )}
           <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
         </div>
       </div>
