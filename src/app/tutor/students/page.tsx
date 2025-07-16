@@ -39,12 +39,12 @@ const Students = () => {
         console.log("Tutor ID is not available");
         return;
       }
-      const response = await getStudents(currentPage, 5);
+      const response = await getStudents(currentPage, 9);
       console.log("Purchased students details:", response); // Log full response for debugging
       if (response && response.success) {
         const studentData = response.data.students || [];
         setStudents(studentData);
-        setTotalPages(Math.ceil(response.data.totalRecord / 5) || 1);
+        setTotalPages(Math.ceil(response.data.totalRecord / 9));
         if (studentData.length === 0) {
           setError('No students found for this tutor.');
         }
