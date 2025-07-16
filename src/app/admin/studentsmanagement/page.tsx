@@ -37,10 +37,10 @@ const StudentsManagement = () => {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const studentData = await getStudents(currentPage, 5);
+      const studentData = await getStudents(currentPage, 7);
       if (studentData && studentData.success) {
         setStudents(studentData.data.students);
-        setTotalPages(Math.ceil(studentData.data.totalRecord / 5));
+        setTotalPages(Math.ceil(studentData.data.totalRecord / 7));
       }
     } catch (error) {
       toast.error('Failed to fetch students');

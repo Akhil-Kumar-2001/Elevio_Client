@@ -36,10 +36,10 @@ const TutorManagement = () => {
   const fetchTutors = async () => {
     setLoading(true);
     try {
-      const tutorData = await getTutors(currentPage, 5);
+      const tutorData = await getTutors(currentPage, 7);
       if (tutorData && tutorData.success) {
         setTutors(tutorData.data.tutors);
-        setTotalPages(Math.ceil(tutorData.data.totalRecord / 5));
+        setTotalPages(Math.ceil(tutorData.data.totalRecord / 7));
       }
     } catch (error) {
       toast.error('Failed to fetch tutors');
