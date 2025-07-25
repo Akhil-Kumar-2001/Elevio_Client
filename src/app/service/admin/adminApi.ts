@@ -28,7 +28,6 @@ export const adminSignin = async (userData: userType) => {
 export const getStudents = async (page: number, limit: number) => {
     try {
         const students = await adminAxiosInstance.get(`admin/getstudents?page=${page}&limit=${limit}`)
-        console.log(students)
         return students.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -38,7 +37,6 @@ export const getStudents = async (page: number, limit: number) => {
 export const getTutors = async (page: number, limit: number) => {
     try {
         const tutors = await adminAxiosInstance.get(`/admin/gettutors?page=${page}&limit=${limit}`)
-        console.log(tutors)
         return tutors.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -66,7 +64,6 @@ export const updateStudentStatus = async (id: string) => {
 export const getPendingTutors = async (page: number, limit: number) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/pending-tutor?page=${page}&limit=${limit}`)
-        console.log("Pending Tutors ===>>>>>", response.data)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -75,10 +72,8 @@ export const getPendingTutors = async (page: number, limit: number) => {
 
 export const getTutor = async (id: string) => {
     try {
-        console.log("I enter here", id)
 
         const response = await adminAxiosInstance.get(`/admin/get-tutor/${id}`);
-        console.log("this is tutor detail pending", response.data)
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -146,7 +141,6 @@ export const deleteCategory = async (id: string) => {
 export const getPendingCourses = async (page: number, limit: number) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/pending-course?page=${page}&limit=${limit}`);
-        console.log(response)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -165,7 +159,6 @@ export const getCategory = async () => {
 export const getCourseDetails = async (id: string) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/course-details/${id}`)
-        console.log("course details", response)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -229,7 +222,6 @@ export const getSubscriptions = async (page: number, limit: number) => {
 // Create a new subscription
 export const createSubscription = async (subscriptionData: SubscriptionType) => {
     try {
-        console.log("Creating new subscription:", subscriptionData);
         const response = await adminAxiosInstance.post(`/admin/subscriptions`, subscriptionData);
         toast.success("Subscription plan created successfully");
         return response.data;
@@ -241,7 +233,6 @@ export const createSubscription = async (subscriptionData: SubscriptionType) => 
 // Update an existing subscription
 export const updateSubscription = async (id: string, subscriptionData: Partial<SubscriptionType>) => {
     try {
-        console.log("update data", id, subscriptionData)
         const response = await adminAxiosInstance.patch(`/admin/subscriptions`, subscriptionData);
         toast.success("Subscription plan updated successfully");
         return response.data;
@@ -253,7 +244,6 @@ export const updateSubscription = async (id: string, subscriptionData: Partial<S
 // Delete a subscription
 export const deleteSubscription = async (id: string) => {
     try {
-        console.log("Deleting subscription with ID:", id);
         const response = await adminAxiosInstance.delete(`/admin/subscriptions/${id}`);
         toast.success("Subscription plan deleted successfully");
         return response.data;
@@ -265,7 +255,6 @@ export const deleteSubscription = async (id: string) => {
 export const getTutorsWallets = async (page: number, limit: number) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/tutor-wallets?page=${page}&limit=${limit}`)
-        console.log("Pending Tutors ===>>>>>", response)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -275,7 +264,6 @@ export const getTutorsWallets = async (page: number, limit: number) => {
 export const getTutorsList = async () => {
     try {
         const tutors = await adminAxiosInstance.get(`/admin/gettutor-list`)
-        console.log(tutors)
         return tutors.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -291,7 +279,7 @@ export const getDashboardDatad = async () => {
     }
 }
 
-export const getAdminWallet = async (page:number,limit:number) => {
+export const getAdminWallet = async (page: number, limit: number) => {
     try {
         const response = await adminAxiosInstance.get(`/admin/wallet?page=${page}&limit=${limit}`);
         return response.data;
@@ -302,7 +290,6 @@ export const getAdminWallet = async (page:number,limit:number) => {
 export const getStudentsData = async () => {
     try {
         const students = await adminAxiosInstance.get(`admin/getstudentsdata`)
-        console.log(students)
         return students.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -313,7 +300,7 @@ export const categoryIncome = async () => {
     try {
         const incomes = await adminAxiosInstance.get(`/admin/category-income`);
         return incomes.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -322,7 +309,7 @@ export const AdminMontlyIncome = async () => {
     try {
         const incomes = await adminAxiosInstance.get(`/admin/admin-monlty-income`);
         return incomes.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -331,7 +318,7 @@ export const AdminYearlyIncome = async () => {
     try {
         const incomes = await adminAxiosInstance.get(`/admin/admin-yearly-income`);
         return incomes.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -339,9 +326,8 @@ export const AdminYearlyIncome = async () => {
 export const AdminIncomeByDateRange = async (startDate: string, endDate: string) => {
     try {
         const incomes = await adminAxiosInstance.get(`/admin/admin-income-by-date-range?startDate=${startDate}&endDate=${endDate}`);
-        console.log("income by date range", incomes.data)   
         return incomes.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }

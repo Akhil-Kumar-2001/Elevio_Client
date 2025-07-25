@@ -84,9 +84,8 @@ const AdminTransactions = () => {
     };
 
     fetchData();
-  }, []);
+  }, [currentPage]);
 
-  console.log("students data", students)
 
   // Define table columns
   const columns = [
