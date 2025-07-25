@@ -69,7 +69,7 @@ const TutorEarnings = () => {
         if (tutorData && tutorData.success) {
           
           // Combine wallet and tutor data
-          const combined = walletData.data.wallets.map((wallet: WalletType) => {
+          const combined = walletData.data.data.map((wallet: WalletType) => {
             const tutor = tutorData.data.find((t: TutorType) => t._id === wallet.tutorId);
             return {
               _id: wallet._id,

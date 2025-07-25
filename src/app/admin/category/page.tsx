@@ -59,7 +59,7 @@ const CategoryPage = () => {
 
             const response = await getCategories(currentPage, 5);
             if (response && response.success) {
-                const formattedCategories = response.data.categories.map((cat: CategoryType) => ({
+                const formattedCategories = response.data.data.map((cat: CategoryType) => ({
 
                     ...cat,
                     statusText: cat.status === 1 ? "Active" : "Blocked",

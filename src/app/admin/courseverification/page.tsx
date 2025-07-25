@@ -55,11 +55,10 @@ const CourseVerification = () => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const courseData = await getPendingCourses(currentPage,5);
-      console.log("coure data ===>",courseData)
+      const courseData = await getPendingCourses(currentPage,7);
       if (courseData && courseData.success) {
-        setCourses(courseData.data.courses);
-        setTotalPages(Math.floor(courseData.data.totalRecord / 5));
+        setCourses(courseData.data.data);
+        setTotalPages(Math.floor(courseData.data.totalRecord / 7));
       }
     } catch (error) {
       console.log(error)
@@ -75,7 +74,7 @@ const CourseVerification = () => {
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [currentPage]);
 
   return (
     <div className="flex flex-col h-screen">

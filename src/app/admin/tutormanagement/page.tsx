@@ -38,7 +38,7 @@ const TutorManagement = () => {
     try {
       const tutorData = await getTutors(currentPage, 7);
       if (tutorData && tutorData.success) {
-        setTutors(tutorData.data.tutors);
+        setTutors(tutorData.data.data);
         setTotalPages(Math.ceil(tutorData.data.totalRecord / 7));
       }
     } catch (error) {
@@ -75,7 +75,7 @@ const TutorManagement = () => {
 
   useEffect(() => {
     fetchTutors();
-  }, []);
+  }, [currentPage]);
 
   // Modal props
   const modalTitle = selectedTutor?.status === 1 ? 'Block Tutor' : 'Unblock Tutor';

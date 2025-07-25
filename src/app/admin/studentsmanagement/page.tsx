@@ -39,7 +39,7 @@ const StudentsManagement = () => {
     try {
       const studentData = await getStudents(currentPage, 7);
       if (studentData && studentData.success) {
-        setStudents(studentData.data.students);
+        setStudents(studentData.data.data);
         setTotalPages(Math.ceil(studentData.data.totalRecord / 7));
       }
     } catch (error) {
@@ -76,7 +76,7 @@ const StudentsManagement = () => {
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [currentPage]);
 
   // Default modal props that always returns the required fields
   const modalTitle = selectedStudent?.status === 1 ? 'Block Student' : 'Unblock Student';

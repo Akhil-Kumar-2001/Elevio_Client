@@ -38,7 +38,7 @@ const TutorManagement = () => {
     try {
       const tutorData = await getPendingTutors(currentPage, 5);
       if (tutorData && tutorData.success) {
-        setTutors(tutorData.data.tutors);
+        setTutors(tutorData.data.data);
         setTotalPages(Math.ceil(tutorData.data.totalRecord / 5));
       }
     } catch (error) {
@@ -55,7 +55,7 @@ const TutorManagement = () => {
 
   useEffect(() => {
     fetchTutors();
-  }, []);
+  }, [currentPage]);
 
   return (
     <div className="flex flex-col h-screen">

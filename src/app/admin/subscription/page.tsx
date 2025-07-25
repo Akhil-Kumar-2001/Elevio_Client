@@ -26,12 +26,11 @@ const Subscription = () => {
       const data = await getSubscriptions(currentPage, 3);
 
       if (data && data.data) {
-        const fetchedSubscriptions = data.data.subscriptions || [];
+        const fetchedSubscriptions = data.data.data || [];
         setSubscriptions(fetchedSubscriptions);
 
         // Calculate total pages based on totalRecord
         const totalRecords = data.data.totalRecord || 0;
-        console.log("total records",totalRecords)
         setTotalPages(Math.ceil(totalRecords / 3));
         setError(null);
       } else {
@@ -58,9 +57,7 @@ const Subscription = () => {
   // Handle creating/updating a subscription
   const handleSaveSubscription = async (subscription: SubscriptionType) => {
     try {
-      console.log('Saving subscription:', subscription);
       if (subscription._id && subscription._id.trim() !== '') {
-        console.log('Updating subscription with ID:', subscription._id);
         const subscriptionToUpdate = { ...subscription };
         const result = await updateSubscription(subscription._id, subscriptionToUpdate);
         if (result && result.data) {
@@ -70,7 +67,6 @@ const Subscription = () => {
           setIsModalOpen(false);
         }
       } else {
-        console.log('Creating new subscription');
         const subscriptionToCreate = { ...subscription };
         delete subscriptionToCreate._id;
         const result = await createSubscription(subscriptionToCreate);
@@ -94,10 +90,8 @@ const Subscription = () => {
   const handleDeleteSubscription = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this subscription plan?")) {
       try {
-        console.log('Deleting subscription with ID:', id);
         const result = await deleteSubscription(id);
         if (result) {
-          console.log('Subscription deleted:', result);
           setCurrentPage(1); // Reset to page 1 after deletion
           await fetchSubscriptionData();
         } else {
@@ -112,7 +106,6 @@ const Subscription = () => {
 
   // Handle edit button click
   const handleEditClick = (subscription: SubscriptionType) => {
-    console.log('Editing subscription:', subscription);
     setEditingSubscription(subscription);
     setIsModalOpen(true);
   };
