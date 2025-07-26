@@ -27,7 +27,6 @@ const Navbar = () => {
   useListenNotification();
 
   const router = useRouter();
-  const [tutor, setTutor] = useState<TutorType | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [demo, setDemo] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
@@ -49,7 +48,6 @@ const Navbar = () => {
       console.error("Failed to fetch notifications:", error);
     }
   };
-  console.log(tutor)
 
   const fetchTutorDetails = async () => {
     try {
@@ -59,7 +57,6 @@ const Navbar = () => {
       }
 
       const response = await getTutor(tutorId);
-      setTutor(response.data);
       const verificationStatus = response.data.isVerified;
 
       if (verificationStatus === "not_verified") {

@@ -56,7 +56,7 @@ const Courses = () => {
       }
       const response = await getCourses(tutorId, page, 5);
       if (response && response.success) {
-        setCourses(response.data.courses || []); // Ensure courses is an array
+        setCourses(response.data.data || []); // Ensure courses is an array
         const totalRecords = response.data.totalRecord || 0;
         const calculatedTotalPages = Math.ceil(totalRecords / 5); // Use Math.ceil to round up
         setTotalPages(calculatedTotalPages > 0 ? calculatedTotalPages : 1); // Ensure at least 1 page

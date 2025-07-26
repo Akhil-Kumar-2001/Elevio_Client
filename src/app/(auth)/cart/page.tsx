@@ -31,7 +31,6 @@ const Cart = () => {
     try {
       setLoading(true);
       const response = await cartData(studentId);
-      console.log('cart data', response.data);
       if (response.success && response.data) {
         const items = response.data.items || [];
         setLocalCartItems(items);

@@ -247,7 +247,6 @@ const CoursePreview = () => {
     try {
       setLoading(true);
       const response = await getCourseDetails(id as string);
-      console.log("course response from backend for preview", response.data);
       if (response.success) {
         setCourse(response.data);
       } else {
@@ -318,7 +317,6 @@ const CoursePreview = () => {
   const fetchReviews = async () => {
     try {
       const response = await getReviewsByCourse(id as string);
-      console.log("get review by course", response.data);
       if (response.success) {
         const reviewsWithUser = response.data.map((review: IReview) => ({
           ...review,
@@ -522,7 +520,6 @@ const CoursePreview = () => {
     if (!course) return;
     const response = await getProgress(course?._id);
     if (response.success) {
-      console.log("progress of the course", response.data);
       setProgress(response.data);
     }
   };

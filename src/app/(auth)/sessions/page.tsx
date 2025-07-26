@@ -33,7 +33,6 @@ const StudentScheduledSession = () => {
     const fetchSessions = async () => {
         try {
             const response = await getSessions();
-            console.log('API Response:', response); // Debug API response
             if (response.success && Array.isArray(response.data)) {
                 const convertedSessions = response.data.map((session: SessionInfo) => ({
                     ...session,

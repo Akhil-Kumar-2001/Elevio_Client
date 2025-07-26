@@ -29,11 +29,12 @@ const MyLearning = () => {
       }
     } catch (error) {
       console.log("Error while getting Purchased Courses:", error);
+      setCourses([])
     }
   };
 
   const fetchProgressForCourses = async () => {
-    if (!courses.length) return;
+    if (!courses || courses.length === 0) return;
     try {
       const progressPromises = courses.map(course =>
         getProgress(course._id).then(response => ({

@@ -168,7 +168,6 @@ const VerificationForm: React.FC = () => {
       console.log(formData);
 
       const response = await verifyTutor(formData);
-      console.log(response);
       if (response.success === true) {
         toast.success(response.message);
         router.push('/tutor/pending-page');

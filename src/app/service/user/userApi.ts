@@ -81,7 +81,6 @@ export const forgotOtpPost = async (otp: string, email: string) => {
 export const resetPassword = async (password: string, email: string) => {
     try {
         const response = await axios.post(`${API_URI}/student/reset-password`, { password, email });
-        console.log(response)
         return response.data
     }
     catch (error: unknown) {
@@ -190,7 +189,6 @@ export const cartData = async (studentId: string) => {
 export const wishlistData = async () => {
     try {
         const response = await userAxiosInstance.get(`/student/wishlist`);
-        console.log("wishlist data in api", response.data)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -243,7 +241,6 @@ export const getCourses = async (page: number, limit: number) => {
             }
         });
 
-        console.log("pagenation data", response.data)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -262,7 +259,6 @@ export const getPurchasedCourses = async (userId: string) => {
 export const getCourseDetails = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/getCourse/${courseId}`)
-        console.log(response)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -330,7 +326,6 @@ export const verifySubscritionPayment = async (razorpay_order_id: string, razorp
 export const getReviewsByCourse = async (id: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/reviews/${id}`);
-        console.log("course reviws", response.data)
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error)

@@ -101,7 +101,7 @@ const Courses = () => {
         setTotalPages(Math.floor(response.data.totalRecord / 5));
       }
 
-      const mappedCourses: ExtendedFrontendCourse[] = response.data.courses.map((course: ICoursePreview) => {
+      const mappedCourses: ExtendedFrontendCourse[] = response.data.data.map((course: ICoursePreview) => {
         // Find category name by matching category ID
         const categoryName = categories.find(cat => cat._id === course.category)?.name || 'Unknown';
 

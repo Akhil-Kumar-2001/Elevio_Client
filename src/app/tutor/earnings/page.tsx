@@ -95,7 +95,6 @@ const InstructorEarnings = () => {
         try {
             setLoading(true);
             const response = await getTutorTransactions(currentPage, 5); // Pass tutorId
-            console.log("tutor transactions", response);
             if (response.success) {
                 setTransactions(response.data.transactions);
                 // Set totalPages based on total from the response
@@ -113,7 +112,6 @@ const InstructorEarnings = () => {
         fetchTutorTransaction();
     }, [currentPage]); // Re-fetch when page changes
 
-    console.log("current page of transaction", currentPage)
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">

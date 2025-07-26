@@ -30,7 +30,6 @@ export const tutorSignup = async (userData: basicType) => {
 export const otpPost = async (otp: string, email: string) => {
     try {
         const response = await axios.post(`${API_URI}/tutor/verify-otp`, { otp, email });
-        console.log(response)
         return response.data;
     }
     catch (error: unknown) {
@@ -50,7 +49,6 @@ export const resendOtp = async (email: string) => {
 export const tutorSignin = async (userData: userType) => {
     try {
         const response = await axios.post(`${API_URI}/tutor/signin`, { ...userData }, { withCredentials: true })
-        console.log(response)
         return response.data
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
@@ -85,7 +83,6 @@ export const forgotOtpPost = async (otp: string, email: string) => {
 export const resetPassword = async (password: string, email: string) => {
     try {
         const response = await axios.post(`${API_URI}/tutor/reset-password`, { password, email });
-        console.log(response)
         return response.data
     }
     catch (error: unknown) {
@@ -95,9 +92,7 @@ export const resetPassword = async (password: string, email: string) => {
 
 export const googleSignInApi = async (userData: basicType) => {
     try {
-        console.log("Before API call");
         const response = await axios.post(`${API_URI}/tutor/callback`, userData, { withCredentials: true });
-        console.log("API Response:", response);  // Check if response contains tokens
         return response.data;
     } catch (error: unknown) {
         console.error("API Call Failed:", error);  // Log error for debugging
@@ -154,7 +149,6 @@ export const createCourse = async (courseData: CourseData) => {
 
 export const getCourses = async (tutorId: string, page: number, limit: number) => {
     try {
-        console.log("Tutor id in courses", tutorId)
         const response = await userAxiosInstance.get(`/tutor/courses`, {
             params: {
                 tutorId,
@@ -216,9 +210,7 @@ export const getSections = async (courseId: string) => {
 
 export const getLecturesBySection = async (sectionId: string) => {
     try {
-        console.log("lectues from the api called")
         const response = await userAxiosInstance.get(`/tutor/get-lectures?id=${sectionId}`)
-        console.log("lectues from the api call", response)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -404,7 +396,6 @@ export const getLecturesBySectionForPreview = async (sectionId: string) => {
 export const getReviewsByCourse = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/tutor/reviews/${courseId}`);
-        console.log("course reviws", response.data)
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error)

@@ -82,16 +82,6 @@ const useAuthStore = create<AuthState>()(
     set({ user: null, token: null, isAuthenticated: false });
     },
 
-      
-      // logout: async () => {
-      //   try {
-      //     const response = await userAxiosInstance.post('/student/logout'); // Call logout API
-      //     console.log(response)
-      //   } catch (error) {
-      //     console.error('Logout failed:', error);
-      //   }
-      //   set({ user: null, token: null, isAuthenticated: false });
-      // },
       googleSignIn: async () =>{
         try {
           const result = await signIn("google", { callbackUrl: '/home',redirect: false, } );
@@ -130,7 +120,6 @@ const useAuthStore = create<AuthState>()(
           console.log("Session retrieved:", session);
           // const response = await googleSignInApi(userData,session);
           const response = await axios.post(`${API_URI}/student/callback`,{userData,session})
-          console.log(response)
           localStorage.setItem('authUserCheck', response.data.accessToken) 
           useAuthStore.getState().saveUserDetails(response.data);
         } catch (error) {

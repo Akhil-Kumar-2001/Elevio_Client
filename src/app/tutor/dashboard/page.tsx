@@ -76,7 +76,6 @@ const InstructorDashboard = () => {
       } else {
         response = type === "monthly" ? await getMonthlyIncome() : await getYearlyIncome();
       }
-      console.log(`${type} income from backend`, response.data);
       if (response.success) {
         if (type === "monthly" || type === "custom") {
           const transformedData = response.data.map((item: IncomeData) => ({

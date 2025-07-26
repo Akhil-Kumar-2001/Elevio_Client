@@ -85,7 +85,6 @@ const ProfileSettings = () => {
     }));
   };
 
-  console.log(imageFile)
 
   // Upload image to Cloudinary
   const uploadToCloudinary = async (file: File) => {

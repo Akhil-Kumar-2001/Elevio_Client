@@ -40,7 +40,6 @@ const Students = () => {
         return;
       }
       const response = await getStudents(currentPage, 9);
-      console.log("Purchased students details:", response); // Log full response for debugging
       if (response && response.success) {
         const studentData = response.data.students || [];
         setStudents(studentData);

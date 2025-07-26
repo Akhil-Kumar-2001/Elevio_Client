@@ -23,7 +23,6 @@ import {
 
 const Navbar = () => {
   const router = useRouter();
-  const [student, setStudent] = useState(null);
   const [image, setImage] = useState(null);
   const [initial, setInitial] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +36,6 @@ const Navbar = () => {
   const { logout } = useAuthStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  console.log(student);
 
   const handleLogout = () => {
     logout();
@@ -77,7 +75,6 @@ const Navbar = () => {
         setLoading(true);
         const response = await getStudent();
         if (response.success) {
-          setStudent(response.data);
           setImage(response.data.profilePicture || null);
           setInitial(response.data.username?.charAt(0).toUpperCase() || null);
         } else {
@@ -177,35 +174,35 @@ const Navbar = () => {
           <div className="flex items-center space-x-6">
             <Link
               href="/home"
-              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 hover:underline"
+              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 "
             >
               <HomeIcon className="w-5 h-5 mr-1" />
               Home
             </Link>
             <Link
               href="/mylearning"
-              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 hover:underline"
+              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 "
             >
               <BookOpenIcon className="w-5 h-5 mr-1" />
               My Learning
             </Link>
             <Link
               href="/courses"
-              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 hover:underline"
+              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 "
             >
               <AcademicCapIcon className="w-5 h-5 mr-1" />
               Courses
             </Link>
             <Link
               href="/about"
-              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 hover:underline"
+              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 "
             >
               <InformationCircleIcon className="w-5 h-5 mr-1" />
               About
             </Link>
             <Link
               href="/sessions"
-              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 hover:underline"
+              className="flex items-center text-gray-700 hover:text-blue-500 transition-all duration-200 hover:scale-105 "
               onClick={toggleMobileMenu}
             >
               <CalendarIcon className="w-5 h-5 mr-2" />

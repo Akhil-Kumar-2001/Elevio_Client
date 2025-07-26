@@ -55,7 +55,6 @@ const CourseDetailPage = () => {
     }
   };
 
-  console.log(imageFile, 'imageFile');
 
   const fetchCategories = async () => {
     try {
