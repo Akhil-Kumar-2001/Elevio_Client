@@ -130,6 +130,17 @@ export interface ICourse {
   updatedAt: string;
 }
 
+
+export interface ICourseData {
+  tutorId: string;
+  title: string;
+  subtitle: string;
+  price: number;
+  category: string;
+  imageThumbnail: File; 
+  description: string;
+}
+
 export interface ICoursePreview {
   _id: string;
   tutorId:{

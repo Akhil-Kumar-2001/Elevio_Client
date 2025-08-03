@@ -89,7 +89,6 @@ const WhatToLearnNext = () => {
     try {
       const response = await addToWishlist(courseId);
       if (response.success) {
-        console.log("Added to wishlist icrementing count========================>");
         toast.success(response.message);
         incrementWishlistCount();
       }

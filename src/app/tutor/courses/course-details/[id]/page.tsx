@@ -129,79 +129,97 @@ const CourseDetailPage = () => {
     }
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImageFile(file);
-
       const reader = new FileReader();
       reader.onload = (event) => {
-        if (event.target?.result) {
-          setImagePreview(event.target.result as string);
-        }
+        if (event.target?.result) setImagePreview(event.target.result as string);
       };
       reader.readAsDataURL(file);
-
-      try {
-        const imageUrl = await uploadToCloudinary(file);
-        setEditedCourse(prev => ({
-          ...prev,
-          imageThumbnail: imageUrl
-        }));
-      } catch (error) {
-        console.log(`Error while uploading course thumbnail to Cloudinary: ${error}`);
-      }
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ 
 
-    if (!editedCourse) return;
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!editedCourse) return;
 
-    setSubmitting(true);
-    try {
-      const courseToUpdate = { ...editedCourse };
-      if (typeof courseToUpdate.category === 'object' && courseToUpdate.category?._id) {
-        courseToUpdate.category = courseToUpdate.category._id;
+  setSubmitting(true);
+
+  try {
+    // Prepare FormData for file upload + trimmed data fields
+    const formData = new FormData();
+    formData.append('id', id as string);
+
+    // List of allowed fields to send
+    const allowedFields = ["title", "subtitle", "price", "description", "category", "status"];
+
+    allowedFields.forEach((field) => {
+      const value = (editedCourse as any)[field]; // ts workaround
+
+      if (value !== undefined && value !== null) {
+        if (field === "category" && typeof value === "object" && value._id) {
+          formData.append(field, value._id);
+        } else {
+          formData.append(field, value.toString());
+        }
       }
+    });
 
-      const response = await updateCourse(id as string, courseToUpdate as Course);
-      if (response && response.success) {
-        toast.success('Course updated successfully');
+    // Append image file only if selected
+    if (imageFile) formData.append('imageThumbnail', imageFile);
 
-        const updatedCourse = { ...course, ...courseToUpdate } as Course;
-        setCourse(updatedCourse);
-        setEditedCourse(updatedCourse);
+    const response = await updateCourse(formData);
 
-        await fetchCourseDetails();
-
-        setEditMode(false);
-        setImagePreview(null);
-      } else {
-        toast.error('Failed to update course');
-      }
-    } catch (error) {
-      console.error('Error updating course:', error);
+    if (response && response.success) {
+      toast.success('Course updated successfully');
+      await fetchCourseDetails();
+      setEditMode(false);
+      setImageFile(null);
+      setImagePreview(null);
+    } else {
       toast.error('Failed to update course');
-    } finally {
-      setSubmitting(false);
     }
-  };
+  } catch (error) {
+    toast.error('Failed to update course');
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
 
   const handleListCourse = async () => {
     if (!course || !courseId) return;
 
     setSubmitting(true);
     try {
-      const updatedCourseData = {
-        ...course,
-        status: "listed"
-      };
+      const formData = new FormData();
+      formData.append('id', courseId);
 
-      const response = await updateCourse(courseId, updatedCourseData);
+      // Append all course fields - or at minimum update status
+      Object.entries(course).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === 'category' && typeof value === 'object' && '_id' in value) {
+            formData.append(key, (value as any)._id);
+          } else {
+            formData.append(key, value as any);
+          }
+        }
+      });
+
+      // Overwrite status to "listed"
+      formData.set('status', 'listed')
+
+      const response = await updateCourse(formData);
+
       if (response && response.success) {
         toast.success('Course listed successfully');
+        const updatedCourseData = { ...course, status: 'listed' };
         setCourse(updatedCourseData);
         setEditedCourse(updatedCourseData);
         await fetchCourseDetails();
@@ -215,6 +233,7 @@ const CourseDetailPage = () => {
       setSubmitting(false);
     }
   };
+
 
   // Function to show the confirmation modal
   const handleShowConfirmModal = () => {
@@ -406,12 +425,12 @@ const CourseDetailPage = () => {
                         <div className="group relative inline-block">
                           <span
                             className={`px-3 py-1 rounded-full text-sm font-medium ${course.status === 'published'
-                                ? 'bg-green-100 text-green-800'
-                                : course.status === 'accepted'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : course.status === 'rejected'
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-green-100 text-green-800'
+                              : course.status === 'accepted'
+                                ? 'bg-blue-100 text-blue-800'
+                                : course.status === 'rejected'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
                               }`}
                           >
                             {course.status}
@@ -464,12 +483,12 @@ const CourseDetailPage = () => {
                         <div className="group relative inline-block">
                           <span
                             className={`px-3 py-1 rounded-full text-sm font-medium ${course.status === 'listed'
-                                ? 'bg-green-100 text-green-800'
-                                : course.status === 'accepted'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : course.status === 'rejected'
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-green-100 text-green-800'
+                              : course.status === 'accepted'
+                                ? 'bg-blue-100 text-blue-800'
+                                : course.status === 'rejected'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
                               }`}
                           >
                             {course.status}

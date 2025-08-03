@@ -23,7 +23,6 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const response = await getDashboardDatad();
-      console.log("dashboard data", response.data);
       if (response.success) {
         setDashboardData(response.data);
       }
@@ -40,7 +39,6 @@ const AdminDashboard = () => {
       } else {
         response = type === "monthly" ? await AdminMontlyIncome() : await AdminYearlyIncome();
       }
-      console.log(`${type} income ============>xxxxxxxxxxxxxxxxxx`, response.data);
       if (response.success) {
         if (type === "monthly") {
           const transformedData = response.data.map((item: IncomeData) => ({
@@ -66,7 +64,6 @@ const AdminDashboard = () => {
   const fetchCategoryIncome = async () => {
     try {
       const response = await categoryIncome();
-      console.log("category income", response.data);
       if (response.success) {
         const transformedData = response.data.map((item: { name: string, value: number }) => ({
           name: item.name,

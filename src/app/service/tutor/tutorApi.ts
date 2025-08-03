@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, Course, CourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
+import { basicType, Course, ICourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
 
@@ -136,16 +136,31 @@ export const getCategories = async () => {
     }
 }
 
-export const createCourse = async (courseData: CourseData) => {
-    try {
-        const response = await userAxiosInstance.post(`/tutor/create-course`, courseData);
-        console.log(response.data)
-        return response.data
-    } catch (error: unknown) {
-        handleAxiosError(error)
-    }
-}
 
+export const createCourse = async (courseData: ICourseData) => {
+    try {
+        const formData = new FormData();
+
+        formData.append('tutorId', courseData.tutorId);
+        formData.append('title', courseData.title);
+        formData.append('subtitle', courseData.subtitle);
+        formData.append('price', courseData.price.toString());
+        formData.append('category', courseData.category);
+        formData.append('description', courseData.description);
+        formData.append('imageThumbnail', courseData.imageThumbnail);
+
+        const response = await userAxiosInstance.post('/tutor/create-course', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                // Add auth header here if needed, e.g. Authorization
+            },
+        });
+
+        return response.data;
+    } catch (error: unknown) {
+        return handleAxiosError(error);
+    }
+};
 
 export const getCourses = async (tutorId: string, page: number, limit: number) => {
     try {
@@ -170,18 +185,28 @@ export const getCourseDetails = async (courseId: string) => {
     }
 }
 
-export const updateCourse = async (id: string, editedCourse: Course) => {
+
+export const updateCourse = async (formData: FormData) => {
     try {
-        const response = await userAxiosInstance.post(`/tutor/edit-course`, { id, editedCourse })
-        return response.data
+        console.log("formdate in edit in frontend",formData)
+        const response = await userAxiosInstance.post(
+            `/tutor/edit-course`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            }
+        );
+        return response.data;
     } catch (error: unknown) {
-        handleAxiosError(error)
+        handleAxiosError(error);
     }
-}
+};
+
 
 export const createSection = async (id: string, sectionData: ISectionData) => {
     try {
-        console.log("Iam here in the create  section api call ============>>>>>>>>>>>>>>")
         const response = await userAxiosInstance.post(`/tutor/create-section`, { id, sectionData });
         return response.data;
     } catch (error: unknown) {
@@ -355,11 +380,11 @@ export const getSessionDetails = async (sessionId: string) => {
 }
 
 
-export const updateSessionStatus = async (sessionId:string,status:string) =>{
+export const updateSessionStatus = async (sessionId: string, status: string) => {
     try {
-        const response = await userAxiosInstance.put(`/tutor/session-status/${sessionId}`,{status});
+        const response = await userAxiosInstance.put(`/tutor/session-status/${sessionId}`, { status });
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
@@ -368,7 +393,7 @@ export const updateSessionStatus = async (sessionId:string,status:string) =>{
 export const getCourseDetailsForPreview = async (courseId: string) => {
     try {
         const response = await userAxiosInstance.get(`/tutor/getcourse/${courseId}`)
-        console.log("preview course details with populate details",response)
+        console.log("preview course details with populate details", response)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -403,7 +428,7 @@ export const getReviewsByCourse = async (courseId: string) => {
 }
 
 
-export  const replyReview =  async(reviewId: string, reply: string) => {
+export const replyReview = async (reviewId: string, reply: string) => {
     try {
         const response = await userAxiosInstance.post(`/tutor/reply-review/${reviewId}`, { reply });
         return response.data;
@@ -412,11 +437,11 @@ export  const replyReview =  async(reviewId: string, reply: string) => {
     }
 }
 
-export const deleteReply = async(reviewId:string) => {
+export const deleteReply = async (reviewId: string) => {
     try {
         const response = await userAxiosInstance.delete(`/tutor/delete-reply/${reviewId}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error);
     }
 }

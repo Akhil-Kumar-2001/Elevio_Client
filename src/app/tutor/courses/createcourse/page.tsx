@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import TutorSidebar from '@/components/tutor/tutorSidebar';
 import Navbar from '@/components/tutor/navbar';
-import axios from 'axios';
 import { createCourse, getCategories } from '@/app/service/tutor/tutorApi';
 import useAuthStore from '@/store/tutorAuthStore';
 import { toast } from 'react-toastify';
+import { ICourseData } from '@/types/types';
 
 const AddCourseForm = () => {
   const router = useRouter();
@@ -182,56 +182,43 @@ const AddCourseForm = () => {
     if (!validateForm() || !user?.id) return;
 
     try {
-      // Show loading toast
-      const loadingToastId = toast.loading("Uploading course thumbnail...");
+      const loadingToastId = toast.loading("Creating course...");
 
-      const formData = new FormData();
-      formData.append('file', imageThumbnail as File);
-      formData.append('upload_preset', 'Course_Thumbnail');
-
-      const cloudinaryRes = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        formData
-      );
-
-      // Update loading toast
-      toast.update(loadingToastId, { 
-        render: "Creating course...", 
-        isLoading: true 
-      });
-
-      const courseData: CourseData = {
+      const courseData: ICourseData = {
         tutorId: user.id,
         title,
         subtitle,
         price: Number(price),
         category,
-        imageThumbnail: cloudinaryRes.data.secure_url,
         description,
+        imageThumbnail: imageThumbnail as File,
       };
 
       const response = await createCourse(courseData);
-      
-      // Close loading toast
+
       toast.dismiss(loadingToastId);
-      
-      if (response.success) {
+
+      if (response?.success) {
         toast.success(response.message);
         router.push('/tutor/courses');
+      } else {
+        toast.error(response?.message || 'Failed to create course');
       }
-    } catch (error: unknown) {
-      console.log('Error creating course:', error);
+    } catch (error) {
+      toast.dismiss();
+      console.error('Error creating course:', error);
+      toast.error('An error occurred while creating the course');
     }
   };
 
   // Handle price input change with validation
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
+
     // Allow only numbers and decimal point
     if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
       setPrice(value);
-      
+
       // Clear error if value is valid and greater than zero
       if (value === '' || Number(value) <= 0) {
         setErrors(prev => ({ ...prev, price: '' }));
@@ -360,14 +347,14 @@ const AddCourseForm = () => {
                 </div>
 
                 <div className="flex justify-end space-x-4 pt-4">
-                  <button 
-                    onClick={handleCancel} 
+                  <button
+                    onClick={handleCancel}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
                   </button>
-                  <button 
-                    onClick={handleCreate} 
+                  <button
+                    onClick={handleCreate}
                     className="px-4 py-2 bg-black rounded-md text-white hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     disabled={!title || !subtitle || !category || !price || !imageThumbnail || !description || Number(price) <= 0}
                   >
