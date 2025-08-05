@@ -247,6 +247,36 @@ export const getCourses = async (page: number, limit: number) => {
     }
 }
 
+export const searchCourse = async (
+  query: string,
+  page: number,
+  limit: number,
+  category: string = 'all',
+  priceRange: [number, number] = [0, 5000],
+  sortOrder: 'asc' | 'desc' | null = null
+) => {
+  try {
+    const response = await userAxiosInstance.get('/student/search-courses', {
+      params: {
+        query: query.trim(),
+        page,
+        limit,
+        category: category === 'all' ? undefined : category,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        sortOrder,
+      },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    handleAxiosError(error);
+  }
+};
+
+
+
+
+
 export const getPurchasedCourses = async (userId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/purchased-courses/${userId}`)

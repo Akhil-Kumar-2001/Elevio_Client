@@ -178,7 +178,7 @@ export const getCourses = async (tutorId: string, page: number, limit: number) =
 
 export const getCourseDetails = async (courseId: string) => {
     try {
-        const response = await userAxiosInstance.get(`/tutor/get-category?id=${courseId}`)
+        const response = await userAxiosInstance.get(`/tutor/get-course?id=${courseId}`)
         return response.data
     } catch (error: unknown) {
         handleAxiosError(error)
@@ -188,7 +188,6 @@ export const getCourseDetails = async (courseId: string) => {
 
 export const updateCourse = async (formData: FormData) => {
     try {
-        console.log("formdate in edit in frontend",formData)
         const response = await userAxiosInstance.post(
             `/tutor/edit-course`,
             formData,

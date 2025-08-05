@@ -52,9 +52,34 @@ export const updateTutorStatus = async (id: string) => {
     }
 };
 
+export const searchTutors = async (query: string, page: number, limit: number) => {
+    try {
+        const response = await adminAxiosInstance.get(`${API_URI}/admin/searchtutors`, {
+            params: { query, page, limit },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error);
+    }
+};
+
 export const updateStudentStatus = async (id: string) => {
     try {
         const response = await adminAxiosInstance.patch(`/admin/updatestudentstatus`, { id, status });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error);
+    }
+};
+
+
+export const searchStudents = async (query: string, page: number, limit: number) => {
+    try {
+        const response = await adminAxiosInstance.get(`${API_URI}/admin/searchstudents`, {
+            params: { query, page, limit },
+            withCredentials: true
+        });
         return response.data;
     } catch (error: unknown) {
         handleAxiosError(error);

@@ -86,7 +86,7 @@ export interface CourseData {
   subtitle: string;
   price: number;
   category: string;
-  imageThumbnail: string;
+  imageThumbnail?: string;
   description: string;
 }
 
@@ -104,7 +104,8 @@ export interface Course {
   isBlocked: boolean;
   status: string;
   rejectedReason: string;
-  imageThumbnail: string;
+  imageThumbnail?: string;
+  imageThumbnailId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -123,7 +124,8 @@ export interface ICourse {
   isBlocked: boolean;
   status: string;
   rejectedReason: string;
-  imageThumbnail: string;
+  imageThumbnail?: string;
+  imageThumbnailId?: string;
   avgRating?: number;
   totalReviews?: number;
   createdAt: string;
@@ -159,7 +161,8 @@ export interface ICoursePreview {
   isBlocked: boolean;
   status: string;
   rejectedReason: string;
-  imageThumbnail: string;
+  imageThumbnail?: string;
+  imageThumbnailId?: string;
   avgRating?: number;
   totalReviews?: number;
   createdAt: string;
@@ -396,4 +399,16 @@ export interface IncomeData {
   month?: string; 
   date?: string; 
   income: number;
+}
+
+
+
+export interface ICourseSearchServiceDto {
+  id: string;
+  title: string;
+  price: number;
+  imageThumbnail: string;
+  category: string;
+  createdAt: Date;
+  purchasedStudents: string[];
 }

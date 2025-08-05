@@ -129,7 +129,7 @@ const CourseDetailPage = () => {
     }
   };
 
-  
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -142,7 +142,6 @@ const CourseDetailPage = () => {
     }
   };
 
- 
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();

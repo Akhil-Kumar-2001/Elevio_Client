@@ -1,17 +1,17 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Filter, SortAsc, SortDesc, X } from 'lucide-react';
+import { Filter, SortAsc, SortDesc, X, Search } from 'lucide-react';
 import useAuthStore from '@/store/userAuthStore';
 import { useRouter } from 'next/navigation';
 import { useCartCountStore } from '@/store/cartCountStore';
-import { addToCart, addToWishlist, getCategories, getCourses, getPurchasedCourses } from '@/app/service/user/userApi';
+import { addToCart, addToWishlist, getCategories, getPurchasedCourses, searchCourse } from '@/app/service/user/userApi';
 import { toast } from 'react-toastify';
 import Navbar from '@/components/student/navbar';
 import CoursesLoading from '@/components/student/coursesLoading';
 import Pagination from '@/components/student/pagination';
 import Image from 'next/image';
-import { ICoursePreview } from '@/types/types';
+import { ICoursePreview, ICourseSearchServiceDto } from '@/types/types';
 
 interface ExtendedFrontendCourse {
   _id: string;
@@ -26,7 +26,7 @@ interface ExtendedFrontendCourse {
 const Courses = () => {
   const router = useRouter();
   const [courses, setCourses] = useState<ExtendedFrontendCourse[]>([]);
-  const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]); // Store purchased course IDs
+  const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]);
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,9 +37,10 @@ const Courses = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const { user } = useAuthStore();
-  const { incrementCartCount,incrementWishlistCount } = useCartCountStore();
+  const { incrementCartCount, incrementWishlistCount } = useCartCountStore();
 
   const userId = user?.id;
 
@@ -86,57 +87,61 @@ const Courses = () => {
       const response = await getPurchasedCourses(userId);
       if (response.success) {
         const purchasedCourseIds = response.data.map((course: ICoursePreview) => course._id);
-        setPurchasedCourses(purchasedCourseIds); // Store only the _id of purchased courses
+        setPurchasedCourses(purchasedCourseIds);
       }
     } catch (error) {
       console.log("Error while getting Purchased Courses:", error);
     }
   };
 
-  // Fetch courses and map category names
   const fetchCourses = async () => {
     try {
-      const response = await getCourses(currentPage, 8);
-      if (response) {
-        setTotalPages(Math.floor(response.data.totalRecord / 5));
-      }
-
-      const mappedCourses: ExtendedFrontendCourse[] = response.data.data.map((course: ICoursePreview) => {
-        // Find category name by matching category ID
-        const categoryName = categories.find(cat => cat._id === course.category)?.name || 'Unknown';
-
-        return {
-          _id: course._id,
-          title: course.title,
-          rating: 4.8, // Default rating or you could add this to your API response
-          students: course.purchasedStudents.length || Math.floor(Math.random() * 1000),
-          price: course.price,
-          image: course.imageThumbnail,
-          category: categoryName // Assign category name instead of ID
-        };
+      console.log('Fetching courses with params:', {
+        searchQuery,
+        currentPage,
+        selectedCategory,
+        priceRange,
+        sortOrder,
       });
+      const response = await searchCourse(searchQuery, currentPage, 8, selectedCategory, priceRange, sortOrder);
+      console.log('API Response:', response);
+      if (response && response.success) {
+        setTotalPages(Math.ceil(response.data.totalRecord / 8));
 
-      setCourses(mappedCourses);
-      setLoading(false);
+        const mappedCourses: ExtendedFrontendCourse[] = response.data.data.map((course: ICourseSearchServiceDto) => {
+          return {
+            _id: course.id,
+            title: course.title,
+            rating: 4.8,
+            students: course.purchasedStudents?.length || Math.floor(Math.random() * 1000),
+            price: course.price,
+            image: course.imageThumbnail,
+            category: course.category || 'Unknown', // Use the category name directly
+          };
+        });
+
+        setCourses(mappedCourses);
+        setLoading(false);
+      }
     } catch (err) {
-      console.log("Error fetching courses:", err);
+      console.error('Error fetching courses:', err);
       setError('Failed to load courses');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCategories(); // Fetch categories first
+    fetchCategories();
     if (userId) {
-      fetchPurchasedCourses(); // Fetch purchased courses only if user is logged in
+      fetchPurchasedCourses();
     }
   }, [userId]);
 
   useEffect(() => {
     if (categories.length > 0) {
-      fetchCourses(); // Fetch courses after categories are available
+      fetchCourses();
     }
-  }, [categories, currentPage]);
+  }, [categories, currentPage, searchQuery, selectedCategory, priceRange, sortOrder]);
 
   const handleAddToCart = async (courseId: string) => {
     if (!userId) {
@@ -157,8 +162,7 @@ const Courses = () => {
     }
   };
 
-  const handleWishlist = async(courseId:string) => {
-    // toast.info("Wish list feature Coming Soon....");
+  const handleWishlist = async (courseId: string) => {
     try {
       const response = await addToWishlist(courseId);
       if (response) {
@@ -167,57 +171,24 @@ const Courses = () => {
       }
     } catch (error) {
       console.log("Error adding course to wishlist:", error);
-      // setError('Failed to add course to wishlist');
-      
     }
   };
 
-  // New function to handle navigation to course details page
   const navigateToCourseDetails = (courseId: string) => {
     router.push(`/coursePreview/${courseId}`);
   };
 
-  // Toggle filter sidebar
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
-  // Apply filters to courses
-  const filterCourses = () => {
-    let filtered = [...courses];
-
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(course => course.category === selectedCategory);
-    }
-
-    // Price filter using range slider values
-    filtered = filtered.filter(course =>
-      course.price >= priceRange[0] && course.price <= priceRange[1]
-    );
-
-    // Sort by name
-    if (sortOrder) {
-      filtered.sort((a, b) => {
-        if (sortOrder === 'asc') {
-          return a.title.localeCompare(b.title);
-        } else {
-          return b.title.localeCompare(a.title);
-        }
-      });
-    }
-
-    return filtered;
-  };
-
-  // Reset all filters
   const resetFilters = () => {
     setSelectedCategory('all');
     setPriceRange([0, 5000]);
     setSortOrder(null);
+    setSearchQuery('');
   };
 
-  // Handle price range change
   const handlePriceRangeChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const value = parseInt(e.target.value);
     setPriceRange(prev => {
@@ -244,10 +215,23 @@ const Courses = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       <div className="px-16 pt-32 py-8 relative">
+        {/* Search Bar */}
+        <div className="flex justify-center mb-4 -mt-4">
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              placeholder="Search courses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-gray-700"
+              style={{ outline: 'none' }} // Inline style to override default outline
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </div>
+        </div>
+
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-gray-800">All Courses</h2>
-
-          {/* Improved Filter button */}
           <button
             onClick={toggleFilters}
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
@@ -257,27 +241,28 @@ const Courses = () => {
           </button>
         </div>
 
-        {/* Filter Summary - show active filters */}
-        {(selectedCategory !== 'all' || priceRange[0] > 0 || priceRange[1] < 5000 || sortOrder) && (
+        {(selectedCategory !== 'all' || priceRange[0] > 0 || priceRange[1] < 5000 || sortOrder || searchQuery) && (
           <div className="flex flex-wrap gap-2 mb-4">
             {selectedCategory !== 'all' && (
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center border border-purple-100">
                 Category: {selectedCategory}
               </div>
             )}
-
             {(priceRange[0] > 0 || priceRange[1] < 5000) && (
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center border border-purple-100">
                 Price: ₹{priceRange[0]} - ₹{priceRange[1]}
               </div>
             )}
-
             {sortOrder && (
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center border border-purple-100">
                 Sort: {sortOrder === 'asc' ? 'A to Z' : 'Z to A'}
               </div>
             )}
-
+            {searchQuery && (
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center border border-purple-100">
+                Search: {searchQuery}
+              </div>
+            )}
             <button
               onClick={resetFilters}
               className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center hover:bg-gray-200"
@@ -287,11 +272,9 @@ const Courses = () => {
           </div>
         )}
 
-        {/* Improved Sidebar Filter Panel */}
         <div
-          className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto ${showFilters ? 'translate-x-0' : 'translate-x-full'
-            }`}
-          style={{ paddingTop: '80px' }}  // Add space for the header
+          className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out overflow-y-auto ${showFilters ? 'translate-x-0' : 'translate-x-full'}`}
+          style={{ paddingTop: '80px' }}
         >
           <div className="p-6">
             <div className="flex justify-between items-center mb-8">
@@ -305,7 +288,6 @@ const Courses = () => {
             </div>
 
             <div className="space-y-8">
-              {/* Improved Category filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category
@@ -332,14 +314,11 @@ const Courses = () => {
                 </div>
               </div>
 
-              {/* Improved Price range slider */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-4">
                   Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
                 </label>
-
                 <div className="space-y-6">
-                  {/* Min price */}
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Min Price</label>
                     <input
@@ -359,8 +338,6 @@ const Courses = () => {
                       <span>₹5000</span>
                     </div>
                   </div>
-
-                  {/* Max price */}
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Max Price</label>
                     <input
@@ -383,7 +360,6 @@ const Courses = () => {
                 </div>
               </div>
 
-              {/* Improved Sort order */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Sort by Name
@@ -391,20 +367,14 @@ const Courses = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setSortOrder('asc')}
-                    className={`flex-1 flex items-center text-gray-700 justify-center gap-2 p-2 border rounded-lg transition-all ${sortOrder === 'asc'
-                      ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-sm'
-                      : 'hover:bg-gray-50 border-gray-300'
-                      }`}
+                    className={`flex-1 flex items-center text-gray-700 justify-center gap-2 p-2 border rounded-lg transition-all ${sortOrder === 'asc' ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-sm' : 'hover:bg-gray-50 border-gray-300'}`}
                   >
                     <SortAsc size={16} />
                     A to Z
                   </button>
                   <button
                     onClick={() => setSortOrder('desc')}
-                    className={`flex-1 flex items-center text-gray-700 justify-center gap-2 p-2 border rounded-lg transition-all ${sortOrder === 'desc'
-                      ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-sm'
-                      : 'hover:bg-gray-50 border-gray-300'
-                      }`}
+                    className={`flex-1 flex items-center text-gray-700 justify-center gap-2 p-2 border rounded-lg transition-all ${sortOrder === 'desc' ? 'bg-purple-100 border-purple-500 text-purple-700 shadow-sm' : 'hover:bg-gray-50 border-gray-300'}`}
                   >
                     <SortDesc size={16} />
                     Z to A
@@ -412,7 +382,6 @@ const Courses = () => {
                 </div>
               </div>
 
-              {/* Improved Reset Button */}
               <button
                 onClick={resetFilters}
                 className="w-full px-4 py-3 mt-6 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-lg hover:from-gray-200 hover:to-gray-300 transition-colors font-medium shadow-sm"
@@ -423,9 +392,8 @@ const Courses = () => {
           </div>
         </div>
 
-        {/* Course Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filterCourses().map((course, index) => {
+          {courses.map((course, index) => {
             const isPurchased = purchasedCourses.includes(course._id);
 
             return (
@@ -435,7 +403,6 @@ const Courses = () => {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                {/* Next.js Image component instead of img tag */}
                 <div
                   onClick={() => navigateToCourseDetails(course._id)}
                   className="relative w-full h-40 cursor-pointer"
@@ -447,20 +414,18 @@ const Courses = () => {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     style={{ objectFit: 'cover' }}
                     className="rounded-t-lg"
-                    priority={index < 4} // Only prioritize loading for the first 4 images
+                    priority={index < 4}
                   />
                 </div>
-                {/* Card Content */}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
                     {course.title}
                   </h3>
                   {hoveredIndex === index && !isPurchased ? (
-                    // Hover State: Show Add to Cart button and Wishlist icon only if not purchased
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent navigation when clicking the button
+                          e.stopPropagation();
                           handleAddToCart(course._id);
                         }}
                         className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-colors"
@@ -469,7 +434,7 @@ const Courses = () => {
                       </button>
                       <button
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent navigation when clicking the button
+                          e.stopPropagation();
                           handleWishlist(course._id);
                         }}
                         className="p-2 border border-purple-600 rounded-full hover:bg-purple-100 transition-colors"
@@ -492,7 +457,6 @@ const Courses = () => {
                       </button>
                     </div>
                   ) : (
-                    // Default State or Purchased State: Show rating, students, and price
                     <>
                       <div className="flex items-center mb-2">
                         <span className="text-yellow-500 mr-1">★</span>
@@ -519,7 +483,7 @@ const Courses = () => {
           })}
         </div>
 
-        {filterCourses().length === 0 && (
+        {courses.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500">No courses match your filters.</p>
           </div>
