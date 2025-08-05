@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 import { Course, Category, ICategory } from '@/types/types';
 import Image from 'next/image';
 import { Camera, Edit, FileText, CheckCircle, ArrowLeft, Eye } from 'lucide-react';
-import axios from 'axios';
 
 const CourseDetailPage = () => {
   const { id } = useParams();
@@ -32,8 +31,6 @@ const CourseDetailPage = () => {
   const [imageUploading, setImageUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Hardcoded Cloudinary cloud name - replace with your own
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchCourseDetails = async () => {
     try {
@@ -95,41 +92,6 @@ const CourseDetailPage = () => {
     setEditMode(!editMode);
   };
 
-  const uploadToCloudinary = async (file: File) => {
-    try {
-      setImageUploading(true);
-      setUploadProgress(0);
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "Course_Thumbnail");
-      formData.append("folder", "Course-Thumbnail");
-
-      const uploadResponse = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
-        formData,
-        {
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total) {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              setUploadProgress(progress);
-            }
-          }
-        }
-      );
-
-      return uploadResponse.data.secure_url;
-    } catch (error) {
-      console.error("Error uploading course thumbnail:", error);
-      toast.error("Failed to upload course thumbnail. Please try again.");
-      throw new Error("Failed to upload course thumbnail");
-    } finally {
-      setImageUploading(false);
-      setUploadProgress(0);
-    }
-  };
-
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -143,52 +105,67 @@ const CourseDetailPage = () => {
   };
 
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!editedCourse) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editedCourse) return;
 
-  setSubmitting(true);
+    setSubmitting(true);
+    setImageUploading(true); // Set uploading state to true
 
-  try {
-    // Prepare FormData for file upload + trimmed data fields
-    const formData = new FormData();
-    formData.append('id', id as string);
+    try {
+      const formData = new FormData();
+      formData.append('id', id as string);
 
-    // List of allowed fields to send
-    const allowedFields = ["title", "subtitle", "price", "description", "category", "status"];
-
-    allowedFields.forEach((field) => {
-      const value = (editedCourse as any)[field]; // ts workaround
-
-      if (value !== undefined && value !== null) {
-        if (field === "category" && typeof value === "object" && value._id) {
-          formData.append(field, value._id);
-        } else {
-          formData.append(field, value.toString());
+      const allowedFields = ["title", "subtitle", "price", "description", "category", "status"];
+      allowedFields.forEach((field) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value = (editedCourse as any)[field];
+        if (value !== undefined && value !== null) {
+          if (field === "category" && typeof value === "object" && value._id) {
+            formData.append(field, value._id);
+          } else {
+            formData.append(field, value.toString());
+          }
         }
+      });
+
+      if (imageFile) {
+        formData.append('imageThumbnail', imageFile);
+        // Simulate upload progress (replace with actual API progress tracking if available)
+        const simulateProgress = () => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 10;
+            setUploadProgress(progress);
+            if (progress >= 100) {
+              clearInterval(interval);
+            }
+          }, 500);
+        };
+        simulateProgress();
       }
-    });
 
-    // Append image file only if selected
-    if (imageFile) formData.append('imageThumbnail', imageFile);
+      const response = await updateCourse(formData);
 
-    const response = await updateCourse(formData);
-
-    if (response && response.success) {
-      toast.success('Course updated successfully');
-      await fetchCourseDetails();
-      setEditMode(false);
-      setImageFile(null);
-      setImagePreview(null);
-    } else {
+      if (response && response.success) {
+        toast.success('Course updated successfully');
+        await fetchCourseDetails();
+        setEditMode(false);
+        setImageFile(null);
+        setImagePreview(null);
+        setImageUploading(false); // Reset uploading state
+        setUploadProgress(0); // Reset progress
+      } else {
+        toast.error('Failed to update course');
+      }
+    } catch (error) {
       toast.error('Failed to update course');
+      console.log(error);
+    } finally {
+      setSubmitting(false);
+      setImageUploading(false); // Ensure uploading state is reset
     }
-  } catch (error) {
-    toast.error('Failed to update course');
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
 
 
@@ -204,8 +181,10 @@ const CourseDetailPage = () => {
       Object.entries(course).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (key === 'category' && typeof value === 'object' && '_id' in value) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formData.append(key, (value as any)._id);
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formData.append(key, value as any);
           }
         }

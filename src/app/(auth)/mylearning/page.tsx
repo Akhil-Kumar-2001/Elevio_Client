@@ -98,14 +98,16 @@ const MyLearning = () => {
                 >
                   {/* Image */}
                   <div className="relative h-48">
-                    <Image
-                      src={course.imageThumbnail}
-                      alt={course.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      style={{ objectFit: 'cover' }}
-                      className="rounded-t-lg"
-                    />
+                    {course.imageThumbnail && (
+                      <Image
+                        src={course.imageThumbnail}
+                        alt={course.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                        className="rounded-t-lg"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
                       {Math.round(progressPercentage)}% Complete

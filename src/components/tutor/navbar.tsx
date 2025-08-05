@@ -11,19 +11,7 @@ import useNotification from "@/store/notificationStore";
 import useListenNotification from "@/app/hooks/useListenNotificationHook";
 
 const Navbar = () => {
-  interface TutorType {
-    _id: string;
-    username: string;
-    email: string;
-    status: number;
-    role: string;
-    createdAt: string;
-    profile?: {
-      profilePicture?: string;
-    };
-  }
-
-  // Initialize live notification listener
+ 
   useListenNotification();
 
   const router = useRouter();

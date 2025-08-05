@@ -18,15 +18,6 @@ const AddCourseForm = () => {
     name: string;
   };
 
-  interface CourseData {
-    tutorId: string;
-    title: string;
-    subtitle: string;
-    price: number;
-    category: string;
-    imageThumbnail: string;
-    description: string;
-  }
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -49,7 +40,6 @@ const AddCourseForm = () => {
     description: ''
   });
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fetchCategories = async () => {
     try {

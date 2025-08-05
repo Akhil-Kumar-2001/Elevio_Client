@@ -50,7 +50,7 @@ const ProfileSettings = () => {
 
   // Hardcoded Cloudinary cloud name
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
+  console.log(imageFile)
   useEffect(() => {
     const fetchTutorDetails = async () => {
       try {

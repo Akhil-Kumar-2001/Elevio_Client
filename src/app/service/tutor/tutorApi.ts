@@ -1,5 +1,5 @@
 import axios from "axios";
-import { basicType, Course, ICourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
+import { basicType, ICourseData, ISectionData, TutorType, TutorVerificationFormData, userType } from "@/types/types";
 import { toast } from "react-toastify";
 import userAxiosInstance from "./tutorAxiosInstance";
 
