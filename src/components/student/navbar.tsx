@@ -42,7 +42,7 @@ const Navbar = () => {
     await logout();
     localStorage.removeItem('authUserCheck');
     toast.success('Logged out successfully!');
-    router.push('/login'); 
+    router.replace('/login'); 
   } catch (error) {
     console.log('Logout error:', error);
     toast.error('Failed to log out. Please try again.');
