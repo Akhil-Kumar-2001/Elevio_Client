@@ -96,15 +96,7 @@ const Courses = () => {
 
   const fetchCourses = async () => {
     try {
-      console.log('Fetching courses with params:', {
-        searchQuery,
-        currentPage,
-        selectedCategory,
-        priceRange,
-        sortOrder,
-      });
       const response = await searchCourse(searchQuery, currentPage, 8, selectedCategory, priceRange, sortOrder);
-      console.log('API Response:', response);
       if (response && response.success) {
         setTotalPages(Math.ceil(response.data.totalRecord / 8));
 

@@ -51,8 +51,8 @@ const Navbar = () => {
       if (response.success) {
         setCartCount(response.data.items.length);
       }
-    } catch (error) {
-      console.log('Failed to fetch cart data:', error);
+    } catch{
+      
     }
   };
 

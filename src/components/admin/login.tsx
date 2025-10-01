@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Eye, EyeOff } from 'lucide-react';
@@ -67,6 +67,12 @@ const LoginPage: React.FC = () => {
 
   const router = useRouter();
   const adminAuth = useAdminAuthStore();
+
+  useEffect(() => {
+    if (adminAuth.isAuthenticated) {
+      router.replace('/admin/dashboard');
+    }
+  }, [adminAuth.isAuthenticated, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
