@@ -93,24 +93,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ role }) => {
   };
 
 
-  // useEffect(() => {
-  //   let isAuthenticated = false;
-  //   let userRole = null;
+  useEffect(() => {
+    let isAuthenticated = false;
+    let userRole = null;
 
-  //   if (role === "student") {
-  //     isAuthenticated = studentAuth.isAuthenticated;
-  //     userRole = studentAuth.user?.role;
-  //   } else if (role === "tutor") {
-  //     isAuthenticated = tutorAuth.isAuthenticated;
-  //     userRole = tutorAuth.user?.role;
-  //   }
+    if (role === "student") {
+      isAuthenticated = studentAuth.isAuthenticated;
+      userRole = studentAuth.user?.role;
+    } else if (role === "tutor") {
+      isAuthenticated = tutorAuth.isAuthenticated;
+      userRole = tutorAuth.user?.role;
+    }
 
-  //   if (isAuthenticated) {
-  //     if (userRole === "Student") router.replace("/home");
-  //     else if (userRole === "Tutor") router.replace("/tutor/dashboard");
-  //     else router.replace("/");
-  //   }
-  // }, [studentAuth.isAuthenticated, tutorAuth.isAuthenticated,role]);
+    if (isAuthenticated) {
+      if (userRole === "Student") router.replace("/home");
+      else if (userRole === "Tutor") router.replace("/tutor/dashboard");
+      else router.replace("/");
+    }
+  }, [studentAuth.isAuthenticated, tutorAuth.isAuthenticated,role]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
