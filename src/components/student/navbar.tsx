@@ -37,11 +37,16 @@ const Navbar = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async() => {
+  try {
+    await logout();
     localStorage.removeItem('authUserCheck');
     toast.success('Logged out successfully!');
-    router.push('/login');
+    router.push('/login'); 
+  } catch (error) {
+    console.log('Logout error:', error);
+    toast.error('Failed to log out. Please try again.');
+  }
   };
 
   const fetchCartCount = async () => {

@@ -68,11 +68,16 @@ const TutorSidebar = ({ expanded, setExpanded }: TutorSidebarProps) => {
     });
   };
 
-  const handleLogout = () => {
-    logout();
-    localStorage.removeItem('authTutorCheck');
+  const handleLogout = async() => {
+  try {
+    await logout();
+    localStorage.removeItem('authUserCheck');
     toast.success('Logged out successfully!');
     router.push('/tutor/login');
+  } catch (error) {
+    console.log('Logout error:', error);
+    toast.error('Failed to log out. Please try again.');
+  }
   };
 
   return (
