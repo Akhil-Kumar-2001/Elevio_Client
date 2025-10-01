@@ -206,7 +206,6 @@ export const removeItem = async (id: string, studentId: string) => {
 
 export const createOrder = async (studentId: string, amount: number, courseIds: string[] | string) => {
     try {
-        console.log("create order", amount, courseIds)
         const response = await userAxiosInstance.post('/student/payment/create-order', { studentId, amount, courseIds });
         return response.data; // { id, amount, currency }
     } catch (error: unknown) {
@@ -248,29 +247,29 @@ export const getCourses = async (page: number, limit: number) => {
 }
 
 export const searchCourse = async (
-  query: string,
-  page: number,
-  limit: number,
-  category: string = 'all',
-  priceRange: [number, number] = [0, 5000],
-  sortOrder: 'asc' | 'desc' | null = null
+    query: string,
+    page: number,
+    limit: number,
+    category: string = 'all',
+    priceRange: [number, number] = [0, 5000],
+    sortOrder: 'asc' | 'desc' | null = null
 ) => {
-  try {
-    const response = await userAxiosInstance.get('/student/search-courses', {
-      params: {
-        query: query.trim(),
-        page,
-        limit,
-        category: category === 'all' ? undefined : category,
-        minPrice: priceRange[0],
-        maxPrice: priceRange[1],
-        sortOrder,
-      },
-    });
-    return response.data;
-  } catch (error: unknown) {
-    handleAxiosError(error);
-  }
+    try {
+        const response = await userAxiosInstance.get('/student/search-courses', {
+            params: {
+                query: query.trim(),
+                page,
+                limit,
+                category: category === 'all' ? undefined : category,
+                minPrice: priceRange[0],
+                maxPrice: priceRange[1],
+                sortOrder,
+            },
+        });
+        return response.data;
+    } catch (error: unknown) {
+        handleAxiosError(error);
+    }
 };
 
 
@@ -400,40 +399,40 @@ export const getSessions = async () => {
     } catch (error: unknown) {
         handleAxiosError(error)
     }
-} 
+}
 
-export const getSessionDetails = async (sessionId:string) =>{
+export const getSessionDetails = async (sessionId: string) => {
     try {
         const response = await userAxiosInstance.get(`/student/session-details/${sessionId}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const updateSessionStatus = async (sessionId:string,status:string) =>{
+export const updateSessionStatus = async (sessionId: string, status: string) => {
     try {
-        const response = await userAxiosInstance.put(`/student/session-status/${sessionId}`,{status});
+        const response = await userAxiosInstance.put(`/student/session-status/${sessionId}`, { status });
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const updateReview = async (reviewId:string,ratings:ReviewEdit) => {
+export const updateReview = async (reviewId: string, ratings: ReviewEdit) => {
     try {
-        const response = await userAxiosInstance.put(`/student/edit-review/${reviewId}`,{ratings});
+        const response = await userAxiosInstance.put(`/student/edit-review/${reviewId}`, { ratings });
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }
 
-export const deleteReview = async (reviewId:string) => {
+export const deleteReview = async (reviewId: string) => {
     try {
         const response = await userAxiosInstance.delete(`/student/delete-review/${reviewId}`);
         return response.data;
-    } catch (error:unknown) {
+    } catch (error: unknown) {
         handleAxiosError(error)
     }
 }

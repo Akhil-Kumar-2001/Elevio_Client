@@ -98,7 +98,7 @@ const PricingPlans = () => {
       const order = await createSubscritionOrder(userId, Price, planId);
 
       if (!order || !order.data || !order.data.orderId) {
-        toast.error("Failed to create order. Please try again.");
+        // toast.error("Failed to create order. Please try again.");
         setPaymentFailureMessage("Failed to create order. Please try again.");
         setIsPaymentFailureModalOpen(true);
         setIsProcessingPayment(false);
@@ -155,7 +155,12 @@ const PricingPlans = () => {
           color: "#4F46E5",
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: async() => {
+            try {
+              await verifySubscritionPayment(order.data.orderId, "", "");
+            } catch (err) {
+              console.error("Failed to notify backend of failure:", err);
+            }
             setPaymentFailureMessage("Payment was not completed. Please try again.");
             setIsPaymentFailureModalOpen(true);
           },
@@ -194,7 +199,7 @@ const PricingPlans = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-indigo-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -209,11 +214,10 @@ const PricingPlans = () => {
           {subscription?.map((plan, index) => (
             <div
               key={index}
-              className={`relative transform transition-all duration-300 hover:scale-105 ${
-                plan.planName.toLowerCase().includes('premium') 
+              className={`relative transform transition-all duration-300 hover:scale-105 ${plan.planName.toLowerCase().includes('premium')
                   ? 'bg-gradient-to-br from-indigo-600 to-blue-700 text-white'
                   : 'bg-white text-gray-900'
-              } rounded-2xl shadow-xl overflow-hidden`}
+                } rounded-2xl shadow-xl overflow-hidden`}
             >
               {plan.planName.toLowerCase().includes('premium') && (
                 <div className="absolute top-4 right-4">
@@ -239,11 +243,10 @@ const PricingPlans = () => {
                 <div className="space-y-4 mb-8">
                   {plan.features.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-center">
-                      <Check className={`w-5 h-5 mr-3 ${
-                        plan.planName.toLowerCase().includes('premium') 
-                          ? 'text-yellow-300' 
+                      <Check className={`w-5 h-5 mr-3 ${plan.planName.toLowerCase().includes('premium')
+                          ? 'text-yellow-300'
                           : 'text-green-500'
-                      }`} />
+                        }`} />
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
@@ -260,14 +263,13 @@ const PricingPlans = () => {
                     handlePayment(plan.price, plan._id, plan.planName);
                   }}
                   disabled={isProcessingPayment && selectedPlan === plan._id}
-                  className={`w-full py-4 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                    plan.planName.toLowerCase().includes('premium')
+                  className={`w-full py-4 rounded-xl font-semibold text-sm transition-all duration-300 ${plan.planName.toLowerCase().includes('premium')
                       ? 'bg-white text-indigo-600 hover:bg-gray-100'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  } ${isProcessingPayment && selectedPlan === plan._id ? 'opacity-75 cursor-not-allowed' : ''}`}
+                    } ${isProcessingPayment && selectedPlan === plan._id ? 'opacity-75 cursor-not-allowed' : ''}`}
                 >
-                  {isProcessingPayment && selectedPlan === plan._id 
-                    ? 'Processing...' 
+                  {isProcessingPayment && selectedPlan === plan._id
+                    ? 'Processing...'
                     : 'Get Started'}
                 </button>
               </div>

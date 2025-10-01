@@ -132,7 +132,7 @@ const Checkout: React.FC = () => {
       const order = await createOrder(studentId, totalPrice, courseIds);
       console.log('order after creation', order);
       if (!order || !order.data || !order.data.razorpayOrderId) {
-        toast.error('Failed to create order. Please try again.');
+        // toast.error('Failed to create order. Please try again.');
         setPaymentFailureMessage('Failed to create order. Please try again.');
         setIsPaymentFailureModalOpen(true);
         setLoading(false);
