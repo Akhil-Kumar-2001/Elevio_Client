@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 const SubscriptionBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
-
+  console.log(isVisible)
   useEffect(() => {
     setIsVisible(true);
   }, []);
