@@ -83,20 +83,20 @@ const ConfirmationModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">{title}</h2>
-        <p className="text-gray-600 mb-6">{message}</p>
-        <div className="flex justify-end gap-2">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">{title}</h2>
+        <p className="text-gray-600 mb-6 leading-relaxed">{message}</p>
+        <div className="flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition-all duration-200"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
           >
             Delete
           </button>
@@ -175,7 +175,6 @@ const CoursePreview = () => {
       }
       const order = await createOrder(userId, course.price, courseIds);
       if (!order || !order.data || !order.data.razorpayOrderId) {
-        toast.error("Failed to create order. Please try again.");
         setPaymentFailureMessage("Failed to create order. Please try again.");
         setIsPaymentFailureModalOpen(true);
         return;
@@ -225,11 +224,18 @@ const CoursePreview = () => {
           color: "#6B46C1",
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: async () => {
+            try {
+              await verifyPayment(order.data.razorpayOrderId, "", "");
+            } catch (err) {
+              console.error("Failed to notify backend of failure:", err);
+            }
+
             setPaymentFailureMessage("Payment was not completed. Please try again.");
             setIsPaymentFailureModalOpen(true);
           },
         },
+
       };
       const razorpay = new window.Razorpay(options);
       razorpay.open();
@@ -592,16 +598,16 @@ const CoursePreview = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="text-blue-600 text-xl">Loading course...</div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-100">
+        <div className="text-indigo-600 text-xl font-semibold animate-pulse">Loading course...</div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="text-red-600 text-xl">Course not found</div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-100">
+        <div className="text-red-600 text-xl font-semibold">Course not found</div>
       </div>
     );
   }
@@ -611,31 +617,16 @@ const CoursePreview = () => {
     : '0.0';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Navbar />
-      <div className="flex flex-col lg:flex-row w-full pt-16 flex-grow">
+      <div className="flex flex-col lg:flex-row w-full pt-20 flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:w-3/4 h-full flex flex-col">
-          <div className="relative bg-black w-full" style={{ paddingTop: '56.25%' }}>
-            {/* {currentLecture ? (
-              <ReactPlayer
-                url={currentLecture.videoUrl || '/placeholder-video.mp4'}
-                className="absolute top-0 left-0 w-full h-full"
-                style={{ objectFit: 'contain' }}
-                width="100%"
-                height="100%"
-                controls
-                onProgress={handleVideoProgress}
-              />
-            ) : (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white">
-                Select a lecture to start learning
-              </div>
-            )} */}
+          <div className="relative bg-black w-full rounded-2xl overflow-hidden shadow-xl" style={{ paddingTop: '56.25%' }}>
             {currentLecture ? (
               <ReactPlayer
                 url={currentLecture.videoUrl || '/placeholder-video.mp4'}
                 className="absolute top-0 left-0 w-full h-full"
-                style={{ objectFit: 'contain' }}
+                style={{ objectFit: 'cover' }}
                 width="100%"
                 height="100%"
                 controls
@@ -643,7 +634,6 @@ const CoursePreview = () => {
                   file: {
                     attributes: {
                       controlsList: 'nodownload',
-                      // disablePictureInPicture: true,
                       onContextMenu: (e: React.MouseEvent<HTMLVideoElement>) => e.preventDefault(),
                     },
                   },
@@ -651,48 +641,48 @@ const CoursePreview = () => {
                 onProgress={handleVideoProgress}
               />
             ) : (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white">
+              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-lg font-semibold">
                 Select a lecture to start learning
               </div>
             )}
           </div>
-          <div className="p-6 bg-white border-b">
-            <Link href="/mylearning" className="flex items-center text-blue-600 mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+          <div className="p-6 sm:p-8 bg-white rounded-2xl mt-6 shadow-lg">
+            <Link href="/mylearning" className="flex items-center text-indigo-600 hover:text-indigo-800 font-medium mb-6 transition-colors duration-200">
+              <ArrowLeft className="w-5 h-5 mr-2" />
               Back to My Learning
             </Link>
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-4">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{course.title}</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">{course.title}</h1>
                   {progress?.isCompleted && hasPurchased() && (
                     <Image
                       src="/images/completed badge.jpg"
                       alt="Course Completed Seal"
                       width={80}
                       height={80}
-                      className="mb-2"
+                      className="rounded-full"
                     />
                   )}
                 </div>
-                <p className="text-gray-600 mb-4">{course.subtitle}</p>
-                <div className="flex items-center gap-4 text-sm">
+                <p className="text-gray-600 text-lg leading-relaxed mb-4">{course.subtitle}</p>
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm sm:text-base">
                   <div className="flex items-center">
-                    <User className="w-4 h-4 text-gray-500 mr-1" />
-                    <span className="text-gray-700">Tutor: {course.tutorId.username || "Unknown"}</span>
+                    <User className="w-5 h-5 text-indigo-500 mr-2" />
+                    <span className="text-gray-700 font-medium">Tutor: {course.tutorId.username || "Unknown"}</span>
                   </div>
                   <div className="flex items-center">
-                    <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                    <span className="text-gray-700">{averageRating} Rating</span>
+                    <Star className="w-5 h-5 text-yellow-400 mr-2" />
+                    <span className="text-gray-700 font-medium">{averageRating} ({reviews.length} reviews)</span>
                   </div>
                   <div className="flex items-center">
-                    <Clock className="w-4 h-4 text-gray-500 mr-1" />
-                    <span className="text-gray-700">{course.totalDuration} hours</span>
+                    <Clock className="w-5 h-5 text-indigo-500 mr-2" />
+                    <span className="text-gray-700 font-medium">{course.totalDuration} hours</span>
                   </div>
                 </div>
               </div>
               {progress?.isCompleted && hasPurchased() && (
-                <div className="mb-4">
+                <div className="flex-shrink-0">
                   <CertificateGenerator
                     courseTitle={course.title}
                     username={username}
@@ -702,28 +692,28 @@ const CoursePreview = () => {
               )}
               {!hasPurchased() && (
                 <div className="flex flex-col items-end">
-                  <div className="text-2xl font-bold text-gray-900 mb-2">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">
                     {formatPrice(course.price)}
                   </div>
                   {course.price && (
-                    <div className="text-sm text-gray-500 mb-2 line-through">
+                    <div className="text-sm text-gray-500 mb-4 line-through">
                       {formatPrice((course.price * 2) + 1)}
                     </div>
                   )}
                   <button
                     onClick={handlePayment}
                     disabled={isProcessingPayment}
-                    className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center shadow-md hover:shadow-lg transition-all duration-300 ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    <ShoppingCart className="w-5 h-5 mr-2" />
                     {isProcessingPayment ? 'Processing...' : 'Enroll Now'}
                   </button>
                 </div>
               )}
             </div>
             {currentLecture && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <h2 className="font-semibold text-gray-800">
+              <div className="mt-6 p-6 bg-gray-50 rounded-xl">
+                <h2 className="font-semibold text-xl text-gray-900">
                   Now Playing: {currentLecture.title}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
@@ -731,110 +721,110 @@ const CoursePreview = () => {
                 </p>
               </div>
             )}
-            <div className="mt-4">
+            <div className="mt-6">
               {hasPurchased() ? (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center">
-                  <Check className="w-5 h-5 mr-2" />
-                  <span>You are enrolled in this course. Full access granted.</span>
+                <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-xl flex items-center">
+                  <Check className="w-6 h-6 mr-3" />
+                  <span className="font-medium">You are enrolled in this course. Full access granted.</span>
                 </div>
               ) : (
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md flex items-center">
-                  <Lock className="w-5 h-5 mr-2" />
-                  <span>Preview available. Purchase to unlock all content.</span>
+                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-4 rounded-xl flex items-center">
+                  <Lock className="w-6 h-6 mr-3" />
+                  <span className="font-medium">Preview available. Purchase to unlock all content.</span>
                 </div>
               )}
             </div>
             {hasPurchased() && hasValidSubscription() && (
-              <div className="mt-4">
+              <div className="mt-6">
                 <button
                   onClick={handleChatWithTutor}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full flex items-center justify-center shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 w-full max-w-xs transition-all duration-300 text-sm transform hover:-translate-y-1"
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 w-full sm:w-auto"
                 >
                   <MessageSquare className="w-5 h-5 mr-2" />
-                  <span>Chat with Tutor</span>
+                  Chat with Tutor
                 </button>
               </div>
             )}
           </div>
-          <div className="mt-6 p-6 bg-white border-t">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Student Reviews</h2>
+          <div className="mt-6 mb-10 p-6 sm:p-8 bg-white rounded-2xl shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Student Reviews</h2>
             {hasPurchased() && !hasReviewed && !isEditingReview ? (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Submit Your Review</h3>
+              <div className="mb-8 p-6 bg-gray-50 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Submit Your Review</h3>
                 <form onSubmit={handleReviewSubmit}>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           type="button"
                           onClick={() => setUserReview({ ...userReview, rating: star })}
-                          className={`w-8 h-8 flex items-center justify-center ${userReview.rating >= star ? 'text-yellow-400' : 'text-gray-300'}`}
+                          className={`w-10 h-10 flex items-center justify-center transition-colors duration-200 ${userReview.rating >= star ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'}`}
                         >
-                          <Star className="w-6 h-6" fill={userReview.rating >= star ? '#FBBF24' : 'none'} />
+                          <Star className="w-8 h-8" fill={userReview.rating >= star ? '#FBBF24' : 'none'} />
                         </button>
                       ))}
                     </div>
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
                     <textarea
                       value={userReview.review}
                       onChange={(e) => setUserReview({ ...userReview, review: e.target.value })}
-                      className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      rows={4}
+                      className="w-full p-3 border text-gray-800 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                      rows={5}
                       placeholder="Share your thoughts about the course..."
                     ></textarea>
                   </div>
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300"
                   >
                     Submit Review
                   </button>
                 </form>
               </div>
             ) : hasPurchased() && isEditingReview ? (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Edit Your Review</h3>
+              <div className="mb-8 p-6 bg-gray-50 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Edit Your Review</h3>
                 <form onSubmit={handleUpdateReview}>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           type="button"
                           onClick={() => setEditingReview({ ...editingReview, rating: star })}
-                          className={`w-8 h-8 flex items-center justify-center ${editingReview.rating >= star ? 'text-yellow-400' : 'text-gray-300'}`}
+                          className={`w-10 h-10 flex items-center justify-center transition-colors duration-200 ${editingReview.rating >= star ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'}`}
                         >
-                          <Star className="w-6 h-6" fill={editingReview.rating >= star ? '#FBBF24' : 'none'} />
+                          <Star className="w-8 h-8" fill={editingReview.rating >= star ? '#FBBF24' : 'none'} />
                         </button>
                       ))}
                     </div>
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Your Review</label>
                     <textarea
                       value={editingReview.review}
                       onChange={(e) => setEditingReview({ ...editingReview, review: e.target.value })}
-                      className="w-full p-2 border text-gray-800 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      rows={4}
+                      className="w-full p-3 border text-gray-800 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                      rows={5}
                       placeholder="Share your thoughts about the course..."
                     ></textarea>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-4">
                     <button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300"
                     >
                       Update Review
                     </button>
                     <button
                       type="button"
                       onClick={cancelEditReview}
-                      className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md"
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-all duration-200"
                     >
                       Cancel
                     </button>
@@ -844,54 +834,54 @@ const CoursePreview = () => {
             ) : null}
             {reviews.length > 0 ? (
               <>
-                <div className="flex items-center mb-4">
+                <div className="flex items-center mb-6">
                   <div className="flex items-center">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-5 h-5 ${star <= parseFloat(averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                        className={`w-6 h-6 ${star <= parseFloat(averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}
                         fill={star <= parseFloat(averageRating) ? '#FBBF24' : 'none'}
                       />
                     ))}
                   </div>
-                  <span className="ml-2 text-lg text-gray-700 font-semibold">{averageRating}</span>
-                  <span className="ml-2 text-sm text-gray-600">({reviews.length} reviews)</span>
+                  <span className="ml-3 text-xl text-gray-900 font-semibold">{averageRating}</span>
+                  <span className="ml-3 text-sm text-gray-600">({reviews.length} reviews)</span>
                 </div>
                 <div className="space-y-6">
                   {reviews.map((review) => {
                     const isUserReview = review.userId._id === userId;
 
                     return (
-                      <div key={review._id} className="border-b pb-4">
-                        <div className="flex items-center mb-2">
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                      <div key={review._id} className="border-b border-gray-200 pb-6">
+                        <div className="flex items-start mb-3">
+                          <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg">
                             {review.userId?.username?.slice(0, 2).toUpperCase() || 'AN'}
                           </div>
-                          <div className="ml-3">
-                            <p className={`font-medium ${isUserReview ? 'font-semibold underline decoration-1 underline-offset-4 decoration-blue-300 text-gray-700' : 'text-gray-800'}`}>
+                          <div className="ml-4 flex-1">
+                            <p className={`font-semibold text-lg ${isUserReview ? 'underline decoration-2 underline-offset-4 decoration-indigo-300 text-gray-900' : 'text-gray-900'}`}>
                               {review.userId?.username || 'Anonymous'}
                             </p>
-                            <div className="flex items-center">
+                            <div className="flex items-center mt-1">
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star
                                   key={star}
-                                  className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                  className={`w-5 h-5 ${star <= review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
                                   fill={star <= review.rating ? '#FBBF24' : 'none'}
                                 />
                               ))}
-                              <span className="text-gray-500 text-sm ml-2">
+                              <span className="text-gray-500 text-sm ml-3">
                                 {new Date(review.createdAt).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
                           {isUserReview && (
-                            <div className="ml-auto flex space-x-2">
+                            <div className="ml-auto flex space-x-3">
                               <button
                                 onClick={() => handleEditReview(review)}
-                                className="flex items-center justify-center p-2 rounded-md hover:bg-gray-100 text-blue-600 hover:text-blue-800 transition-colors"
+                                className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 text-indigo-600 hover:text-indigo-800 transition-all duration-200"
                                 aria-label="Edit review"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                                   <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
                                   <path d="m15 5 4 4"></path>
                                 </svg>
@@ -899,10 +889,10 @@ const CoursePreview = () => {
                               </button>
                               <button
                                 onClick={() => handleDeleteReview(review._id)}
-                                className="flex items-center justify-center p-2 rounded-md hover:bg-gray-100 text-red-600 hover:text-red-800 transition-colors"
+                                className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 text-red-600 hover:text-red-800 transition-all duration-200"
                                 aria-label="Delete review"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                                   <path d="M3 6h18"></path>
                                   <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                                   <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -912,11 +902,11 @@ const CoursePreview = () => {
                             </div>
                           )}
                         </div>
-                        <p className="text-gray-700">{review.review}</p>
+                        <p className="text-gray-700 leading-relaxed">{review.review}</p>
                         {review.reply && (
-                          <div className="mt-3 ml-6 p-3 bg-gray-50 border-l-4 border-blue-400 rounded">
-                            <p className="text-sm font-medium text-gray-700">{`${course.tutorId?.username || "Unknown"}'s Reply:`}</p>
-                            <p className="text-gray-600 mt-1">{review.reply}</p>
+                          <div className="mt-4 ml-6 p-4 bg-gray-50 border-l-4 border-indigo-400 rounded-lg">
+                            <p className="text-sm font-semibold text-gray-900">{`${course.tutorId?.username || "Unknown"}'s Reply:`}</p>
+                            <p className="text-gray-600 mt-2 leading-relaxed">{review.reply}</p>
                           </div>
                         )}
                       </div>
@@ -925,20 +915,20 @@ const CoursePreview = () => {
                 </div>
               </>
             ) : (
-              <p className="text-gray-600">No reviews yet. Be the first to share your feedback!</p>
+              <p className="text-gray-600 text-lg">No reviews yet. Be the first to share your feedback!</p>
             )}
           </div>
         </div>
-        <div className="lg:w-1/4 bg-white border-l h-full overflow-y-auto">
-          <div className="p-4 border-b bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-800">Course Content</h2>
-            <div className="flex justify-between text-sm text-gray-600 mt-1">
+        <div className="lg:w-1/4 bg-white border-l h-full overflow-y-auto rounded-r-2xl shadow-lg">
+          <div className="p-6 border-b bg-gray-50">
+            <h2 className="text-xl font-bold text-gray-900">Course Content</h2>
+            <div className="flex justify-between text-sm text-gray-600 mt-2">
               <span>{course.totalSections} sections</span>
               <span>{course.totalLectures} lectures</span>
               <span>{course.totalDuration} hours</span>
             </div>
           </div>
-          <div className="divide-y">
+          <div className="divide-y divide-gray-200">
             {sections.map((section, sectionIndex) => {
               const sectionId = section._id.toString();
               const isFirstSection = sectionIndex === 0;
@@ -947,16 +937,16 @@ const CoursePreview = () => {
               return (
                 <div key={sectionId} className="border-b">
                   <button
-                    className={`w-full p-4 flex justify-between items-center hover:bg-gray-50 transition-colors ${!userCanAccessSection ? 'cursor-not-allowed opacity-75' : ''}`}
+                    className={`w-full p-6 flex justify-between items-center hover:bg-gray-50 transition-all duration-200 ${!userCanAccessSection ? 'cursor-not-allowed opacity-75' : ''}`}
                     onClick={() => toggleSection(sectionId, sectionIndex)}
                     disabled={!userCanAccessSection}
                   >
                     <div className="flex-1 flex items-center">
                       {!userCanAccessSection && (
-                        <Lock className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                        <Lock className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
                       )}
                       <div>
-                        <h3 className="font-medium text-gray-800 text-left">{section.title}</h3>
+                        <h3 className="font-semibold text-lg text-gray-900 text-left">{section.title}</h3>
                         <p className="text-sm text-gray-600 mt-1">
                           {section.totalLectures} lectures • {section.totalDuration} min
                         </p>
@@ -964,12 +954,12 @@ const CoursePreview = () => {
                     </div>
                     {userCanAccessSection ? (
                       expandedSections[sectionId] ? (
-                        <ChevronUp className="w-5 h-5 text-gray-500" />
+                        <ChevronUp className="w-6 h-6 text-gray-500" />
                       ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                        <ChevronDown className="w-6 h-6 text-gray-500" />
                       )
                     ) : (
-                      <div className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                      <div className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-medium">
                         Locked
                       </div>
                     )}
@@ -985,7 +975,7 @@ const CoursePreview = () => {
                           return (
                             <button
                               key={lecture._id.toString()}
-                              className={`w-full p-3 flex items-center text-left hover:bg-gray-100 transition-colors ${isActive ? 'bg-blue-50' : ''} ${!userCanAccessLecture ? 'cursor-not-allowed opacity-75' : ''}`}
+                              className={`w-full p-4 flex items-center text-left hover:bg-gray-100 transition-all duration-200 ${isActive ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''} ${!userCanAccessLecture ? 'cursor-not-allowed opacity-75' : ''}`}
                               onClick={() => handleLectureSelect(lecture, sectionIndex)}
                               disabled={!userCanAccessLecture}
                             >
@@ -993,20 +983,20 @@ const CoursePreview = () => {
                                 {hasPurchased() && lectureStatus === "completed" ? (
                                   <Check className="w-5 h-5 text-green-500" />
                                 ) : lecture.isPreview || hasPurchased() || isFirstSection ? (
-                                  <Play className="w-5 h-5 text-blue-500" />
+                                  <Play className="w-5 h-5 text-indigo-500" />
                                 ) : (
                                   <Lock className="w-5 h-5 text-gray-400" />
                                 )}
                               </div>
-                              <div className="ml-2 flex-1">
-                                <p className={`${isActive ? 'text-blue-600 font-medium' : 'text-gray-800'}`}>
+                              <div className="ml-3 flex-1">
+                                <p className={`${isActive ? 'text-indigo-600 font-semibold' : 'text-gray-900'} font-medium`}>
                                   {lecture.title}
                                 </p>
                                 <div className="flex items-center text-xs text-gray-500 mt-1">
-                                  <Clock className="w-3 h-3 mr-1" />
+                                  <Clock className="w-4 h-4 mr-1" />
                                   <span>{lecture.duration} min</span>
                                   {lecture.isPreview && (
-                                    <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">
+                                    <span className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
                                       Preview
                                     </span>
                                   )}
@@ -1027,17 +1017,17 @@ const CoursePreview = () => {
             })}
           </div>
           {!hasPurchased() && (
-            <div className="p-4 bg-blue-50 border-t">
-              <div className="flex justify-between items-center mb-3">
-                <p className="text-sm text-gray-700">
+            <div className="p-6 bg-indigo-50 border-t">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-gray-700 font-medium">
                   Unlock all {course.totalLectures} lectures
                 </p>
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-2xl font-extrabold text-gray-900">
                   {formatPrice(course.price)}
                 </div>
               </div>
               {course.price && (
-                <div className="flex justify-between items-center mb-3">
+                <div className="flex justify-between items-center mb-4">
                   <p className="text-xs text-gray-600">Original price</p>
                   <div className="text-sm text-gray-500 line-through">
                     {formatPrice((course.price * 2) + 1)}
@@ -1047,9 +1037,9 @@ const CoursePreview = () => {
               <button
                 onClick={handlePayment}
                 disabled={isProcessingPayment}
-                className={`w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center justify-center ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                <ShoppingCart className="w-4 h-4 mr-2" />
+                <ShoppingCart className="w-5 h-5 mr-2" />
                 {isProcessingPayment ? 'Processing...' : 'Purchase this course'}
               </button>
             </div>
